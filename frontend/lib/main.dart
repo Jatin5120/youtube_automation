@@ -1,22 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/data/data.dart';
+import 'package:frontend/res/res.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' show Client;
 
 void main() {
+  initialize();
   runApp(const MyApp());
+}
+
+void initialize() {
+  WidgetsFlutterBinding.ensureInitialized();
+  Get.put(ApiWrapper(Client()));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Youtube Automation',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.dark,
+      initialRoute: AppPages.initial,
+      getPages: AppPages.pages,
+      unknownRoute: AppPages.dashboard,
     );
   }
 }

@@ -8,8 +8,8 @@ import 'package:frontend/utils/utils.dart';
 import 'package:http/http.dart' show Client, Response, MultipartRequest, MultipartFile;
 
 /// API WRAPPER to call all the IsmLiveApis and handle the status codes
-class IsmLiveApiWrapper {
-  const IsmLiveApiWrapper(this.client);
+class ApiWrapper {
+  const ApiWrapper(this.client);
 
   final Client client;
 
@@ -18,7 +18,7 @@ class IsmLiveApiWrapper {
     String api, {
     String? baseUrl,
     required RequestType type,
-    required Map<String, String> headers,
+    Map<String, String>? headers,
     dynamic payload,
     String field = '',
     String filePath = '',
@@ -140,7 +140,7 @@ class IsmLiveApiWrapper {
   Future<Response> _handleRequest(
     Uri api, {
     required RequestType type,
-    required Map<String, String> headers,
+    Map<String, String>? headers,
     required String field,
     required String filePath,
     dynamic payload,
@@ -169,7 +169,7 @@ class IsmLiveApiWrapper {
 
   Future<Response> _get(
     Uri api, {
-    required Map<String, String> headers,
+    Map<String, String>? headers,
   }) async =>
       await client
           .get(
@@ -181,7 +181,7 @@ class IsmLiveApiWrapper {
   Future<Response> _post(
     Uri api, {
     required payload,
-    required Map<String, String> headers,
+    Map<String, String>? headers,
   }) async =>
       await client
           .post(
@@ -194,7 +194,7 @@ class IsmLiveApiWrapper {
   Future<Response> _put(
     Uri api, {
     required dynamic payload,
-    required Map<String, String> headers,
+    Map<String, String>? headers,
   }) async =>
       await client
           .put(
@@ -207,7 +207,7 @@ class IsmLiveApiWrapper {
   Future<Response> _patch(
     Uri api, {
     required dynamic payload,
-    required Map<String, String> headers,
+    Map<String, String>? headers,
   }) async =>
       await client
           .patch(
@@ -220,7 +220,7 @@ class IsmLiveApiWrapper {
   Future<Response> _delete(
     Uri api, {
     required dynamic payload,
-    required Map<String, String> headers,
+    Map<String, String>? headers,
   }) async =>
       await client
           .delete(
@@ -234,7 +234,7 @@ class IsmLiveApiWrapper {
   Future<Response> _upload(
     Uri api, {
     required Map<String, String> payload,
-    required Map<String, String> headers,
+    Map<String, String>? headers,
     required String field,
     required String filePath,
   }) async {
@@ -242,7 +242,7 @@ class IsmLiveApiWrapper {
       'POST',
       api,
     )
-      ..headers.addAll(headers)
+      ..headers.addAll(headers ?? {})
       ..fields.addAll(payload)
       ..files.add(
         await MultipartFile.fromPath(field, filePath),

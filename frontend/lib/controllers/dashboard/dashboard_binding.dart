@@ -9,7 +9,9 @@ class DashboardBinding implements Bindings {
     Get.put<DashboardController>(
       DashboardController(
         DashboardViewModel(
-          DashboardRepository(),
+          DashboardRepository(
+            Get.find(),
+          ),
         ),
       ),
     );
