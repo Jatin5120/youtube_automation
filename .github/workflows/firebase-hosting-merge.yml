@@ -2,7 +2,7 @@
 # https://github.com/firebase/firebase-tools
 
 name: Deploy to Firebase Hosting on merge
-'on':
+"on":
   push:
     branches:
       - main
@@ -11,10 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: flutter build web
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.16.9"
+          channel: "stable"
+      - name: Checking Flutter version
+        run: flutter --version
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Building Web release
+        run: flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUTOMATION_F1555 }}'
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUTOMATION_F1555 }}"
           channelId: live
           projectId: automation-f1555
