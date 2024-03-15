@@ -3,4 +3,6 @@ class Endpoints {
   const Endpoints._();
 
   static const String baseUrl = 'https://youtube-automation-s16h.onrender.com/api';
+
+  static const String videos = '/videos';
 }

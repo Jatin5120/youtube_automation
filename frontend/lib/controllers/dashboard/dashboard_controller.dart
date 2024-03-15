@@ -4,4 +4,11 @@ import 'package:get/get.dart';
 class DashboardController extends GetxController {
   DashboardController(this._viewModel);
   final DashboardViewModel _viewModel;
+
+  void getVideos() {
+    _viewModel.getVideos([
+      'anotherhomosapien',
+      'flutterdev',
+    ]);
+  }
 }
