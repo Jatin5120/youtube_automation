@@ -15,14 +15,12 @@ jobs:
         with:
           flutter-version: "3.16.9"
           channel: "stable"
-      - name: Changing Working Directory
-        run: cd frontend && pwd
       - name: Checking Flutter version
         run: flutter --version
       - name: Install dependencies
-        run: pwd && flutter pub get
+        run: cd frontend && flutter pub get
       - name: Building Web release
-        run: flutter build web
+        run: cd frontend && flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
