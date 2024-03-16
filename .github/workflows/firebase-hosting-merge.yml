@@ -20,7 +20,7 @@ jobs:
       - name: Checking Flutter version
         run: flutter --version
       - name: Install dependencies
-        run: flutter pub get
+        run: pwd && flutter pub get
       - name: Building Web release
         run: flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
