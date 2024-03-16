@@ -16,7 +16,7 @@ jobs:
           flutter-version: "3.16.9"
           channel: "stable"
       - name: Changing Working Directory
-        run: cd frontend
+        run: cd frontend && pwd
       - name: Checking Flutter version
         run: flutter --version
       - name: Install dependencies
