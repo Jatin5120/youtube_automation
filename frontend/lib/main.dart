@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:frontend/data/data.dart';
 import 'package:frontend/res/res.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ void main() {
 }
 
 void initialize() {
+  usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(ApiWrapper(Client()));
 }
