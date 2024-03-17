@@ -23,7 +23,7 @@ jobs:
         run: cd frontend && flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          entrypoint: /frontend
+          entrypoint: ./frontend
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUTOMATION_F1555 }}"
           channelId: live
