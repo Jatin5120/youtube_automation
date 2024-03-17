@@ -9,7 +9,7 @@ class DashboardViewModel {
 
   final DashboardRepository _repository;
 
-  Future<List> getVideos(List<String> usernames) async {
+  Future<List<VideoModel>> getVideos(List<String> usernames) async {
     try {
       var ids = base64.encode(usernames.join(',').codeUnits);
       final res = await _repository.getVideos(ids);

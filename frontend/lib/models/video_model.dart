@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 class VideoModel {
-  final String subscriberCount;
-  final String totalVideos;
+  final int subscriberCount;
+  final int totalVideos;
   final String channelName;
   final String userName;
   final int totalVideosLastMonth;
@@ -21,9 +21,26 @@ class VideoModel {
     required this.uploadedThisMonth,
   });
 
+  Iterable get properties => [
+        subscriberCount,
+        totalVideos,
+        channelName,
+        userName,
+        totalVideosLastMonth,
+        latestVideoTitle,
+        lastUploadDate,
+        uploadedThisMonth,
+      ];
+
+  Iterable get numericProperties => [
+        subscriberCount,
+        totalVideos,
+        totalVideosLastMonth,
+      ];
+
   VideoModel copyWith({
-    String? subscriberCount,
-    String? totalVideos,
+    int? subscriberCount,
+    int? totalVideos,
     String? channelName,
     String? userName,
     int? totalVideosLastMonth,
@@ -56,10 +73,23 @@ class VideoModel {
     };
   }
 
+  Map<String, bool> toNumericMap() {
+    return <String, bool>{
+      'subscriberCount': true,
+      'totalVideos': true,
+      'channelName': false,
+      'userName': false,
+      'totalVideosLastMonth': true,
+      'latestVideoTitle': false,
+      'lastUploadDate': false,
+      'uploadedThisMonth': false,
+    };
+  }
+
   factory VideoModel.fromMap(Map<String, dynamic> map) {
     return VideoModel(
-      subscriberCount: map['subscriberCount'] as String,
-      totalVideos: map['totalVideos'] as String,
+      subscriberCount: int.parse(map['subscriberCount'] as String),
+      totalVideos: int.parse(map['totalVideos'] as String),
       channelName: map['channelName'] as String,
       userName: map['userName'] as String,
       totalVideosLastMonth: map['totalVideosLastMonth'] as int,

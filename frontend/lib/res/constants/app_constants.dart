@@ -8,5 +8,10 @@ class AppConstants {
 
   static const String name = 'YoutubeAutomation';
 
-  static const Duration timeOutDuration = Duration(seconds: 90);
+  static const Duration timeOutDuration = Duration(seconds: 180);
+
+  static const double desktopLargeBreakPoint = 1920;
+  static const double desktopBreakPoint = 1366;
+  static const double tabletBreakPoint = 1024;
+  static const double mobileBreakPoint = 612;
 }
