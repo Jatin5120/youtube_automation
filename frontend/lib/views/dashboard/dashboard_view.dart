@@ -4,6 +4,7 @@ import 'package:frontend/controllers/controllers.dart';
 import 'package:frontend/models/models.dart';
 import 'package:frontend/res/res.dart';
 import 'package:frontend/utils/utils.dart';
+import 'package:frontend/views/views.dart';
 import 'package:frontend/widgets/widgets.dart';
 import 'package:get/get.dart';
 
@@ -17,6 +18,20 @@ class DashboardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        elevation: 0,
+        backgroundColor: AppColors.backgroundDark,
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: context.width * 0.05),
+            child: ElevatedButton(
+              onPressed: () => Get.offNamed(AnalysisView.route),
+              child: const Text('Analyze'),
+            ),
+          ),
+        ],
+      ),
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: context.width * 0.05,
@@ -28,12 +43,11 @@ class DashboardView extends StatelessWidget {
             return Center(
               child: Column(
                 children: [
-                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Flexible(
                         child: InputField(
-                          hint: 'usernames must be separated by comma or space',
+                          hint: 'Usernames must be separated by comma or space',
                           controller: controller.searchController,
                           onFieldSubmitted: (_) => Get.find<DashboardController>().getVideos(),
                         ),
