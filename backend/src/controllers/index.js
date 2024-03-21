@@ -3,6 +3,9 @@ const VideoService = require("../services");
 class VideoController {
   static async getChannel(req, res) {
     const { ids } = req.query;
+    if (!ids) {
+      return res.status(204);
+    }
     const input = atob(ids);
     const idList = input.split(",");
 
@@ -41,6 +44,18 @@ class VideoController {
     const result = internalChannels
       .filter((e) => e.status === "fulfilled")
       .map((e) => e.value);
+
+    return res.status(200).send(result);
+  }
+
+  static async searchChannels(req, res) {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.status(204);
+    }
+
+    var result = await VideoService.searchChannels(query);
 
     return res.status(200).send(result);
   }

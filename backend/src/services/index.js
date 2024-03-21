@@ -4,6 +4,7 @@ const { isUploadedThisMonth } = require("../utils");
 
 module.exports = class VideoService {
   static YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+  static SEARCH_API_KEY = process.env.SEARCH_API_KEY;
 
   static async getChannelByUsername(username) {
     const res = await google.youtube("v3").channels.list({
@@ -101,5 +102,22 @@ module.exports = class VideoService {
     }
 
     return videos;
+  }
+
+  static async searchChannels(query) {
+    const res = await google.youtube("v3").search.list({
+      key: this.SEARCH_API_KEY,
+      part: ["snippet"],
+      q: query,
+      type: "channel",
+      maxResults: 1,
+    });
+
+    return res.data.items.map((e) => ({
+      channelId: e.snippet.channelId,
+      channelName: e.snippet.channelTitle,
+      title: e.snippet.title,
+      description: e.snippet.description,
+    }));
   }
 };
