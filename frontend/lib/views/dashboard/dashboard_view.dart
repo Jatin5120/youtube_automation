@@ -55,7 +55,7 @@ class DashboardView extends StatelessWidget {
                     children: [
                       Flexible(
                         child: InputField(
-                          hint: 'Usernames must be separated by comma or space',
+                          hint: '${controller.channelBy.label} must be separated by comma or space',
                           controller: controller.searchController,
                           onFieldSubmitted: (_) => controller.getVideos(),
                         ),
@@ -74,6 +74,22 @@ class DashboardView extends StatelessWidget {
                         ),
                       ],
                     ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: ChannelBy.values
+                        .map((e) => Flexible(
+                              child: RadioListTile(
+                                value: e,
+                                groupValue: controller.channelBy,
+                                title: Text(
+                                  e.label,
+                                  style: context.textTheme.titleMedium?.withTitleColor,
+                                ),
+                                onChanged: controller.onChannelByChanged,
+                              ),
+                            ))
+                        .toList(),
                   ),
                   const SizedBox(height: 16),
                   if (controller.videos.isEmpty) ...[
