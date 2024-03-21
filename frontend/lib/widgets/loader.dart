@@ -16,7 +16,7 @@ class AppLoader extends StatelessWidget {
   Widget build(BuildContext context) => Center(
         child: Card(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,

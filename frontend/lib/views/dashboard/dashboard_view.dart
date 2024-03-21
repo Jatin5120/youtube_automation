@@ -7,6 +7,7 @@ import 'package:frontend/utils/utils.dart';
 import 'package:frontend/views/views.dart';
 import 'package:frontend/widgets/widgets.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
@@ -98,6 +99,38 @@ class DashboardView extends StatelessWidget {
       multiSortEnabled: true,
       columns: [
         DaviColumn(
+          name: 'Channel Name',
+          stringValue: (row) => row.channelName,
+        ),
+        DaviColumn(
+          name: 'UserName',
+          stringValue: (row) => row.userName,
+        ),
+        DaviColumn(
+          name: 'Analyzed Name',
+          stringValue: (row) => row.analyzedName,
+        ),
+        DaviColumn(
+          name: 'Channel Link',
+          cellBuilder: (context, row) => TapHandler(
+            onTap: () => Utility.launchURL(row.data.channelLink),
+            child: AppText(
+              row.data.channelLink,
+              style: context.textTheme.bodyMedium?.withTitleColor.copyWith(
+                decoration: TextDecoration.underline,
+                decorationColor: AppColors.titleDark,
+              ),
+              isSelectable: false,
+            ),
+          ),
+          grow: 2,
+        ),
+        DaviColumn(
+          name: 'Channel Description',
+          stringValue: (row) => row.description,
+          grow: 2,
+        ),
+        DaviColumn(
           name: 'Subscriber Count',
           intValue: (row) => row.subscriberCount,
           cellAlignment: Alignment.centerRight,
@@ -108,14 +141,6 @@ class DashboardView extends StatelessWidget {
           cellAlignment: Alignment.centerRight,
         ),
         DaviColumn(
-          name: 'Channel Name',
-          stringValue: (row) => row.channelName,
-        ),
-        DaviColumn(
-          name: 'Username',
-          stringValue: (row) => row.userName,
-        ),
-        DaviColumn(
           name: 'Total Videos Last Month',
           intValue: (row) => row.totalVideosLastMonth,
           cellAlignment: Alignment.centerRight,
@@ -123,11 +148,16 @@ class DashboardView extends StatelessWidget {
         DaviColumn(
           name: 'Latest Video Title',
           stringValue: (row) => row.latestVideoTitle,
-          grow: 3,
+          grow: 2,
+        ),
+        DaviColumn(
+          name: 'Analyzed Title',
+          stringValue: (row) => row.analyzedTitle,
+          grow: 2,
         ),
         DaviColumn(
           name: 'Last Upload Date',
-          objectValue: (row) => row.lastUploadDate,
+          stringValue: (row) => DateFormat('yyyy MMM dd, hh:mm:ss').format(row.lastUploadDate),
         ),
         DaviColumn(
           name: 'Uploaded this Month?',
@@ -156,8 +186,9 @@ class DashboardView extends StatelessWidget {
       ),
       child: Davi<VideoModel>(
         tableModel,
-        columnWidthBehavior: ColumnWidthBehavior.fit,
+        columnWidthBehavior: ColumnWidthBehavior.scrollable,
         visibleRowsCount: videos.length,
+        unpinnedHorizontalScrollController: Get.find<DashboardController>().tableController,
       ),
     );
   }
