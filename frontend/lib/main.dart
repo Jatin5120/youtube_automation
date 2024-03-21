@@ -5,12 +5,15 @@ import 'package:frontend/res/res.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' show Client;
 
+late String kApiKey;
+
 void main() {
   initialize();
   runApp(const MyApp());
 }
 
 void initialize() {
+  kApiKey = const String.fromEnvironment('API_KEY', defaultValue: '');
   usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(ApiWrapper(Client()));
