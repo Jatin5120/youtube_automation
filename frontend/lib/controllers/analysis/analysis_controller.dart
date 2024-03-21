@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:frontend/main.dart';
 import 'package:frontend/res/res.dart';
 import 'package:frontend/utils/utils.dart';
 import 'package:get/get.dart';
@@ -27,7 +28,7 @@ class AnalysisController extends GetxController {
 
   void _loadAPIKey() async {
     await dotenv.load();
-    apiKey = dotenv.get('API_KEY', fallback: '');
+    apiKey = kApiKey.isEmpty ? dotenv.get('API_KEY', fallback: '') : kApiKey;
     _model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
   }
 
