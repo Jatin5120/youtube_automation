@@ -42,21 +42,24 @@ module.exports = class VideoService {
       return null;
     }
 
+    const description = channel.snippet.description;
     const subscriberCount = channel.statistics.subscriberCount;
     const totalVideos = channel.statistics.videoCount;
     var channelId = channel.contentDetails.relatedPlaylists.uploads;
     const videos = await this.getPlaylists(channelId);
+    const uploadedThisMonth = isUploadedThisMonth(
+      Date.parse(videos[0].snippet.publishedAt)
+    );
     return {
       subscriberCount,
       totalVideos,
+      description,
       channelName: channel.snippet.title,
       userName: channel.snippet.customUrl,
-      totalVideosLastMonth: videos.length,
+      totalVideosLastMonth: uploadedThisMonth ? videos.length : 0,
       latestVideoTitle: videos[0].snippet.title,
       lastUploadDate: videos[0].snippet.publishedAt,
-      uploadedThisMonth: isUploadedThisMonth(
-        Date.parse(videos[0].snippet.publishedAt)
-      ),
+      uploadedThisMonth: uploadedThisMonth,
     };
   }
 
