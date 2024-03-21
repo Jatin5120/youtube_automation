@@ -6,8 +6,6 @@ class VideoController {
     const input = atob(ids);
     const idList = input.split(",");
 
-    console.log(idList);
-
     if (idList.length == 0) {
       return res.status(204);
     }
@@ -20,6 +18,11 @@ class VideoController {
         pending.push(data);
       }
     }
+
+    if (pending.length == 0) {
+      return res.status(204);
+    }
+
     const internal = await Promise.allSettled(pending);
     const channels = internal
       .filter((e) => e.status === "fulfilled")
