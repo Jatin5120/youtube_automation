@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/controllers/controllers.dart';
 import 'package:frontend/models/models.dart';
 import 'package:frontend/utils/utils.dart';
 import 'package:frontend/view_models/view_models.dart';
@@ -14,9 +15,13 @@ class DashboardController extends GetxController {
   DashboardController(this._viewModel);
   final DashboardViewModel _viewModel;
 
+  AnalysisController get _analyticsController => Get.find();
+
   var fetchedResult = false;
 
   var videos = <VideoModel>[];
+
+  var tableController = ScrollController();
 
   var searchController = TextEditingController();
 
@@ -24,9 +29,49 @@ class DashboardController extends GetxController {
     if (searchController.text.trim().isEmpty) {
       return;
     }
-    var userNames = searchController.text.trim().split(',').join(' ').split(' ').map((e) => e.trim()).toList();
+    var userNames = searchController.text
+        .trim()
+        .replaceAll('@', '')
+        .replaceAll(',', ' ')
+        .replaceAll('  ', ' ')
+        .trim()
+        .split(' ')
+        .map(
+          (e) => e.trim(),
+        )
+        .toList();
+
+    if (userNames.isEmpty) {
+      return;
+    }
+
     videos = await _viewModel.getVideos(userNames);
     fetchedResult = true;
+    analyzeData();
+    update([DashboardView.updateId]);
+  }
+
+  void analyzeData() async {
+    Utility.showLoader('Analzing data');
+    var titles = <Future<String?>>[];
+    var names = <Future<String?>>[];
+    for (var video in videos) {
+      titles.add(_analyticsController.analyzeTitle(video.latestVideoTitle));
+      names.add(_analyticsController.analyzeName(video.userName, video.description));
+    }
+    final output = await Future.wait([
+      Future.wait(titles),
+      Future.wait(names),
+    ]);
+    final analyzedTitles = output[0];
+    final analyzedNames = output[1];
+    for (var i = 0; i < videos.length; i++) {
+      videos[i] = videos[i].copyWith(
+        analyzedTitle: analyzedTitles[i],
+        analyzedName: analyzedNames[i],
+      );
+    }
+    Utility.closeLoader();
     update([DashboardView.updateId]);
   }
 
@@ -36,12 +81,16 @@ class DashboardController extends GetxController {
     String file = const ListToCsvConverter().convert(
       [
         [
+          'Channel Name',
+          'UserName',
+          'Analyzed Name',
+          'Channel Link',
+          'Channel Description',
           'Subscriber Count',
           'Total Videos',
-          'Channel Name',
-          'Username',
           'Total Videos Last Month',
           'Latest Video Title',
+          'Analyzed Title',
           'Last Upload Date',
           'Uploaded this Month?',
         ],

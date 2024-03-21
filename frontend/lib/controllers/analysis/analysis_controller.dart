@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:frontend/res/res.dart';
+import 'package:frontend/utils/utils.dart';
 import 'package:get/get.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
@@ -29,26 +31,47 @@ class AnalysisController extends GetxController {
     _model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
   }
 
-  Future<void> getAnalysis(String title) async {
-    if (isAnalizing) {
-      return;
+  Future<void> analyzeSearchTitle(String title) async {
+    try {
+      if (isAnalizing) {
+        return;
+      }
+      isAnalizing = true;
+      analysis = await analyzeTitle(title);
+      isAnalizing = false;
+    } catch (e) {
+      AppLog.error(e);
     }
-    isAnalizing = true;
-    final prompt = '''Input: $title
-Output: Analysis of the video topic or theme
+  }
 
-Instructions:
-1. Analyze the provided YouTube video title and generate a concise analysis of its primary topic or theme.
-2. The analysis should focus on identifying the main subject matter or message conveyed by the video title.
-3. Consider the keywords, phrases, or tone used in the title to infer the content of the video.
-4. The output should not exceed 5-7 words.
+  Future<String?> analyzeTitle(String title) async {
+    try {
+      final prompt = AppPrompts.titlePrompt(title);
+      return await _getAnalysis(title, prompt);
+    } catch (e) {
+      AppLog.error(e);
+      return null;
+    }
+  }
 
-Example:
-Input: "If You Don't Get LOTS of Comments on Your Videos, Watch This ASAP"
-Output: "Getting comments"''';
-    final content = [Content.text(prompt)];
-    final response = await _model.generateContent(content);
-    isAnalizing = false;
-    analysis = response.text;
+  Future<String?> analyzeName(String name, String description) async {
+    try {
+      final prompt = AppPrompts.namePrompt(name, description);
+      return await _getAnalysis(name, prompt);
+    } catch (e) {
+      AppLog.error(e);
+      return null;
+    }
+  }
+
+  Future<String?> _getAnalysis(String title, String prompt) async {
+    try {
+      final content = [Content.text(prompt)];
+      final response = await _model.generateContent(content);
+      return response.text;
+    } catch (e) {
+      AppLog.error(e);
+      return null;
+    }
   }
 }

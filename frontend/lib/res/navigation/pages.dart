@@ -11,7 +11,10 @@ class AppPages {
   static GetPage get dashboard => GetPage<DashboardView>(
         name: DashboardView.route,
         page: DashboardView.new,
-        binding: DashboardBinding(),
+        bindings: [
+          DashboardBinding(),
+          AnalysisBinding(),
+        ],
       );
 
   static List<GetPage> pages = [

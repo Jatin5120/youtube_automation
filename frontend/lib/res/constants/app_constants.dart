@@ -14,4 +14,6 @@ class AppConstants {
   static const double desktopBreakPoint = 1366;
   static const double tabletBreakPoint = 1024;
   static const double mobileBreakPoint = 612;
+
+  static const String youtubeBase = 'https://www.youtube.com/';
 }

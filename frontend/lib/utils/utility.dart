@@ -46,6 +46,7 @@ class Utility {
   static void showLoader([String? message]) {
     Get.dialog(
       AppLoader(message: message),
+      barrierDismissible: false,
     );
   }
 

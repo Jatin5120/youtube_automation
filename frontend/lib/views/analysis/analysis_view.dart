@@ -46,13 +46,13 @@ class AnalysisView extends StatelessWidget {
                       child: InputField(
                         hint: 'Enter video title',
                         controller: controller.titleController,
-                        onFieldSubmitted: controller.getAnalysis,
+                        onFieldSubmitted: controller.analyzeSearchTitle,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Obx(
                       () => FloatingActionButton(
-                        onPressed: controller.isAnalizing ? () {} : () => controller.getAnalysis(controller.titleController.text),
+                        onPressed: controller.isAnalizing ? () {} : () => controller.analyzeSearchTitle(controller.titleController.text),
                         elevation: 0,
                         child: controller.isAnalizing
                             ? const CircularProgressIndicator(
