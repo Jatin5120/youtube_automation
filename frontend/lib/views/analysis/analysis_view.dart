@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/controllers/controllers.dart';
 import 'package:frontend/res/res.dart';
 import 'package:frontend/utils/utils.dart';
-import 'package:frontend/views/dashboard/dashboard.dart';
 import 'package:frontend/widgets/widgets.dart';
 import 'package:get/get.dart';
 
@@ -19,13 +18,21 @@ class AnalysisView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Analyze Title'),
         elevation: 0,
+        centerTitle: true,
         backgroundColor: AppColors.backgroundDark,
         actions: [
           Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: ElevatedButton(
+              onPressed: () => Get.offNamed(AppRoutes.dashboard),
+              child: const Text('Dashboard'),
+            ),
+          ),
+          Padding(
             padding: EdgeInsets.only(right: context.width * 0.05),
             child: ElevatedButton(
-              onPressed: () => Get.offNamed(DashboardView.route),
-              child: const Text('Dashboard'),
+              onPressed: () => Get.offNamed(AppRoutes.search),
+              child: const Text('Search'),
             ),
           ),
         ],

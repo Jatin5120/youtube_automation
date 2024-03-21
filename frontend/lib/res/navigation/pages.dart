@@ -23,6 +23,11 @@ class AppPages {
       name: AnalysisView.route,
       page: AnalysisView.new,
       binding: AnalysisBinding(),
-    )
+    ),
+    GetPage<SearchView>(
+      name: SearchView.route,
+      page: SearchView.new,
+      binding: SearchBinding(),
+    ),
   ];
 }

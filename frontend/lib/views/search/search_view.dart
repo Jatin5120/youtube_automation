@@ -1,25 +1,24 @@
 import 'package:davi/davi.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide SearchController;
 import 'package:frontend/controllers/controllers.dart';
 import 'package:frontend/models/models.dart';
 import 'package:frontend/res/res.dart';
 import 'package:frontend/utils/utils.dart';
 import 'package:frontend/widgets/widgets.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
-class DashboardView extends StatelessWidget {
-  const DashboardView({super.key});
+class SearchView extends StatelessWidget {
+  const SearchView({super.key});
 
-  static const String route = AppRoutes.dashboard;
+  static const String route = AppRoutes.search;
 
-  static const String updateId = 'dashboard-view';
+  static const String updateId = 'search-view';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('Search'),
         elevation: 0,
         centerTitle: true,
         backgroundColor: AppColors.backgroundDark,
@@ -27,8 +26,8 @@ class DashboardView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: ElevatedButton(
-              onPressed: () => Get.offNamed(AppRoutes.search),
-              child: const Text('Search'),
+              onPressed: () => Get.offNamed(AppRoutes.dashboard),
+              child: const Text('Dashboard'),
             ),
           ),
           Padding(
@@ -45,7 +44,7 @@ class DashboardView extends StatelessWidget {
           horizontal: context.width * 0.05,
           vertical: 24,
         ),
-        child: GetBuilder<DashboardController>(
+        child: GetBuilder<SearchController>(
           id: updateId,
           builder: (controller) {
             return Center(
@@ -55,18 +54,18 @@ class DashboardView extends StatelessWidget {
                     children: [
                       Flexible(
                         child: InputField(
-                          hint: 'Usernames must be separated by comma or space',
+                          hint: 'Enter your query to search',
                           controller: controller.searchController,
-                          onFieldSubmitted: (_) => controller.getVideos(),
+                          onFieldSubmitted: (_) => controller.search(),
                         ),
                       ),
                       const SizedBox(width: 8),
                       FloatingActionButton(
-                        onPressed: controller.getVideos,
+                        onPressed: controller.search,
                         elevation: 0,
                         child: const Icon(Icons.search),
                       ),
-                      if (controller.videos.isNotEmpty) ...[
+                      if (controller.channels.isNotEmpty) ...[
                         const SizedBox(width: 16),
                         ElevatedButton(
                           onPressed: controller.downloadCSV,
@@ -76,7 +75,7 @@ class DashboardView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  if (controller.videos.isEmpty) ...[
+                  if (controller.channels.isEmpty) ...[
                     Text(
                       controller.fetchedResult ? 'No videos found for "${controller.searchController.text.trim()}"' : 'Search to see results',
                       textAlign: TextAlign.center,
@@ -84,12 +83,12 @@ class DashboardView extends StatelessWidget {
                     ),
                   ] else ...[
                     Text(
-                      '${controller.videos.length} result(s)',
+                      '${controller.channels.length} result(s)',
                       textAlign: TextAlign.center,
                       style: context.textTheme.bodyMedium?.withTitleColor,
                     ),
                     const SizedBox(height: 16),
-                    Flexible(child: buildTable(context, controller.videos)),
+                    Flexible(child: buildTable(context, controller.channels)),
                   ],
                 ],
               ),
@@ -100,22 +99,14 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget buildTable(BuildContext context, List<VideoModel> videos) {
-    var tableModel = DaviModel<VideoModel>(
-      rows: videos,
+  Widget buildTable(BuildContext context, List<ChannelModel> channels) {
+    var tableModel = DaviModel<ChannelModel>(
+      rows: channels,
       multiSortEnabled: true,
       columns: [
         DaviColumn(
           name: 'Channel Name',
           stringValue: (row) => row.channelName,
-        ),
-        DaviColumn(
-          name: 'UserName',
-          stringValue: (row) => row.userName,
-        ),
-        DaviColumn(
-          name: 'Analyzed Name',
-          stringValue: (row) => row.analyzedName,
         ),
         DaviColumn(
           name: 'Channel Link',
@@ -133,43 +124,13 @@ class DashboardView extends StatelessWidget {
           grow: 2,
         ),
         DaviColumn(
+          name: 'Title',
+          stringValue: (row) => row.title,
+        ),
+        DaviColumn(
           name: 'Channel Description',
           stringValue: (row) => row.description,
           grow: 2,
-        ),
-        DaviColumn(
-          name: 'Subscriber Count',
-          intValue: (row) => row.subscriberCount,
-          cellAlignment: Alignment.centerRight,
-        ),
-        DaviColumn(
-          name: 'Total Videos',
-          intValue: (row) => row.totalVideos,
-          cellAlignment: Alignment.centerRight,
-        ),
-        DaviColumn(
-          name: 'Total Videos Last Month',
-          intValue: (row) => row.totalVideosLastMonth,
-          cellAlignment: Alignment.centerRight,
-        ),
-        DaviColumn(
-          name: 'Latest Video Title',
-          stringValue: (row) => row.latestVideoTitle,
-          grow: 2,
-        ),
-        DaviColumn(
-          name: 'Analyzed Title',
-          stringValue: (row) => row.analyzedTitle,
-          grow: 2,
-        ),
-        DaviColumn(
-          name: 'Last Upload Date',
-          stringValue: (row) => DateFormat('yyyy MMM dd, hh:mm:ss').format(row.lastUploadDate),
-        ),
-        DaviColumn(
-          name: 'Uploaded this Month?',
-          objectValue: (row) => row.uploadedThisMonth,
-          cellAlignment: Alignment.center,
         ),
       ],
     );
@@ -191,11 +152,11 @@ class DashboardView extends StatelessWidget {
           textStyle: context.textTheme.bodyMedium?.withTitleColor,
         ),
       ),
-      child: Davi<VideoModel>(
+      child: Davi<ChannelModel>(
         tableModel,
-        columnWidthBehavior: ColumnWidthBehavior.scrollable,
-        visibleRowsCount: videos.length,
-        unpinnedHorizontalScrollController: Get.find<DashboardController>().tableController,
+        columnWidthBehavior: ColumnWidthBehavior.fit,
+        visibleRowsCount: channels.length,
+        unpinnedHorizontalScrollController: Get.find<SearchController>().tableController,
       ),
     );
   }
