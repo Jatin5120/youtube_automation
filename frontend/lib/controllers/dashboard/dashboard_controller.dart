@@ -101,7 +101,7 @@ class DashboardController extends GetxController {
     Uint8List bytes = Uint8List.fromList(utf8.encode(file));
 
     await FileSaver.instance.saveFile(
-      name: 'channels-${DateTime.now()}',
+      name: 'videos-${DateTime.now()}',
       bytes: bytes,
       ext: 'csv',
       mimeType: MimeType.csv,

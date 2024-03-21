@@ -110,7 +110,7 @@ module.exports = class VideoService {
       part: ["snippet"],
       q: query,
       type: "channel",
-      maxResults: 1,
+      maxResults: 50,
     });
 
     return res.data.items.map((e) => ({
