@@ -2,10 +2,13 @@ const VideoService = require("../services");
 
 class VideoController {
   static async getChannel(req, res) {
-    const { ids } = req.query;
+    const { ids, useId } = req.query;
+    var isId = useId == "true";
+
     if (!ids) {
       return res.status(204);
     }
+
     const input = atob(ids);
     const idList = input.split(",");
 
@@ -16,7 +19,9 @@ class VideoController {
     var pending = [];
 
     for (var id of idList) {
-      const data = VideoService.getChannelByUsername(id);
+      const data = isId
+        ? VideoService.getChannelById(id)
+        : VideoService.getChannelByUsername(id);
       if (data) {
         pending.push(data);
       }
