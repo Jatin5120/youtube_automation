@@ -25,6 +25,16 @@ class DashboardController extends GetxController {
 
   var searchController = TextEditingController();
 
+  final Rx<ChannelBy> _channelBy = ChannelBy.username.obs;
+  ChannelBy get channelBy => _channelBy.value;
+  set channelBy(ChannelBy value) => _channelBy.value = value;
+
+  void onChannelByChanged(ChannelBy? value) {
+    channelBy = value!;
+    searchController.clear();
+    update([DashboardView.updateId]);
+  }
+
   void getVideos() async {
     if (searchController.text.trim().isEmpty) {
       return;
@@ -45,7 +55,10 @@ class DashboardController extends GetxController {
       return;
     }
 
-    videos = await _viewModel.getVideos(userNames);
+    videos = await _viewModel.getVideos(
+      userNames,
+      channelBy == ChannelBy.channelId,
+    );
     fetchedResult = true;
     analyzeData();
     update([DashboardView.updateId]);

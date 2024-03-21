@@ -7,9 +7,9 @@ class DashboardRepository {
 
   final ApiWrapper _apiWrapper;
 
-  Future<ResponseModel> getVideos(String ids) async {
+  Future<ResponseModel> getVideos(String ids, bool useId) async {
     return _apiWrapper.makeRequest(
-      '${Endpoints.videos}?ids=$ids',
+      '${Endpoints.videos}?ids=$ids&useId=$useId',
       type: RequestType.get,
       showLoader: true,
     );
