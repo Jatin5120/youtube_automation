@@ -56,7 +56,7 @@ class ChannelModel {
       channelName: map['channelName'] as String,
       title: map['title'] as String,
       description: map['description'] as String,
-      channelLink: '${AppConstants.youtubeBase}/channel/${map['channelId']}',
+      channelLink: '${AppConstants.youtubeBase}channel/${map['channelId']}',
     );
   }
 
