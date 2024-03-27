@@ -29,9 +29,29 @@ class DashboardController extends GetxController {
   ChannelBy get channelBy => _channelBy.value;
   set channelBy(ChannelBy value) => _channelBy.value = value;
 
+  @override
+  void onInit() {
+    super.onInit();
+    var parameters = Get.parameters;
+    if (parameters.isNotEmpty) {
+      try {
+        var list = parameters['q']?.decrypt();
+        if (list.runtimeType == List) {
+          list = (list as List).cast<String>();
+          Utility.updateLater(() {
+            channelBy = ChannelBy.channelId;
+            searchController.text = list.join(', ');
+            getVideos();
+          });
+        }
+      } catch (e) {
+        AppLog.error(e);
+      }
+    }
+  }
+
   void onChannelByChanged(ChannelBy? value) {
     channelBy = value!;
-    searchController.clear();
     update([DashboardView.updateId]);
   }
 

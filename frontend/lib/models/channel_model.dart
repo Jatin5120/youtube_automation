@@ -20,6 +20,7 @@ class ChannelModel {
   Iterable get properties => [
         channelName,
         channelLink,
+        channelId,
         title,
         description,
       ];

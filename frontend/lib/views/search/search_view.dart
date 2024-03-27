@@ -88,6 +88,11 @@ class SearchView extends StatelessWidget {
                       style: context.textTheme.bodyMedium?.withTitleColor,
                     ),
                     const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: controller.fetchDetails,
+                      child: const Text('Fetch Details'),
+                    ),
+                    const SizedBox(height: 16),
                     Flexible(child: buildTable(context, controller.channels)),
                   ],
                 ],
@@ -122,6 +127,10 @@ class SearchView extends StatelessWidget {
             ),
           ),
           grow: 2,
+        ),
+        DaviColumn(
+          name: 'Channel Id',
+          stringValue: (row) => row.channelId,
         ),
         DaviColumn(
           name: 'Title',
