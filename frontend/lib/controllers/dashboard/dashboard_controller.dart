@@ -40,9 +40,13 @@ class DashboardController extends GetxController {
         print(list);
         if (list.runtimeType == List) {
           list = (list as List).cast<String>();
+          print(list);
           Utility.updateLater(() {
-            channelBy = ChannelBy.channelId;
+            print('Before - $channelBy');
+            onChannelByChanged(ChannelBy.channelId);
+            print('After - $channelBy');
             searchController.text = list.join(', ');
+            print('Search Query - ${searchController.text}');
             getVideos();
           });
         }
@@ -59,9 +63,11 @@ class DashboardController extends GetxController {
   }
 
   void getVideos() async {
+    print('Getting videos...');
     if (searchController.text.trim().isEmpty) {
       return;
     }
+    print('Before splitting');
     var userNames = searchController.text
         .trim()
         .replaceAll('@', '')
@@ -77,6 +83,7 @@ class DashboardController extends GetxController {
     if (userNames.isEmpty) {
       return;
     }
+    print('After splitting');
 
     videos = await _viewModel.getVideos(
       userNames,
