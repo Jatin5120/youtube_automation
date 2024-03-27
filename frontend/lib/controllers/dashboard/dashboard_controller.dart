@@ -33,9 +33,11 @@ class DashboardController extends GetxController {
   void onInit() {
     super.onInit();
     var parameters = Get.parameters;
+    print(parameters);
     if (parameters.isNotEmpty) {
       try {
         var list = parameters['q']?.decrypt();
+        print(list);
         if (list.runtimeType == List) {
           list = (list as List).cast<String>();
           Utility.updateLater(() {
@@ -45,6 +47,7 @@ class DashboardController extends GetxController {
           });
         }
       } catch (e) {
+        print(e);
         AppLog.error(e);
       }
     }
