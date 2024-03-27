@@ -38,18 +38,16 @@ class DashboardController extends GetxController {
       try {
         var list = parameters['q']?.decrypt();
         print(list);
-        if (list.runtimeType == List) {
-          list = (list as List).cast<String>();
-          print(list);
-          Utility.updateLater(() {
-            print('Before - $channelBy');
-            onChannelByChanged(ChannelBy.channelId);
-            print('After - $channelBy');
-            searchController.text = list.join(', ');
-            print('Search Query - ${searchController.text}');
-            getVideos();
-          });
-        }
+        list = (list as List).cast<String>();
+        print(list);
+        Utility.updateLater(() {
+          print('Before - $channelBy');
+          onChannelByChanged(ChannelBy.channelId);
+          print('After - $channelBy');
+          searchController.text = list.join(', ');
+          print('Search Query - ${searchController.text}');
+          getVideos();
+        });
       } catch (e) {
         print(e);
         AppLog.error(e);
