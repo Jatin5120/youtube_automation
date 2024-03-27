@@ -13,6 +13,14 @@ class Utility {
 
   static void hideKeyboard() => FocusManager.instance.primaryFocus?.unfocus();
 
+  static void updateLater(VoidCallback callback, [bool addDelay = true]) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(addDelay ? const Duration(milliseconds: 10) : Duration.zero, () {
+        callback();
+      });
+    });
+  }
+
   static void launchURL(
     String url, {
     bool newTab = true,

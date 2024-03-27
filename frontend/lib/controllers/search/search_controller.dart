@@ -5,6 +5,7 @@ import 'package:csv/csv.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/models.dart';
+import 'package:frontend/res/res.dart';
 import 'package:frontend/utils/utils.dart';
 import 'package:frontend/view_models/view_models.dart';
 import 'package:frontend/views/views.dart';
@@ -40,6 +41,7 @@ class SearchController extends GetxController {
         [
           'Channel Name',
           'Channel Link',
+          'Channel Id',
           'Title',
           'Channel Description',
         ],
@@ -56,5 +58,14 @@ class SearchController extends GetxController {
       mimeType: MimeType.csv,
     );
     Utility.closeLoader();
+  }
+
+  void fetchDetails() async {
+    var list = channels.map((e) => e.channelId).toList();
+    var parameters = {'q': list.encrypt()};
+    Get.toNamed(
+      AppRoutes.dashboard,
+      parameters: parameters,
+    );
   }
 }
