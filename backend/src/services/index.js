@@ -6,11 +6,11 @@ module.exports = class VideoService {
   static YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
   static SEARCH_API_KEY = process.env.SEARCH_API_KEY;
 
-  static async getChannelByUsername(username) {
+  static async getChannelByUsername(username, useSearchAPI) {
     const res = await google.youtube("v3").channels.list({
-      key: this.YOUTUBE_API_KEY,
+      key: useSearchAPI == true ? this.SEARCH_API_KEY : this.YOUTUBE_API_KEY,
       part: ["snippet", "id", "contentDetails", "statistics"],
-      forHandle: `@${username}`,
+      forHandle: useSearchAPI == true ? username : `@${username}`,
     });
 
     if (res.data.items.length === 0) {
