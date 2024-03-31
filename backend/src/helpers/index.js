@@ -9,12 +9,12 @@ module.exports = class VideoHelper {
     try {
       const page = await browser.newPage();
       await page.goto(url);
-      //   for (let i = 0; i < 5; i++) {
-      //     await page.evaluate(
-      //       "window.scrollTo(0, document.documentElement.scrollHeight)"
-      //     );
-      //     await new Promise((resolve) => setTimeout(resolve, 1000));
-      //   }
+      for (let i = 0; i < 5; i++) {
+        await page.evaluate(
+          "window.scrollTo(0, document.documentElement.scrollHeight)"
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
 
       await page.waitForSelector(
         "ytd-channel-renderer.ytd-item-section-renderer"
