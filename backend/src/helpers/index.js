@@ -2,11 +2,12 @@ const puppeteer = require("puppeteer");
 
 module.exports = class VideoHelper {
   static async getChannelsFromUrl(url) {
-    const browser = await puppeteer.launch({
-      headless: false,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+    let browser;
     try {
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      });
       const page = await browser.newPage();
       await page.goto(url);
       for (let i = 0; i < 5; i++) {
@@ -26,11 +27,14 @@ module.exports = class VideoHelper {
         ).map((e) => e.textContent);
       });
 
-      browser.close();
       return result;
     } catch (err) {
-      browser.close();
       console.error(err);
+      return [];
+    } finally {
+      if (browser) {
+        browser.close();
+      }
     }
   }
 };
