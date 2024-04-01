@@ -55,7 +55,7 @@ class DashboardView extends StatelessWidget {
                     children: [
                       Flexible(
                         child: InputField(
-                          hint: '${controller.channelBy.label} must be separated by comma or space',
+                          hint: controller.channelBy.inputHint,
                           controller: controller.searchController,
                           onFieldSubmitted: (_) => controller.getVideos(),
                         ),

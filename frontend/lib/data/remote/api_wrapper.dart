@@ -107,6 +107,7 @@ class ApiWrapper {
       }
       return res;
     } on ArgumentError catch (e, st) {
+      AppLog.info(e.runtimeType);
       AppLog.error(e, st);
       if (showLoader) {
         Utility.closeLoader();

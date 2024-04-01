@@ -7,9 +7,17 @@ class DashboardRepository {
 
   final ApiWrapper _apiWrapper;
 
-  Future<ResponseModel> getVideos(String ids, bool useId) async {
+  Future<ResponseModel> getVideosByChannelIdentifier(String ids, bool useId) async {
     return _apiWrapper.makeRequest(
       '${Endpoints.videos}?ids=$ids&useId=$useId',
+      type: RequestType.get,
+      showLoader: true,
+    );
+  }
+
+  Future<ResponseModel> getVideosByUrl(String url) async {
+    return _apiWrapper.makeRequest(
+      '${Endpoints.scrape}?url=$url',
       type: RequestType.get,
       showLoader: true,
     );

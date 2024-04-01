@@ -6,4 +6,5 @@ class Endpoints {
 
   static const String videos = 'videos';
   static const String search = 'search';
+  static const String scrape = 'scrape';
 }
