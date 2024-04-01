@@ -33,23 +33,16 @@ class DashboardController extends GetxController {
   void onInit() {
     super.onInit();
     var parameters = Get.parameters;
-    print(parameters);
     if (parameters.isNotEmpty) {
       try {
         var list = parameters['q']?.decrypt();
-        print(list);
         list = (list as List).cast<String>();
-        print(list);
         Utility.updateLater(() {
-          print('Before - $channelBy');
           onChannelByChanged(ChannelBy.channelId);
-          print('After - $channelBy');
           searchController.text = list.join(', ');
-          print('Search Query - ${searchController.text}');
           getVideos();
         });
       } catch (e) {
-        print(e);
         AppLog.error(e);
       }
     }
@@ -61,11 +54,21 @@ class DashboardController extends GetxController {
   }
 
   void getVideos() async {
-    print('Getting videos...');
     if (searchController.text.trim().isEmpty) {
       return;
     }
-    print('Before splitting');
+
+    if (channelBy == ChannelBy.url) {
+      videos = await _getVideosByUrl();
+    } else {
+      videos = await _getVideosByChannelIdentifier();
+    }
+    fetchedResult = true;
+    analyzeData();
+    update([DashboardView.updateId]);
+  }
+
+  Future<List<VideoModel>> _getVideosByChannelIdentifier() async {
     var userNames = searchController.text
         .trim()
         .replaceAll('@', '')
@@ -79,18 +82,17 @@ class DashboardController extends GetxController {
         .toList();
 
     if (userNames.isEmpty) {
-      return;
+      return [];
     }
-    print('After splitting');
-
-    videos = await _viewModel.getVideos(
+    return await _viewModel.getVideosByChannelIdentifier(
       userNames,
       channelBy == ChannelBy.channelId,
     );
-    fetchedResult = true;
-    analyzeData();
-    update([DashboardView.updateId]);
   }
+
+  Future<List<VideoModel>> _getVideosByUrl() => _viewModel.getVideosByUrl(
+        searchController.text.trim(),
+      );
 
   void analyzeData() async {
     Utility.showLoader('Analzing data');
