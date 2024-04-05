@@ -58,11 +58,7 @@ class DashboardController extends GetxController {
       return;
     }
 
-    if (channelBy == ChannelBy.url) {
-      videos = await _getVideosByUrl();
-    } else {
-      videos = await _getVideosByChannelIdentifier();
-    }
+    videos = await _getVideosByChannelIdentifier();
     fetchedResult = true;
     analyzeData();
     update([DashboardView.updateId]);
@@ -89,10 +85,6 @@ class DashboardController extends GetxController {
       channelBy == ChannelBy.channelId,
     );
   }
-
-  Future<List<VideoModel>> _getVideosByUrl() => _viewModel.getVideosByUrl(
-        searchController.text.trim(),
-      );
 
   void analyzeData() async {
     Utility.showLoader('Analzing data');
