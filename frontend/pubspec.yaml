@@ -47,6 +47,7 @@ dependencies:
   flutter_dotenv: ^5.1.0
   google_generative_ai: ^0.2.2
   intl: ^0.19.0
+  chaleno: ^0.0.8
 
 dev_dependencies:
   flutter_test:

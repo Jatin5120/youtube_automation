@@ -24,4 +24,6 @@ enum ChannelBy {
         return 'Enter Single $label';
     }
   }
+
+  static List<ChannelBy> get visibleValues => [username, channelId];
 }
