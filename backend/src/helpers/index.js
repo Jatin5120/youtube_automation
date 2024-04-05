@@ -4,10 +4,12 @@ module.exports = class VideoHelper {
   static async getChannelsFromUrl(url) {
     let browser;
     try {
-      browser = await puppeteer.launch({
+      let _browser = await puppeteer.launch({
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       });
+      let browserWSEndpoint = await _browser.wsEndpoint();
+      browser = await puppeteer.connect({ browserWSEndpoint });
       const page = await browser.newPage();
       await page.goto(url);
       for (let i = 0; i < 5; i++) {
