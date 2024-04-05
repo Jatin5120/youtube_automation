@@ -4,7 +4,7 @@ const VideoHelper = require("../helpers");
 class VideoController {
   static async getChannel(req, res) {
     const { ids, useId } = req.query;
-    var isId = useId == "true";
+    let isId = useId == "true";
 
     if (!ids) {
       return res.status(204);
@@ -17,9 +17,9 @@ class VideoController {
       return res.status(204);
     }
 
-    var pending = [];
+    let pending = [];
 
-    for (var id of idList) {
+    for (let id of idList) {
       const data = isId
         ? VideoService.getChannelById(id)
         : VideoService.getChannelByUsername(id);
@@ -37,7 +37,7 @@ class VideoController {
       .filter((e) => e.status === "fulfilled")
       .map((e) => e.value);
 
-    var pendingChannels = [];
+    let pendingChannels = [];
 
     for (const channel of channels) {
       const data = VideoService.getVideosDataByChannel(channel);
@@ -61,11 +61,11 @@ class VideoController {
       return res.status(204);
     }
 
-    var usernames = await VideoHelper.getChannelsFromUrl(url);
+    let usernames = await VideoHelper.getChannelsFromUrl(url);
 
-    var pending = [];
+    let pending = [];
 
-    for (var username of usernames) {
+    for (let username of usernames) {
       const data = VideoService.getChannelByUsername(username, true);
       if (data) {
         pending.push(data);
@@ -81,7 +81,7 @@ class VideoController {
       .filter((e) => e.status === "fulfilled")
       .map((e) => e.value);
 
-    var pendingChannels = [];
+    let pendingChannels = [];
 
     for (const channel of channels) {
       const data = VideoService.getVideosDataByChannel(channel);
@@ -105,7 +105,7 @@ class VideoController {
       return res.status(204);
     }
 
-    var result = await VideoService.searchChannels(query);
+    let result = await VideoService.searchChannels(query);
 
     return res.status(200).send(result);
   }
