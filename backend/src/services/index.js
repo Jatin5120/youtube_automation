@@ -7,19 +7,29 @@ module.exports = class VideoService {
   static SEARCH_API_KEY = process.env.SEARCH_API_KEY;
 
   static async getChannelByUsername(username, useSearchAPI) {
-    const res = await google.youtube("v3").channels.list({
-      key: useSearchAPI == true ? this.SEARCH_API_KEY : this.YOUTUBE_API_KEY,
-      part: ["snippet", "id", "contentDetails", "statistics"],
-      forHandle: useSearchAPI == true ? username : `@${username}`,
-    });
+    try {
+      const res = await google.youtube("v3").channels.list({
+        key: useSearchAPI == true ? this.SEARCH_API_KEY : this.YOUTUBE_API_KEY,
+        part: [
+          "snippet",
+          "id",
+          "contentDetails",
+          "statistics",
+          "localizations",
+        ],
+        forHandle: useSearchAPI == true ? username : `@${username}`,
+      });
 
-    if (res.data.items.length === 0) {
-      return null;
+      if (res.data.items.length === 0) {
+        return null;
+      }
+
+      var item = res.data.items[0];
+
+      return item;
+    } catch (e) {
+      console.log(e);
     }
-
-    var item = res.data.items[0];
-
-    return item;
   }
 
   static async getChannelById(id) {
@@ -57,9 +67,11 @@ module.exports = class VideoService {
       description,
       channelName: channel.snippet.title,
       userName: channel.snippet.customUrl,
+      country: channel.snippet.country,
       totalVideosLastMonth: uploadedThisMonth ? videos.length : 0,
       latestVideoTitle: videos[0].snippet.title,
       lastUploadDate: videos[0].snippet.publishedAt,
+      language: videos.language,
       uploadedThisMonth: uploadedThisMonth,
     };
   }
@@ -71,7 +83,12 @@ module.exports = class VideoService {
       id: id,
       maxResults: 1,
     });
-    return await this.getPlaylistVideos(res.data.items[0].id);
+    const language = res.data.items[0].snippet.defaultLanguage;
+    var videos = await this.getPlaylistVideos(res.data.items[0].id);
+    return {
+      ...videos,
+      language,
+    };
   }
 
   static async getPlaylistVideos(id) {
@@ -110,6 +127,7 @@ module.exports = class VideoService {
       part: ["snippet"],
       q: query,
       type: "channel",
+      relevanceLanguage: "en",
       maxResults: 50,
     });
 

@@ -15,6 +15,9 @@ class VideoModel {
   final bool uploadedThisMonth;
   final String analyzedTitle;
   final String analyzedName;
+  final String language;
+  final String country;
+  final bool isEnglish;
 
   const VideoModel({
     required this.subscriberCount,
@@ -29,7 +32,9 @@ class VideoModel {
     required this.uploadedThisMonth,
     this.analyzedTitle = '',
     this.analyzedName = '',
-  });
+    required this.language,
+    required this.country,
+  }) : isEnglish = language == 'en';
 
   Iterable get properties => [
         channelName,
@@ -44,6 +49,9 @@ class VideoModel {
         analyzedTitle,
         lastUploadDate,
         uploadedThisMonth,
+        country,
+        isEnglish,
+        language,
       ];
 
   VideoModel copyWith({
@@ -59,6 +67,8 @@ class VideoModel {
     bool? uploadedThisMonth,
     String? analyzedTitle,
     String? analyzedName,
+    String? language,
+    String? country,
   }) {
     return VideoModel(
       subscriberCount: subscriberCount ?? this.subscriberCount,
@@ -73,6 +83,8 @@ class VideoModel {
       uploadedThisMonth: uploadedThisMonth ?? this.uploadedThisMonth,
       analyzedTitle: analyzedTitle ?? this.analyzedTitle,
       analyzedName: analyzedName ?? this.analyzedName,
+      language: language ?? this.language,
+      country: country ?? this.country,
     );
   }
 
@@ -90,21 +102,25 @@ class VideoModel {
       'uploadedThisMonth': uploadedThisMonth,
       'analyzedTitle': analyzedTitle,
       'analyzedName': analyzedName,
+      'language': language,
+      'country': country,
     };
   }
 
   factory VideoModel.fromMap(Map<String, dynamic> map) {
     return VideoModel(
-      subscriberCount: int.parse(map['subscriberCount'] as String),
-      totalVideos: int.parse(map['totalVideos'] as String),
-      channelName: map['channelName'] as String,
-      userName: map['userName'] as String,
-      description: map['description'] as String,
+      subscriberCount: int.parse(map['subscriberCount'] as String? ?? '0'),
+      totalVideos: int.parse(map['totalVideos'] as String? ?? '0'),
+      channelName: map['channelName'] as String? ?? '',
+      userName: map['userName'] as String? ?? '',
+      description: map['description'] as String? ?? '',
       channelLink: '${AppConstants.youtubeBase}${(map['userName'] as String)}',
-      totalVideosLastMonth: map['totalVideosLastMonth'] as int,
-      latestVideoTitle: map['latestVideoTitle'] as String,
+      totalVideosLastMonth: map['totalVideosLastMonth'] as int? ?? 0,
+      latestVideoTitle: map['latestVideoTitle'] as String? ?? '',
       lastUploadDate: DateTime.parse(map['lastUploadDate'] as String),
-      uploadedThisMonth: map['uploadedThisMonth'] as bool,
+      uploadedThisMonth: map['uploadedThisMonth'] as bool? ?? false,
+      language: map['language'] as String? ?? 'en',
+      country: map['country'] as String? ?? 'IN',
     );
   }
 
@@ -114,7 +130,7 @@ class VideoModel {
 
   @override
   String toString() {
-    return 'VideoModel(subscriberCount: $subscriberCount, totalVideos: $totalVideos, channelName: $channelName, userName: $userName, decription: $description, channelLink: $channelLink, totalVideosLastMonth: $totalVideosLastMonth, latestVideoTitle: $latestVideoTitle, lastUploadDate: $lastUploadDate, uploadedThisMonth: $uploadedThisMonth, analyzedTitle: $analyzedTitle, analyzedName: $analyzedTitle)';
+    return 'VideoModel(subscriberCount: $subscriberCount, totalVideos: $totalVideos, channelName: $channelName, userName: $userName, decription: $description, channelLink: $channelLink, totalVideosLastMonth: $totalVideosLastMonth, latestVideoTitle: $latestVideoTitle, lastUploadDate: $lastUploadDate, uploadedThisMonth: $uploadedThisMonth, analyzedTitle: $analyzedTitle, analyzedName: $analyzedTitle, language: $language, country: $country)';
   }
 
   @override
@@ -132,7 +148,9 @@ class VideoModel {
         other.lastUploadDate == lastUploadDate &&
         other.uploadedThisMonth == uploadedThisMonth &&
         other.analyzedTitle == analyzedTitle &&
-        other.analyzedName == analyzedName;
+        other.analyzedName == analyzedName &&
+        other.language == language &&
+        other.country == country;
   }
 
   @override
@@ -148,6 +166,8 @@ class VideoModel {
         lastUploadDate.hashCode ^
         uploadedThisMonth.hashCode ^
         analyzedTitle.hashCode ^
-        analyzedName.hashCode;
+        analyzedName.hashCode ^
+        language.hashCode ^
+        country.hashCode;
   }
 }

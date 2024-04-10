@@ -29,10 +29,5 @@ class AppPages {
       page: SearchView.new,
       binding: SearchBinding(),
     ),
-    GetPage<ScrapeView>(
-      name: ScrapeView.route,
-      page: ScrapeView.new,
-      binding: ScrapeBinding(),
-    ),
   ];
 }

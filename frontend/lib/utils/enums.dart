@@ -9,8 +9,8 @@ enum RequestType {
 
 enum ChannelBy {
   username('Username'),
-  channelId('Channel Id'),
-  url('Search Url');
+  channelId('Channel Id');
+  // url('Search Url');
 
   const ChannelBy(this.label);
   final String label;
@@ -20,8 +20,8 @@ enum ChannelBy {
       case ChannelBy.username:
       case ChannelBy.channelId:
         return '$label must be separated by comma or space';
-      case ChannelBy.url:
-        return 'Enter Single $label';
+      // case ChannelBy.url:
+      //   return 'Enter Single $label';
     }
   }
 
