@@ -119,8 +119,8 @@ class VideoModel {
       latestVideoTitle: map['latestVideoTitle'] as String? ?? '',
       lastUploadDate: DateTime.parse(map['lastUploadDate'] as String),
       uploadedThisMonth: map['uploadedThisMonth'] as bool? ?? false,
-      language: map['language'] as String? ?? 'en',
-      country: map['country'] as String? ?? 'IN',
+      language: map['language'] as String? ?? 'N/A',
+      country: map['country'] as String? ?? 'N/A',
     );
   }
 
