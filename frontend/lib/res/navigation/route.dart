@@ -4,5 +4,4 @@ class AppRoutes {
   static const String dashboard = '/dashboard';
   static const String analysis = '/analysis';
   static const String search = '/search';
-  static const String scrape = '/scrape';
 }

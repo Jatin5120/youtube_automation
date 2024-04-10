@@ -27,13 +27,6 @@ class DashboardView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: ElevatedButton(
-              onPressed: () => Get.offNamed(AppRoutes.scrape),
-              child: const Text('Scrape'),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton(
               onPressed: () => Get.offNamed(AppRoutes.search),
               child: const Text('Search'),
             ),
@@ -84,7 +77,7 @@ class DashboardView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Row(
-                    children: ChannelBy.visibleValues
+                    children: ChannelBy.values
                         .map((e) => Flexible(
                               child: RadioListTile(
                                 value: e,
@@ -192,6 +185,21 @@ class DashboardView extends StatelessWidget {
         DaviColumn(
           name: 'Uploaded this Month?',
           objectValue: (row) => row.uploadedThisMonth,
+          cellAlignment: Alignment.center,
+        ),
+        DaviColumn(
+          name: 'Channel Country',
+          stringValue: (row) => row.country,
+          cellAlignment: Alignment.center,
+        ),
+        DaviColumn(
+          name: 'isEnglish?',
+          objectValue: (row) => row.isEnglish,
+          cellAlignment: Alignment.center,
+        ),
+        DaviColumn(
+          name: 'Default Language',
+          stringValue: (row) => row.language,
           cellAlignment: Alignment.center,
         ),
       ],

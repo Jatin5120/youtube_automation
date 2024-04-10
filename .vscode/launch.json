@@ -10,10 +10,6 @@
             "request": "launch",
             "type": "dart",
             // "flutterMode": "release"
-            "args": [
-                "--web-browser-flag",
-                "--disable-web-security",
-            ]
         },
     ]
 }

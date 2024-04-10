@@ -24,13 +24,6 @@ class AnalysisView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: ElevatedButton(
-              onPressed: () => Get.offNamed(AppRoutes.scrape),
-              child: const Text('Scrape'),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton(
               onPressed: () => Get.offNamed(AppRoutes.dashboard),
               child: const Text('Dashboard'),
             ),

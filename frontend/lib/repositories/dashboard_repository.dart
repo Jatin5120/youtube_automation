@@ -14,12 +14,4 @@ class DashboardRepository {
       showLoader: true,
     );
   }
-
-  Future<ResponseModel> getVideosByUrl(String url) async {
-    return _apiWrapper.makeRequest(
-      '${Endpoints.scrape}?url=$url',
-      type: RequestType.get,
-      showLoader: true,
-    );
-  }
 }
