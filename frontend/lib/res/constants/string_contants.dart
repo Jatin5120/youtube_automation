@@ -32,6 +32,6 @@ Channel Name: $channel
 Description: """$description"""
 
 Output:
-If the user's name is identified: The name of the user
-Else: "Not found"''';
+If the user's name is identified: First name of the user
+Else: "Team (Channel Name), here the brackets '()' are supposed to be removed"''';
 }

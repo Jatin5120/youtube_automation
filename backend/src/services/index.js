@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { google } = require("googleapis");
-const { isUploadedThisMonth } = require("../utils");
+const { isUploadedThisMonth, isUploadedInThreeMonth } = require("../utils");
 
 module.exports = class VideoService {
   static YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
@@ -57,9 +57,14 @@ module.exports = class VideoService {
     const subscriberCount = channel.statistics.subscriberCount;
     const totalVideos = channel.statistics.videoCount;
     var channelId = channel.contentDetails.relatedPlaylists.uploads;
-    const videos = await this.getPlaylists(channelId);
+    const playlist = await this.getPlaylists(channelId);
+    const videosThisMonth = playlist.videosThisMonth;
+    const videosLastThreeMonths = playlist.videosLastThreeMonths;
     const uploadedThisMonth = isUploadedThisMonth(
-      Date.parse(videos[0].snippet.publishedAt)
+      Date.parse(videosThisMonth[0].snippet.publishedAt)
+    );
+    const uploadedLastThreeMonths = isUploadedThisMonth(
+      Date.parse(videosLastThreeMonths[0].snippet.publishedAt)
     );
     return {
       subscriberCount,
@@ -68,10 +73,13 @@ module.exports = class VideoService {
       channelName: channel.snippet.title,
       userName: channel.snippet.customUrl,
       country: channel.snippet.country,
-      totalVideosLastMonth: uploadedThisMonth ? videos.length : 0,
-      latestVideoTitle: videos[0].snippet.title,
-      lastUploadDate: videos[0].snippet.publishedAt,
-      language: videos.language,
+      totalVideosLastMonth: uploadedThisMonth ? videosThisMonth.length : 0,
+      totalVideosLastThreeMonths: uploadedLastThreeMonths
+        ? videosLastThreeMonths.length
+        : 0,
+      latestVideoTitle: videosThisMonth[0].snippet.title,
+      lastUploadDate: videosThisMonth[0].snippet.publishedAt,
+      language: playlist.language,
       uploadedThisMonth: uploadedThisMonth,
     };
   }
@@ -86,7 +94,8 @@ module.exports = class VideoService {
     const language = res.data.items[0].snippet.defaultLanguage;
     var videos = await this.getPlaylistVideos(res.data.items[0].id);
     return {
-      ...videos,
+      videosThisMonth: videos.videosThisMonth,
+      videosLastThreeMonths: videos.videosLastThreeMonths,
       language,
     };
   }
@@ -102,23 +111,34 @@ module.exports = class VideoService {
     if (res.data.items.length === 0) {
       return [];
     }
-    var videos = [];
+    var videosThisMonth = [];
+    var videosLastThreeMonths = [];
     for await (var item of res.data.items) {
       try {
         var date = Date.parse(item.snippet.publishedAt);
-        if (!isUploadedThisMonth(date)) {
+        if (isUploadedThisMonth(date)) {
+          videosThisMonth.push(item);
+          videosLastThreeMonths.push(item);
+        } else if (isUploadedInThreeMonth(date)) {
+          videosLastThreeMonths.push(item);
+        } else {
           break;
         }
-        videos.push(item);
       } catch (e) {
         console.log(e);
       }
     }
-    if (videos.length === 0) {
-      videos.push(res.data.items[0]);
+    if (videosThisMonth.length === 0) {
+      videosThisMonth.push(res.data.items[0]);
+    }
+    if (videosLastThreeMonths.length === 0) {
+      videosLastThreeMonths.push(res.data.items[0]);
     }
 
-    return videos;
+    return {
+      videosThisMonth: videosThisMonth,
+      videosLastThreeMonths: videosLastThreeMonths,
+    };
   }
 
   static async searchChannels(query) {
