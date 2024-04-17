@@ -92,7 +92,11 @@ class DashboardController extends GetxController {
     var names = <Future<String?>>[];
     for (var video in videos) {
       titles.add(_analyticsController.analyzeTitle(video.latestVideoTitle));
-      names.add(_analyticsController.analyzeName(video.userName, video.description));
+      names.add(_analyticsController.analyzeName(
+        username: video.userName,
+        channelName: video.channelName,
+        description: video.description,
+      ));
     }
     final output = await Future.wait([
       Future.wait(titles),

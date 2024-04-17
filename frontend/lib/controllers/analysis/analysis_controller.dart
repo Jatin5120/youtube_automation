@@ -29,7 +29,10 @@ class AnalysisController extends GetxController {
   void _loadAPIKey() async {
     await dotenv.load();
     apiKey = kApiKey.isEmpty ? dotenv.get('API_KEY', fallback: '') : kApiKey;
-    _model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+    _model = GenerativeModel(
+      model: 'gemini-pro',
+      apiKey: apiKey,
+    );
   }
 
   Future<void> analyzeSearchTitle(String title) async {
@@ -48,24 +51,28 @@ class AnalysisController extends GetxController {
   Future<String?> analyzeTitle(String title) async {
     try {
       final prompt = AppPrompts.titlePrompt(title);
-      return await _getAnalysis(title, prompt);
+      return await _getAnalysis(prompt);
     } catch (e) {
       AppLog.error(e);
       return null;
     }
   }
 
-  Future<String?> analyzeName(String name, String description) async {
+  Future<String?> analyzeName({
+    required String username,
+    required String channelName,
+    required String description,
+  }) async {
     try {
-      final prompt = AppPrompts.namePrompt(name, description);
-      return await _getAnalysis(name, prompt);
+      final prompt = AppPrompts.namePrompt(username, channelName, description);
+      return await _getAnalysis(prompt);
     } catch (e) {
       AppLog.error(e);
       return null;
     }
   }
 
-  Future<String?> _getAnalysis(String title, String prompt) async {
+  Future<String?> _getAnalysis(String prompt) async {
     try {
       final content = [Content.text(prompt)];
       final response = await _model.generateContent(content);
