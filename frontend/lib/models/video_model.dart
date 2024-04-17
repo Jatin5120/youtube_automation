@@ -10,6 +10,7 @@ class VideoModel {
   final String channelLink;
   final String description;
   final int totalVideosLastMonth;
+  final int totalVideosLastThreeMonths;
   final String latestVideoTitle;
   final DateTime lastUploadDate;
   final bool uploadedThisMonth;
@@ -27,6 +28,7 @@ class VideoModel {
     required this.channelLink,
     required this.description,
     required this.totalVideosLastMonth,
+    required this.totalVideosLastThreeMonths,
     required this.latestVideoTitle,
     required this.lastUploadDate,
     required this.uploadedThisMonth,
@@ -45,6 +47,7 @@ class VideoModel {
         subscriberCount,
         totalVideos,
         totalVideosLastMonth,
+        totalVideosLastThreeMonths,
         latestVideoTitle,
         analyzedTitle,
         lastUploadDate,
@@ -62,6 +65,7 @@ class VideoModel {
     String? channelLink,
     String? description,
     int? totalVideosLastMonth,
+    int? totalVideosLastThreeMonths,
     String? latestVideoTitle,
     DateTime? lastUploadDate,
     bool? uploadedThisMonth,
@@ -78,6 +82,7 @@ class VideoModel {
       channelLink: channelLink ?? this.channelLink,
       description: description ?? this.description,
       totalVideosLastMonth: totalVideosLastMonth ?? this.totalVideosLastMonth,
+      totalVideosLastThreeMonths: totalVideosLastThreeMonths ?? this.totalVideosLastThreeMonths,
       latestVideoTitle: latestVideoTitle ?? this.latestVideoTitle,
       lastUploadDate: lastUploadDate ?? this.lastUploadDate,
       uploadedThisMonth: uploadedThisMonth ?? this.uploadedThisMonth,
@@ -97,6 +102,7 @@ class VideoModel {
       'channelLink': channelLink,
       'description': description,
       'totalVideosLastMonth': totalVideosLastMonth,
+      'totalVideosLastThreeMonths': totalVideosLastThreeMonths,
       'latestVideoTitle': latestVideoTitle,
       'lastUploadDate': lastUploadDate.millisecondsSinceEpoch,
       'uploadedThisMonth': uploadedThisMonth,
@@ -116,6 +122,7 @@ class VideoModel {
       description: map['description'] as String? ?? '',
       channelLink: '${AppConstants.youtubeBase}${(map['userName'] as String)}',
       totalVideosLastMonth: map['totalVideosLastMonth'] as int? ?? 0,
+      totalVideosLastThreeMonths: map['totalVideosLastThreeMonths'] as int? ?? 0,
       latestVideoTitle: map['latestVideoTitle'] as String? ?? '',
       lastUploadDate: DateTime.parse(map['lastUploadDate'] as String),
       uploadedThisMonth: map['uploadedThisMonth'] as bool? ?? false,
@@ -130,7 +137,7 @@ class VideoModel {
 
   @override
   String toString() {
-    return 'VideoModel(subscriberCount: $subscriberCount, totalVideos: $totalVideos, channelName: $channelName, userName: $userName, decription: $description, channelLink: $channelLink, totalVideosLastMonth: $totalVideosLastMonth, latestVideoTitle: $latestVideoTitle, lastUploadDate: $lastUploadDate, uploadedThisMonth: $uploadedThisMonth, analyzedTitle: $analyzedTitle, analyzedName: $analyzedTitle, language: $language, country: $country)';
+    return 'VideoModel(subscriberCount: $subscriberCount, totalVideos: $totalVideos, channelName: $channelName, userName: $userName, decription: $description, channelLink: $channelLink, totalVideosLastMonth: $totalVideosLastMonth, totalVideosLastThreeMonths: $totalVideosLastThreeMonths, latestVideoTitle: $latestVideoTitle, lastUploadDate: $lastUploadDate, uploadedThisMonth: $uploadedThisMonth, analyzedTitle: $analyzedTitle, analyzedName: $analyzedTitle, language: $language, country: $country)';
   }
 
   @override
@@ -144,6 +151,7 @@ class VideoModel {
         other.description == description &&
         other.channelLink == channelLink &&
         other.totalVideosLastMonth == totalVideosLastMonth &&
+        other.totalVideosLastThreeMonths == totalVideosLastThreeMonths &&
         other.latestVideoTitle == latestVideoTitle &&
         other.lastUploadDate == lastUploadDate &&
         other.uploadedThisMonth == uploadedThisMonth &&
@@ -162,6 +170,7 @@ class VideoModel {
         description.hashCode ^
         channelLink.hashCode ^
         totalVideosLastMonth.hashCode ^
+        totalVideosLastThreeMonths.hashCode ^
         latestVideoTitle.hashCode ^
         lastUploadDate.hashCode ^
         uploadedThisMonth.hashCode ^

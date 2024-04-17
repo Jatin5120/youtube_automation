@@ -169,6 +169,11 @@ class DashboardView extends StatelessWidget {
           cellAlignment: Alignment.centerRight,
         ),
         DaviColumn(
+          name: 'Total Videos Last 3 Months',
+          intValue: (row) => row.totalVideosLastThreeMonths,
+          cellAlignment: Alignment.centerRight,
+        ),
+        DaviColumn(
           name: 'Latest Video Title',
           stringValue: (row) => row.latestVideoTitle,
           grow: 2,
