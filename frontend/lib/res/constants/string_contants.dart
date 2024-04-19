@@ -24,7 +24,7 @@ Instructions:
 6. Do not include the words 'Input' and 'Output' in your Output''';
 
   static String namePrompt(String name, String channel, String description) => '''
-Following is the details of a Youtube Channel. Decode the data and find the name of the Channel Owner if possible.
+I want you to act as an Data extractor and extract name that I can address to in an email from the following details of a Youtube Channel. Decode the data and find the name of the Channel Owner if possible.
 
 Input:
 Username: $name
@@ -33,5 +33,5 @@ Description: """$description"""
 
 Output:
 If the user's name is identified: First name of the user
-Else: "Team (Channel Name), here the brackets '()' are supposed to be removed"''';
+Else: "Team $channel"''';
 }

@@ -9,13 +9,22 @@ class SearchViewModel {
 
   final SearchRepository _repository;
 
-  Future<List<ChannelModel>> searchChannels(String query) async {
+  Future<(List<ChannelModel>, String)> searchChannels({
+    required String query,
+    required String pageToken,
+  }) async {
     try {
-      final res = await _repository.searchChannels(query);
-      return (jsonDecode(res.data) as List).map((e) => ChannelModel.fromMap(e as Map<String, dynamic>)).toList();
+      final res = await _repository.searchChannels(
+        query: query,
+        pageToken: pageToken,
+      );
+      var data = jsonDecode(res.data) as Map<String, dynamic>;
+      var token = data['nextPageToken'] as String? ?? '';
+      var channels = (data['data'] as List).map((e) => ChannelModel.fromMap(e as Map<String, dynamic>)).toList();
+      return (channels, token);
     } catch (e, st) {
       AppLog.error(e, st);
-      return [];
+      return (<ChannelModel>[], '');
     }
   }
 }

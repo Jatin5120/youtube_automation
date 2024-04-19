@@ -19,16 +19,26 @@ class SearchController extends GetxController {
 
   var channels = <ChannelModel>[];
 
+  var pageToken = '';
+
   var tableController = ScrollController();
 
   var searchController = TextEditingController();
 
-  void search() async {
+  void search([bool pagination = false]) async {
     if (searchController.text.trim().isEmpty) {
       return;
     }
+    if (!pagination) {
+      channels.clear();
+    }
 
-    channels = await _viewModel.searchChannels(searchController.text.trim());
+    var res = await _viewModel.searchChannels(
+      query: searchController.text.trim(),
+      pageToken: pageToken,
+    );
+    channels.addAll(res.$1);
+    pageToken = res.$2;
     fetchedResult = true;
     update([SearchView.updateId]);
   }

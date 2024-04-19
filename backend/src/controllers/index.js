@@ -99,13 +99,13 @@ class VideoController {
   }
 
   static async searchChannels(req, res) {
-    const { query } = req.query;
+    const { query, pageToken } = req.query;
 
     if (!query) {
       return res.status(204);
     }
 
-    let result = await VideoService.searchChannels(query);
+    let result = await VideoService.searchChannels(query, pageToken);
 
     return res.status(200).send(result);
   }

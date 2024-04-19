@@ -68,7 +68,7 @@ class AnalysisController extends GetxController {
       return await _getAnalysis(prompt);
     } catch (e) {
       AppLog.error(e);
-      return null;
+      return 'Team $channelName';
     }
   }
 

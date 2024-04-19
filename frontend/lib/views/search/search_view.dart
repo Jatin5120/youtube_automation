@@ -94,6 +94,11 @@ class SearchView extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Flexible(child: buildTable(context, controller.channels)),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => controller.search(true),
+                      child: const Text('Load more'),
+                    ),
                   ],
                 ],
               ),
