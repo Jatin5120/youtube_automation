@@ -7,9 +7,16 @@ class SearchRepository {
 
   final ApiWrapper _apiWrapper;
 
-  Future<ResponseModel> searchChannels(String query) async {
+  Future<ResponseModel> searchChannels({
+    required String query,
+    required String pageToken,
+  }) async {
+    var params = 'query=$query';
+    if (pageToken.trim().isNotEmpty) {
+      params += '&pageToken=$pageToken';
+    }
     return _apiWrapper.makeRequest(
-      '${Endpoints.search}?query=$query',
+      '${Endpoints.search}?$params',
       type: RequestType.get,
       showLoader: true,
     );

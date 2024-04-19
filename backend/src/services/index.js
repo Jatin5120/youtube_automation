@@ -141,21 +141,26 @@ module.exports = class VideoService {
     };
   }
 
-  static async searchChannels(query) {
+  static async searchChannels(query, pageToken) {
     const res = await google.youtube("v3").search.list({
       key: this.SEARCH_API_KEY,
       part: ["snippet"],
       q: query,
       type: "channel",
       relevanceLanguage: "en",
+      pageToken: pageToken,
       maxResults: 50,
     });
 
-    return res.data.items.map((e) => ({
+    const nextPageToken = res.data.nextPageToken;
+
+    const data = res.data.items.map((e) => ({
       channelId: e.snippet.channelId,
       channelName: e.snippet.channelTitle,
       title: e.snippet.title,
       description: e.snippet.description,
     }));
+
+    return { data, nextPageToken };
   }
 };
