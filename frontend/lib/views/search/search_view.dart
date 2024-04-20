@@ -83,21 +83,16 @@ class SearchView extends StatelessWidget {
                     ),
                   ] else ...[
                     Text(
-                      '${controller.channels.length} result(s)',
+                      '10 sample results out of ${controller.channels.length} result(s)',
                       textAlign: TextAlign.center,
                       style: context.textTheme.bodyMedium?.withTitleColor,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: controller.fetchDetails,
-                      child: const Text('Fetch Details'),
                     ),
                     const SizedBox(height: 16),
                     Flexible(child: buildTable(context, controller.channels)),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => controller.search(true),
-                      child: const Text('Load more'),
+                      onPressed: controller.triggerInLoop,
+                      child: const Text('Fetch Details'),
                     ),
                   ],
                 ],
@@ -109,9 +104,14 @@ class SearchView extends StatelessWidget {
     );
   }
 
+  // Download all data
+
+  // Download final list
+  // 1. Analyzed name, Email (empty), Analyzed title, Channel name, Instagram, LinkedIn, Twitter
+
   Widget buildTable(BuildContext context, List<ChannelModel> channels) {
     var tableModel = DaviModel<ChannelModel>(
-      rows: channels,
+      rows: channels.take(10).toList(),
       multiSortEnabled: true,
       columns: [
         DaviColumn(
@@ -169,7 +169,7 @@ class SearchView extends StatelessWidget {
       child: Davi<ChannelModel>(
         tableModel,
         columnWidthBehavior: ColumnWidthBehavior.fit,
-        visibleRowsCount: channels.length,
+        visibleRowsCount: channels.take(10).length,
         unpinnedHorizontalScrollController: Get.find<SearchController>().tableController,
       ),
     );

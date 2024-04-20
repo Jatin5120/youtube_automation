@@ -31,6 +31,9 @@ Username: $name
 Channel Name: $channel
 Description: """$description"""
 
+Instruction:
+Do not include anything other than the name in the output
+
 Output:
 If the user's name is identified: First name of the user
 Else: "Team $channel"''';

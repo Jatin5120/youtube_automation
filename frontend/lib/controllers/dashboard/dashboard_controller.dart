@@ -29,6 +29,24 @@ class DashboardController extends GetxController {
   ChannelBy get channelBy => _channelBy.value;
   set channelBy(ChannelBy value) => _channelBy.value = value;
 
+  final RxBool _isAnalyzing = false.obs;
+  bool get isAnalyzing => _isAnalyzing.value;
+  set isAnalyzing(bool value) {
+    if (value == isAnalyzing) {
+      return;
+    }
+    _isAnalyzing.value = value;
+  }
+
+  final RxDouble _analyzeProgress = 0.0.obs;
+  double get analyzeProgress => _analyzeProgress.value;
+  set analyzeProgress(double value) {
+    if (value == analyzeProgress) {
+      return;
+    }
+    _analyzeProgress.value = value;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -60,7 +78,8 @@ class DashboardController extends GetxController {
 
     videos = await _getVideosByChannelIdentifier();
     fetchedResult = true;
-    analyzeData();
+    parseData();
+    // analyzeData();
     update([DashboardView.updateId]);
   }
 
@@ -86,32 +105,36 @@ class DashboardController extends GetxController {
     );
   }
 
+  void parseData() {
+    videos = videos.where((e) => e.subscriberCount > 100 && e.totalVideosLastMonth > 2 && e.totalVideosLastThreeMonths > 5).toList();
+  }
+
   void analyzeData() async {
-    Utility.showLoader('Analzing data');
-    var titles = <Future<String?>>[];
-    var names = <Future<String?>>[];
-    for (var video in videos) {
-      titles.add(_analyticsController.analyzeTitle(video.latestVideoTitle));
-      names.add(_analyticsController.analyzeName(
-        username: video.userName,
-        channelName: video.channelName,
-        description: video.description,
-      ));
-    }
-    final output = await Future.wait([
-      Future.wait(titles),
-      Future.wait(names),
-    ]);
-    final analyzedTitles = output[0];
-    final analyzedNames = output[1];
-    for (var i = 0; i < videos.length; i++) {
-      videos[i] = videos[i].copyWith(
-        analyzedTitle: analyzedTitles[i],
-        analyzedName: analyzedNames[i],
+    isAnalyzing = true;
+    for (var data in videos.indexed) {
+      var video = data.$2;
+      var index = data.$1;
+      analyzeProgress = (index / videos.length);
+      if (video.analyzedName.trim().isNotEmpty && video.analyzedTitle.trim().isNotEmpty) {
+        continue;
+      }
+      var analyzeData = await Future.wait([
+        _analyticsController.analyzeTitle(video.latestVideoTitle),
+        _analyticsController.analyzeName(
+          username: video.userName,
+          channelName: video.channelName,
+          description: video.description,
+        ),
+      ]);
+      videos[index] = video.copyWith(
+        analyzedTitle: analyzeData[0],
+        analyzedName: analyzeData[1],
       );
     }
-    Utility.closeLoader();
+    analyzeProgress = 100;
+    isAnalyzing = false;
     update([DashboardView.updateId]);
+    downloadCSV();
   }
 
   // Download and save CSV to your Device
@@ -120,9 +143,14 @@ class DashboardController extends GetxController {
     String file = const ListToCsvConverter().convert(
       [
         [
-          'Channel Name',
-          'UserName',
           'Analyzed Name',
+          'Email',
+          'Last Video Analyzed Title',
+          'Channel Name',
+          'Instagram',
+          'LinkedIn',
+          'Twitter',
+          'UserName',
           'Channel Link',
           'Channel Description',
           'Subscriber Count',
@@ -130,7 +158,6 @@ class DashboardController extends GetxController {
           'Total Videos Last Month',
           'Total Videos Last 3 Months',
           'Latest Video Title',
-          'Analyzed Title',
           'Last Upload Date',
           'Uploaded this Month?',
           'Channel Country',

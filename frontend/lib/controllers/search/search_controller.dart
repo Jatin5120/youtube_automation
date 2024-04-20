@@ -25,12 +25,20 @@ class SearchController extends GetxController {
 
   var searchController = TextEditingController();
 
-  void search([bool pagination = false]) async {
+  void triggerInLoop() async {
+    for (var i = 0; i < 7; i++) {
+      await search(true);
+    }
+    fetchDetails();
+  }
+
+  Future<void> search([bool pagination = false]) async {
     if (searchController.text.trim().isEmpty) {
       return;
     }
     if (!pagination) {
       channels.clear();
+      pageToken = '';
     }
 
     var res = await _viewModel.searchChannels(
