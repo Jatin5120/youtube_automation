@@ -66,13 +66,6 @@ class DashboardView extends StatelessWidget {
                         elevation: 0,
                         child: const Icon(Icons.search),
                       ),
-                      if (controller.videos.isNotEmpty) ...[
-                        const SizedBox(width: 16),
-                        ElevatedButton(
-                          onPressed: controller.downloadCSV,
-                          child: const Text('Download csv'),
-                        ),
-                      ],
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -100,12 +93,37 @@ class DashboardView extends StatelessWidget {
                     ),
                   ] else ...[
                     Text(
-                      '${controller.videos.length} result(s)',
+                      '10 sample results out of ${controller.videos.length} result(s)',
                       textAlign: TextAlign.center,
                       style: context.textTheme.bodyMedium?.withTitleColor,
                     ),
                     const SizedBox(height: 16),
                     Flexible(child: buildTable(context, controller.videos)),
+                    if (controller.videos.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Obx(
+                        () => controller.isAnalyzing
+                            ? Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  LinearProgressIndicator(
+                                    value: controller.analyzeProgress,
+                                    color: AppColors.primary,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Analyzed ${(controller.analyzeProgress * 100).toStringAsFixed(2)}%',
+                                    style: context.textTheme.bodyLarge?.withTitleColor,
+                                  ),
+                                ],
+                              )
+                            : ElevatedButton(
+                                onPressed: controller.analyzeData,
+                                child: const Text('Analyze and Download csv'),
+                              ),
+                      ),
+                    ],
                   ],
                 ],
               ),
@@ -118,7 +136,7 @@ class DashboardView extends StatelessWidget {
 
   Widget buildTable(BuildContext context, List<VideoModel> videos) {
     var tableModel = DaviModel<VideoModel>(
-      rows: videos,
+      rows: videos.take(10).toList(),
       multiSortEnabled: true,
       columns: [
         DaviColumn(
@@ -129,10 +147,10 @@ class DashboardView extends StatelessWidget {
           name: 'UserName',
           stringValue: (row) => row.userName,
         ),
-        DaviColumn(
-          name: 'Analyzed Name',
-          stringValue: (row) => row.analyzedName,
-        ),
+        // DaviColumn(
+        //   name: 'Analyzed Name',
+        //   stringValue: (row) => row.analyzedName,
+        // ),
         DaviColumn(
           name: 'Channel Link',
           cellBuilder: (context, row) => TapHandler(
@@ -178,35 +196,35 @@ class DashboardView extends StatelessWidget {
           stringValue: (row) => row.latestVideoTitle,
           grow: 2,
         ),
-        DaviColumn(
-          name: 'Analyzed Title',
-          stringValue: (row) => row.analyzedTitle,
-          grow: 2,
-        ),
+        // DaviColumn(
+        //   name: 'Analyzed Title',
+        //   stringValue: (row) => row.analyzedTitle,
+        //   grow: 2,
+        // ),
         DaviColumn(
           name: 'Last Upload Date',
           stringValue: (row) => DateFormat('yyyy MMM dd, hh:mm:ss').format(row.lastUploadDate),
         ),
-        DaviColumn(
-          name: 'Uploaded this Month?',
-          objectValue: (row) => row.uploadedThisMonth,
-          cellAlignment: Alignment.center,
-        ),
+        // DaviColumn(
+        //   name: 'Uploaded this Month?',
+        //   objectValue: (row) => row.uploadedThisMonth,
+        //   cellAlignment: Alignment.center,
+        // ),
         DaviColumn(
           name: 'Channel Country',
           stringValue: (row) => row.country,
           cellAlignment: Alignment.center,
         ),
-        DaviColumn(
-          name: 'isEnglish?',
-          objectValue: (row) => row.isEnglish,
-          cellAlignment: Alignment.center,
-        ),
-        DaviColumn(
-          name: 'Default Language',
-          stringValue: (row) => row.language,
-          cellAlignment: Alignment.center,
-        ),
+        // DaviColumn(
+        //   name: 'isEnglish?',
+        //   objectValue: (row) => row.isEnglish,
+        //   cellAlignment: Alignment.center,
+        // ),
+        // DaviColumn(
+        //   name: 'Default Language',
+        //   stringValue: (row) => row.language,
+        //   cellAlignment: Alignment.center,
+        // ),
       ],
     );
     return DaviTheme(
@@ -230,7 +248,7 @@ class DashboardView extends StatelessWidget {
       child: Davi<VideoModel>(
         tableModel,
         columnWidthBehavior: ColumnWidthBehavior.scrollable,
-        visibleRowsCount: videos.length,
+        visibleRowsCount: videos.take(10).length,
         unpinnedHorizontalScrollController: Get.find<DashboardController>().tableController,
       ),
     );

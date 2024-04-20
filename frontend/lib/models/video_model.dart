@@ -39,9 +39,14 @@ class VideoModel {
   }) : isEnglish = language == 'en';
 
   Iterable get properties => [
-        channelName,
-        userName,
         analyzedName,
+        '',
+        analyzedTitle,
+        channelName,
+        '',
+        '',
+        '',
+        userName,
         channelLink,
         description,
         subscriberCount,
@@ -49,7 +54,6 @@ class VideoModel {
         totalVideosLastMonth,
         totalVideosLastThreeMonths,
         latestVideoTitle,
-        analyzedTitle,
         lastUploadDate,
         uploadedThisMonth,
         country,
@@ -114,13 +118,13 @@ class VideoModel {
   }
 
   factory VideoModel.fromMap(Map<String, dynamic> map) {
-    return VideoModel(
+    var model = VideoModel(
       subscriberCount: int.parse(map['subscriberCount'] as String? ?? '0'),
       totalVideos: int.parse(map['totalVideos'] as String? ?? '0'),
       channelName: map['channelName'] as String? ?? '',
       userName: map['userName'] as String? ?? '',
       description: map['description'] as String? ?? '',
-      channelLink: '${AppConstants.youtubeBase}${(map['userName'] as String)}',
+      channelLink: '',
       totalVideosLastMonth: map['totalVideosLastMonth'] as int? ?? 0,
       totalVideosLastThreeMonths: map['totalVideosLastThreeMonths'] as int? ?? 0,
       latestVideoTitle: map['latestVideoTitle'] as String? ?? '',
@@ -129,6 +133,10 @@ class VideoModel {
       language: map['language'] as String? ?? 'N/A',
       country: map['country'] as String? ?? 'N/A',
     );
+    model = model.copyWith(
+      channelLink: '${AppConstants.youtubeBase}${model.userName}',
+    );
+    return model;
   }
 
   String toJson() => json.encode(toMap());
