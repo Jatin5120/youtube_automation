@@ -20,7 +20,7 @@ class SearchViewModel {
       );
       var data = jsonDecode(res.data) as Map<String, dynamic>;
       var token = data['nextPageToken'] as String? ?? '';
-      var channels = (data['data'] as List).map((e) => ChannelModel.fromMap(e as Map<String, dynamic>)).toList();
+      var channels = (data['data'] as List? ?? []).map((e) => ChannelModel.fromMap(e as Map<String, dynamic>)).toList();
       return (channels, token);
     } catch (e, st) {
       AppLog.error(e, st);

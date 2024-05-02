@@ -13,7 +13,7 @@ class DashboardViewModel {
     try {
       var ids = base64.encode(usernames.join(',').codeUnits);
       final res = await _repository.getVideosByChannelIdentifier(ids, useId);
-      return (jsonDecode(res.data) as List).map((e) => VideoModel.fromMap(e as Map<String, dynamic>)).toList();
+      return (jsonDecode(res.data) as List? ?? []).map((e) => VideoModel.fromMap(e as Map<String, dynamic>)).toList();
     } catch (e, st) {
       AppLog.error(e, st);
       AppLog.error(st);

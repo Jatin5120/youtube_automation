@@ -1,6 +1,8 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:frontend/data/data.dart';
+import 'package:frontend/firebase_options.dart';
 import 'package:frontend/res/res.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' show Client;
@@ -16,6 +18,9 @@ void initialize() {
   kApiKey = const String.fromEnvironment('API_KEY', defaultValue: '');
   usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
+  Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   Get.put(ApiWrapper(Client()));
 }
 
@@ -25,14 +30,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Youtube Automation',
+      title: 'Trisdel Media',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.dark,
       initialRoute: AppPages.initial,
       getPages: AppPages.pages,
-      unknownRoute: AppPages.dashboard,
+      unknownRoute: AppPages.auth,
     );
   }
 }

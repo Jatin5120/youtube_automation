@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:frontend/res/res.dart';
 
 extension StyleExtension on TextStyle {
@@ -27,4 +27,8 @@ extension StringExtension on String {
   dynamic decrypt() {
     return json.decode(utf8.decode(base64.decode(this)));
   }
+}
+
+extension MaterialStateExtension on Set<MaterialState> {
+  bool get isDisabled => any((e) => [MaterialState.disabled].contains(e));
 }
