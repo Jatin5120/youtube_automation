@@ -4,12 +4,15 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:frontend/data/data.dart';
 import 'package:frontend/firebase_options.dart';
 import 'package:frontend/res/res.dart';
+import 'package:frontend/utils/utils.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' show Client;
 
 late String kApiKey;
+late Variant kVariant;
 
-void main() {
+void start(Variant variant) {
+  kVariant = variant;
   initialize();
   runApp(const MyApp());
 }
@@ -19,7 +22,7 @@ void initialize() {
   usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+    options: DefaultFirebaseOptions.currentPlatform(kVariant),
   );
   Get.put(ApiWrapper(Client()));
 }

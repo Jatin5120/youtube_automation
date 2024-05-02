@@ -27,3 +27,10 @@ enum ChannelBy {
 
   static List<ChannelBy> get visibleValues => [username, channelId];
 }
+
+enum Variant {
+  development,
+  variant1,
+  variant2,
+  variant3;
+}
