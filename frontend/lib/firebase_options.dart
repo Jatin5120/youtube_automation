@@ -20,7 +20,7 @@ class DefaultFirebaseOptions {
       return switch (variant) {
         Variant.development => web,
         Variant.variant1 => variant1,
-        Variant.variant2 => variant1,
+        Variant.variant2 => variant2,
         Variant.variant3 => variant1,
       };
     }
@@ -74,6 +74,14 @@ class DefaultFirebaseOptions {
     projectId: "automation-f7a18",
     authDomain: "automation-f7a18.firebaseapp.com",
     storageBucket: "automation-f7a18.appspot.com",
-    // measurementId: 'G-90Z5WX67TD',
+  );
+
+  static const FirebaseOptions variant2 = FirebaseOptions(
+    apiKey: "AIzaSyCvnse-_cbdG_cE90Mf3bMxIaXw25szO70",
+    appId: "1:21225787457:web:c5364dec8bc232a60cb6c0",
+    messagingSenderId: "21225787457",
+    projectId: "automation-f7a18",
+    authDomain: "automation-f7a18.firebaseapp.com",
+    storageBucket: "automation-f7a18.appspot.com",
   );
 }
