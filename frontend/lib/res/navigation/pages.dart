@@ -6,19 +6,29 @@ import 'package:get/get.dart';
 class AppPages {
   const AppPages._();
 
-  static const String initial = AppRoutes.dashboard;
+  static const String initial = AppRoutes.splash;
 
-  static GetPage get dashboard => GetPage<DashboardView>(
-        name: DashboardView.route,
-        page: DashboardView.new,
-        bindings: [
-          DashboardBinding(),
-          AnalysisBinding(),
-        ],
+  static GetPage get auth => GetPage<AuthView>(
+        name: AuthView.route,
+        page: AuthView.new,
+        binding: AuthBinding(),
       );
 
   static List<GetPage> pages = [
-    dashboard,
+    auth,
+    GetPage<SplashView>(
+      name: SplashView.route,
+      page: SplashView.new,
+      binding: SplashBinding(),
+    ),
+    GetPage<DashboardView>(
+      name: DashboardView.route,
+      page: DashboardView.new,
+      bindings: [
+        DashboardBinding(),
+        AnalysisBinding(),
+      ],
+    ),
     GetPage<AnalysisView>(
       name: AnalysisView.route,
       page: AnalysisView.new,

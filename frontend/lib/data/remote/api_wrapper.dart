@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:frontend/data/data.dart';
 import 'package:frontend/models/models.dart';
@@ -103,6 +104,22 @@ class ApiWrapper {
             showLoader: showLoader,
             shouldEncodePayload: shouldEncodePayload,
           ),
+        );
+      }
+      return res;
+    } on SocketException catch (e, st) {
+      AppLog.info(e.runtimeType);
+      AppLog.error(e, st);
+      if (showLoader) {
+        Utility.closeLoader();
+      }
+      await Future.delayed(const Duration(milliseconds: 100));
+      var res = ResponseModel.message(AppStrings.socketProblem);
+
+      if (showDialog) {
+        await Utility.showInfoDialog(
+          res,
+          title: 'Network Error',
         );
       }
       return res;
