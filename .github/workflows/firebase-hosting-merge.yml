@@ -19,7 +19,7 @@ jobs:
         run: flutter --version
       - name: Install dependencies
         run: cd frontend && flutter pub get
-      - name: Building Web release
+      - name: Building Development release
         run: cd frontend && flutter build web -t lib/variants/development.dart --dart-define API_KEY="${{ secrets.GEMINI_API_KEY }}"
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -28,3 +28,30 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUTOMATION_F1555 }}"
           channelId: live
           projectId: automation-f1555
+      - name: Building Variant1 release
+        run: cd frontend && flutter build web -t lib/variants/variant1.dart --dart-define API_KEY="${{ secrets.GEMINI_API_KEY_VARIANT1 }}"
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          entrypoint: ./frontend
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUTOMATION_F7A18 }}"
+          channelId: live
+          projectId: automation-f7a18
+      - name: Building Variant2 release
+        run: cd frontend && flutter build web -t lib/variants/variant2.dart --dart-define API_KEY="${{ secrets.GEMINI_API_KEY_VARIANT2 }}"
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          entrypoint: ./frontend
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUTOMATION_F7A18 }}"
+          channelId: live
+          projectId: automation-v2
+      - name: Building Variant3 release
+        run: cd frontend && flutter build web -t lib/variants/variant3.dart --dart-define API_KEY="${{ secrets.GEMINI_API_KEY_VARIANT3 }}"
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          entrypoint: ./frontend
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUTOMATION_F7A18 }}"
+          channelId: live
+          projectId: automation-v3

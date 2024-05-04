@@ -20,6 +20,7 @@ class AppPages {
       name: SplashView.route,
       page: SplashView.new,
       binding: SplashBinding(),
+      transition: Transition.native,
     ),
     GetPage<DashboardView>(
       name: DashboardView.route,
@@ -28,16 +29,19 @@ class AppPages {
         DashboardBinding(),
         AnalysisBinding(),
       ],
+      transition: Transition.native,
     ),
     GetPage<AnalysisView>(
       name: AnalysisView.route,
       page: AnalysisView.new,
       binding: AnalysisBinding(),
+      transition: Transition.native,
     ),
     GetPage<SearchView>(
       name: SearchView.route,
       page: SearchView.new,
       binding: SearchBinding(),
+      transition: Transition.native,
     ),
   ];
 }
