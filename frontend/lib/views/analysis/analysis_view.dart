@@ -23,16 +23,16 @@ class AnalysisView extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton(
-              onPressed: () => Get.offNamed(AppRoutes.dashboard),
-              child: const Text('Dashboard'),
+            child: AppButton.small(
+              onTap: () => Get.offNamed(AppRoutes.dashboard),
+              label: 'Dashboard',
             ),
           ),
           Padding(
             padding: EdgeInsets.only(right: context.width * 0.05),
-            child: ElevatedButton(
-              onPressed: () => Get.offNamed(AppRoutes.search),
-              child: const Text('Search'),
+            child: AppButton.small(
+              onTap: () => Get.offNamed(AppRoutes.search),
+              label: 'Search',
             ),
           ),
         ],
@@ -59,7 +59,7 @@ class AnalysisView extends StatelessWidget {
                     const SizedBox(width: 8),
                     Obx(
                       () => FloatingActionButton(
-                        onPressed: controller.isAnalizing ? () {} : () => controller.analyzeSearchTitle(controller.titleController.text),
+                        onPressed: controller.isAnalizing ? null : () => controller.analyzeSearchTitle(controller.titleController.text),
                         elevation: 0,
                         child: controller.isAnalizing
                             ? const CircularProgressIndicator(

@@ -10,8 +10,9 @@ class SearchRepository {
   Future<ResponseModel> searchChannels({
     required String query,
     required String pageToken,
+    required String variant,
   }) async {
-    var params = 'query=$query';
+    var params = 'query=$query&variant=$variant';
     if (pageToken.trim().isNotEmpty) {
       params += '&pageToken=$pageToken';
     }

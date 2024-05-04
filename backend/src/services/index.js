@@ -3,13 +3,45 @@ const { google } = require("googleapis");
 const { isUploadedThisMonth, isUploadedInThreeMonth } = require("../utils");
 
 module.exports = class VideoService {
-  static YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-  static SEARCH_API_KEY = process.env.SEARCH_API_KEY;
+  static youtubeKey(variant) {
+    if (variant == "development") {
+      return process.env.YOUTUBE_API_KEY;
+    }
+    if (variant == "variant1") {
+      return process.env.YOUTUBE_API_KEY_VARIANT1;
+    }
+    if (variant == "variant2") {
+      return process.env.YOUTUBE_API_KEY_VARIANT2;
+    }
+    if (variant == "variant3") {
+      return process.env.YOUTUBE_API_KEY_VARIANT3;
+    }
+    return process.env.YOUTUBE_API_KEY;
+  }
 
-  static async getChannelByUsername(username, useSearchAPI) {
+  static searchKey(variant) {
+    if (variant == "development") {
+      return process.env.SEARCH_API_KEY;
+    }
+    if (variant == "variant1") {
+      return process.env.SEARCH_API_KEY_VARIANT1;
+    }
+    if (variant == "variant2") {
+      return process.env.SEARCH_API_KEY_VARIANT2;
+    }
+    if (variant == "variant3") {
+      return process.env.SEARCH_API_KEY_VARIANT3;
+    }
+    return process.env.SEARCH_API_KEY;
+  }
+
+  static async getChannelByUsername(username, useSearchAPI, variant) {
     try {
       const res = await google.youtube("v3").channels.list({
-        key: useSearchAPI == true ? this.SEARCH_API_KEY : this.YOUTUBE_API_KEY,
+        key:
+          useSearchAPI == true
+            ? this.searchKey(variant)
+            : this.youtubeKey(variant),
         part: [
           "snippet",
           "id",
@@ -32,9 +64,9 @@ module.exports = class VideoService {
     }
   }
 
-  static async getChannelById(id) {
+  static async getChannelById(id, variant) {
     const res = await google.youtube("v3").channels.list({
-      key: this.YOUTUBE_API_KEY,
+      key: this.youtubeKey(variant),
       part: ["snippet", "id", "contentDetails", "statistics"],
       id: id,
     });
@@ -48,7 +80,7 @@ module.exports = class VideoService {
     return item;
   }
 
-  static async getVideosDataByChannel(channel) {
+  static async getVideosDataByChannel(channel, variant) {
     if (!channel) {
       return null;
     }
@@ -57,7 +89,7 @@ module.exports = class VideoService {
     const subscriberCount = channel.statistics.subscriberCount;
     const totalVideos = channel.statistics.videoCount;
     var channelId = channel.contentDetails.relatedPlaylists.uploads;
-    const playlist = await this.getPlaylists(channelId);
+    const playlist = await this.getPlaylists(channelId, variant);
     const videosThisMonth = playlist.videosThisMonth;
     const videosLastThreeMonths = playlist.videosLastThreeMonths;
     const uploadedThisMonth = isUploadedThisMonth(
@@ -84,15 +116,15 @@ module.exports = class VideoService {
     };
   }
 
-  static async getPlaylists(id) {
+  static async getPlaylists(id, variant) {
     const res = await google.youtube("v3").playlists.list({
-      key: this.YOUTUBE_API_KEY,
+      key: this.youtubeKey(variant),
       part: ["contentDetails", "snippet"],
       id: id,
       maxResults: 1,
     });
     const language = res.data.items[0].snippet.defaultLanguage;
-    var videos = await this.getPlaylistVideos(res.data.items[0].id);
+    var videos = await this.getPlaylistVideos(res.data.items[0].id, variant);
     return {
       videosThisMonth: videos.videosThisMonth,
       videosLastThreeMonths: videos.videosLastThreeMonths,
@@ -100,9 +132,9 @@ module.exports = class VideoService {
     };
   }
 
-  static async getPlaylistVideos(id) {
+  static async getPlaylistVideos(id, variant) {
     const res = await google.youtube("v3").playlistItems.list({
-      key: this.YOUTUBE_API_KEY,
+      key: this.youtubeKey(variant),
       part: ["contentDetails", "snippet"],
       playlistId: id,
       maxResults: 50,
@@ -141,9 +173,9 @@ module.exports = class VideoService {
     };
   }
 
-  static async searchChannels(query, pageToken) {
+  static async searchChannels(query, pageToken, variant) {
     const res = await google.youtube("v3").search.list({
-      key: this.SEARCH_API_KEY,
+      key: this.searchKey(variant),
       part: ["snippet"],
       q: query,
       type: "channel",

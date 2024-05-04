@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/main.dart';
 import 'package:frontend/models/models.dart';
 import 'package:frontend/res/res.dart';
 import 'package:frontend/utils/utils.dart';
@@ -44,6 +45,7 @@ class SearchController extends GetxController {
     var res = await _viewModel.searchChannels(
       query: searchController.text.trim(),
       pageToken: pageToken,
+      variant: kVariant,
     );
     channels.addAll(res.$1);
     pageToken = res.$2;

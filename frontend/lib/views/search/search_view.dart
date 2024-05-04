@@ -25,16 +25,16 @@ class SearchView extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton(
-              onPressed: () => Get.offNamed(AppRoutes.dashboard),
-              child: const Text('Dashboard'),
+            child: AppButton.small(
+              onTap: () => Get.offNamed(AppRoutes.dashboard),
+              label: 'Dashboard',
             ),
           ),
           Padding(
             padding: EdgeInsets.only(right: context.width * 0.05),
-            child: ElevatedButton(
-              onPressed: () => Get.offNamed(AppRoutes.analysis),
-              child: const Text('Analyze'),
+            child: AppButton.small(
+              onTap: () => Get.offNamed(AppRoutes.analysis),
+              label: 'Analyze',
             ),
           ),
         ],
@@ -67,9 +67,9 @@ class SearchView extends StatelessWidget {
                       ),
                       if (controller.channels.isNotEmpty) ...[
                         const SizedBox(width: 16),
-                        ElevatedButton(
-                          onPressed: controller.downloadCSV,
-                          child: const Text('Download csv'),
+                        AppButton.small(
+                          onTap: controller.downloadCSV,
+                          label: 'Download csv',
                         ),
                       ],
                     ],
@@ -90,9 +90,9 @@ class SearchView extends StatelessWidget {
                     const SizedBox(height: 16),
                     Flexible(child: buildTable(context, controller.channels)),
                     const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: controller.triggerInLoop,
-                      child: const Text('Fetch Details'),
+                    AppButton.small(
+                      onTap: controller.triggerInLoop,
+                      label: 'Fetch Details',
                     ),
                   ],
                 ],

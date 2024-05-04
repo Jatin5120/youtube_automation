@@ -5,6 +5,7 @@ import 'package:csv/csv.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/controllers/controllers.dart';
+import 'package:frontend/main.dart';
 import 'package:frontend/models/models.dart';
 import 'package:frontend/utils/utils.dart';
 import 'package:frontend/view_models/view_models.dart';
@@ -100,8 +101,9 @@ class DashboardController extends GetxController {
       return [];
     }
     return await _viewModel.getVideosByChannelIdentifier(
-      userNames,
-      channelBy == ChannelBy.channelId,
+      usernames: userNames,
+      useId: channelBy == ChannelBy.channelId,
+      variant: kVariant,
     );
   }
 
@@ -118,17 +120,15 @@ class DashboardController extends GetxController {
       if (video.analyzedName.trim().isNotEmpty && video.analyzedTitle.trim().isNotEmpty) {
         continue;
       }
-      var analyzeData = await Future.wait([
-        _analyticsController.analyzeTitle(video.latestVideoTitle),
-        _analyticsController.analyzeName(
-          username: video.userName,
-          channelName: video.channelName,
-          description: video.description,
-        ),
-      ]);
+      var title = await _analyticsController.analyzeTitle(video.latestVideoTitle);
+      var name = await _analyticsController.analyzeName(
+        username: video.userName,
+        channelName: video.channelName,
+        description: video.description,
+      );
       videos[index] = video.copyWith(
-        analyzedTitle: analyzeData[0],
-        analyzedName: analyzeData[1],
+        analyzedTitle: title,
+        analyzedName: name,
       );
     }
     analyzeProgress = 100;
@@ -177,5 +177,6 @@ class DashboardController extends GetxController {
       mimeType: MimeType.csv,
     );
     Utility.closeLoader();
+    Utility.showInfoDialog(ResponseModel.message('Channel data is downloaded', isSuccess: true));
   }
 }
