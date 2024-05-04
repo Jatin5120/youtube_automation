@@ -9,7 +9,7 @@
             "cwd": "frontend",
             "request": "launch",
             "type": "dart",
-            "program": "lib/variants/development.dart",
+            "program": "lib/development.dart",
             // "flutterMode": "release"
         },
     ]

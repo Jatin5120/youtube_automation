@@ -28,12 +28,7 @@ class AnalysisController extends GetxController {
 
   void _loadAPIKey() async {
     await dotenv.load();
-    var key = switch (kVariant) {
-      Variant.development => 'API_KEY',
-      Variant.variant1 => 'API_KEY_VARIANT1',
-      Variant.variant2 => 'API_KEY_VARIANT2',
-      Variant.variant3 => 'API_KEY_VARIANT3',
-    };
+    var key = kVariant.key;
     apiKey = kApiKey.isEmpty ? dotenv.get(key, fallback: '') : kApiKey;
     _model = GenerativeModel(
       model: 'gemini-pro',

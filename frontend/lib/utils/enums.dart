@@ -29,8 +29,22 @@ enum ChannelBy {
 }
 
 enum Variant {
-  development,
-  variant1,
-  variant2,
-  variant3;
+  development('API_KEY'),
+  variant1('API_KEY_VARIANT1'),
+  variant2('API_KEY_VARIANT2'),
+  variant3('API_KEY_VARIANT3');
+
+  String? get appName {
+    return switch (this) {
+      Variant.development => null,
+      Variant.variant1 => 'Variant 1',
+      Variant.variant2 => 'Variant 2',
+      Variant.variant3 => 'Variant 3',
+    };
+  }
+
+  const Variant(this.key);
+  final String key;
+
+  static List<Variant> get variants => [variant1, variant2, variant3];
 }
