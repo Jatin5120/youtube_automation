@@ -15,27 +15,10 @@ class AnalysisView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Analyze Title'),
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: AppColors.backgroundDark,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: AppButton.small(
-              onTap: () => Get.toNamed(AppRoutes.dashboard),
-              label: 'Dashboard',
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: context.width * 0.05),
-            child: AppButton.small(
-              onTap: () => Get.toNamed(AppRoutes.search),
-              label: 'Search',
-            ),
-          ),
-        ],
+      appBar: AppHeader(
+        label: 'Analyze',
+        button1: (label: 'Dashboard', onTap: () => Get.toNamed(AppRoutes.dashboard)),
+        button2: (label: 'Search', onTap: () => Get.toNamed(AppRoutes.search)),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(

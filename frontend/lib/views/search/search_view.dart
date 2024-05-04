@@ -17,27 +17,10 @@ class SearchView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Search'),
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: AppColors.backgroundDark,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: AppButton.small(
-              onTap: () => Get.toNamed(AppRoutes.dashboard),
-              label: 'Dashboard',
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: context.width * 0.05),
-            child: AppButton.small(
-              onTap: () => Get.toNamed(AppRoutes.analysis),
-              label: 'Analyze',
-            ),
-          ),
-        ],
+      appBar: AppHeader(
+        label: 'Search',
+        button1: (label: 'Dashboard', onTap: () => Get.toNamed(AppRoutes.dashboard)),
+        button2: (label: 'Analyze', onTap: () => Get.toNamed(AppRoutes.analysis)),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(

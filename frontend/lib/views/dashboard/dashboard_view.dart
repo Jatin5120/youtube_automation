@@ -18,27 +18,10 @@ class DashboardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: AppColors.backgroundDark,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: AppButton.small(
-              onTap: () => Get.toNamed(AppRoutes.search),
-              label: 'Search',
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: context.width * 0.05),
-            child: AppButton.small(
-              onTap: () => Get.toNamed(AppRoutes.analysis),
-              label: 'Analyze',
-            ),
-          ),
-        ],
+      appBar: AppHeader(
+        label: 'Dashboard',
+        button1: (label: 'Search', onTap: () => Get.toNamed(AppRoutes.search)),
+        button2: (label: 'Analyze', onTap: () => Get.toNamed(AppRoutes.analysis)),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(
