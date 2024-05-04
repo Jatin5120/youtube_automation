@@ -15,6 +15,9 @@ class AppTheme {
       color: AppColors.cardLight,
       elevation: 0,
     ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: AppColors.primary,
+    ),
     textTheme: _textTheme,
     inputDecorationTheme: _inputTheme,
   );
@@ -28,6 +31,9 @@ class AppTheme {
     cardTheme: const CardTheme(
       color: AppColors.cardDark,
       elevation: 0,
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: AppColors.primary,
     ),
     textTheme: _textTheme,
     inputDecorationTheme: _inputTheme,

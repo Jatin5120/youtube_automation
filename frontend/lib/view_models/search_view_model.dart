@@ -12,11 +12,13 @@ class SearchViewModel {
   Future<(List<ChannelModel>, String)> searchChannels({
     required String query,
     required String pageToken,
+    required Variant variant,
   }) async {
     try {
       final res = await _repository.searchChannels(
         query: query,
         pageToken: pageToken,
+        variant: variant.name,
       );
       var data = jsonDecode(res.data) as Map<String, dynamic>;
       var token = data['nextPageToken'] as String? ?? '';

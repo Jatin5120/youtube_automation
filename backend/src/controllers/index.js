@@ -3,7 +3,7 @@ const VideoHelper = require("../helpers");
 
 class VideoController {
   static async getChannel(req, res) {
-    const { ids, useId } = req.query;
+    const { ids, useId, variant } = req.query;
     let isId = useId == "true";
 
     if (!ids) {
@@ -21,8 +21,8 @@ class VideoController {
 
     for (let id of idList) {
       const data = isId
-        ? VideoService.getChannelById(id)
-        : VideoService.getChannelByUsername(id);
+        ? VideoService.getChannelById(id, variant)
+        : VideoService.getChannelByUsername(id, false, variant);
       if (data) {
         pending.push(data);
       }
@@ -40,7 +40,7 @@ class VideoController {
     let pendingChannels = [];
 
     for (const channel of channels) {
-      const data = VideoService.getVideosDataByChannel(channel);
+      const data = VideoService.getVideosDataByChannel(channel, variant);
       if (data) {
         pendingChannels.push(data);
       }
@@ -55,7 +55,7 @@ class VideoController {
   }
 
   static async getChannelsFromUrl(req, res) {
-    const { url } = req.query;
+    const { url, variant } = req.query;
 
     if (!url) {
       return res.status(204);
@@ -66,7 +66,7 @@ class VideoController {
     let pending = [];
 
     for (let username of usernames) {
-      const data = VideoService.getChannelByUsername(username, true);
+      const data = VideoService.getChannelByUsername(username, true, variant);
       if (data) {
         pending.push(data);
       }
@@ -84,7 +84,7 @@ class VideoController {
     let pendingChannels = [];
 
     for (const channel of channels) {
-      const data = VideoService.getVideosDataByChannel(channel);
+      const data = VideoService.getVideosDataByChannel(channel, variant);
       if (data) {
         pendingChannels.push(data);
       }
@@ -99,13 +99,13 @@ class VideoController {
   }
 
   static async searchChannels(req, res) {
-    const { query, pageToken } = req.query;
+    const { query, pageToken, variant } = req.query;
 
     if (!query) {
       return res.status(204);
     }
 
-    let result = await VideoService.searchChannels(query, pageToken);
+    let result = await VideoService.searchChannels(query, pageToken, variant);
 
     return res.status(200).send(result);
   }

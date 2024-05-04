@@ -26,16 +26,16 @@ class DashboardView extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton(
-              onPressed: () => Get.offNamed(AppRoutes.search),
-              child: const Text('Search'),
+            child: AppButton.small(
+              onTap: () => Get.offNamed(AppRoutes.search),
+              label: 'Search',
             ),
           ),
           Padding(
             padding: EdgeInsets.only(right: context.width * 0.05),
-            child: ElevatedButton(
-              onPressed: () => Get.offNamed(AppRoutes.analysis),
-              child: const Text('Analyze'),
+            child: AppButton.small(
+              onTap: () => Get.offNamed(AppRoutes.analysis),
+              label: 'Analyze',
             ),
           ),
         ],
@@ -107,6 +107,11 @@ class DashboardView extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
+                                  Text(
+                                    'This is gonna take some time, so sit back and relax',
+                                    style: context.textTheme.bodyLarge?.withTitleColor,
+                                  ),
+                                  const SizedBox(height: 16),
                                   LinearProgressIndicator(
                                     value: controller.analyzeProgress,
                                     color: AppColors.primary,
@@ -118,9 +123,9 @@ class DashboardView extends StatelessWidget {
                                   ),
                                 ],
                               )
-                            : ElevatedButton(
-                                onPressed: controller.analyzeData,
-                                child: const Text('Analyze and Download csv'),
+                            : AppButton.small(
+                                onTap: controller.analyzeData,
+                                label: 'Analyze and Download csv',
                               ),
                       ),
                     ],
