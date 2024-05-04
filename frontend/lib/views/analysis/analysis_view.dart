@@ -24,14 +24,14 @@ class AnalysisView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: AppButton.small(
-              onTap: () => Get.offNamed(AppRoutes.dashboard),
+              onTap: () => Get.toNamed(AppRoutes.dashboard),
               label: 'Dashboard',
             ),
           ),
           Padding(
             padding: EdgeInsets.only(right: context.width * 0.05),
             child: AppButton.small(
-              onTap: () => Get.offNamed(AppRoutes.search),
+              onTap: () => Get.toNamed(AppRoutes.search),
               label: 'Search',
             ),
           ),

@@ -27,14 +27,14 @@ class DashboardView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: AppButton.small(
-              onTap: () => Get.offNamed(AppRoutes.search),
+              onTap: () => Get.toNamed(AppRoutes.search),
               label: 'Search',
             ),
           ),
           Padding(
             padding: EdgeInsets.only(right: context.width * 0.05),
             child: AppButton.small(
-              onTap: () => Get.offNamed(AppRoutes.analysis),
+              onTap: () => Get.toNamed(AppRoutes.analysis),
               label: 'Analyze',
             ),
           ),
