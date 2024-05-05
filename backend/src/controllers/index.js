@@ -40,8 +40,7 @@ class VideoController {
 
     const isFailed = internal[0].status === "rejected";
     if (isFailed) {
-      const reason = internal[0].reason;
-      const status = reason.status;
+      const status = internal[0].reason.status;
 
       if (status == 403) {
         return res.status(429).send({
@@ -127,9 +126,19 @@ class VideoController {
       return res.status(204).send();
     }
 
-    let result = await VideoService.searchChannels(query, pageToken, variant);
+    return VideoService.searchChannels(query, pageToken, variant)
+      .then((result) => res.status(200).send(result))
+      .catch((error) => {
+        const status = error.status;
 
-    return res.status(200).send(result);
+        if (status == 403) {
+          return res.status(429).send({
+            error:
+              "The request cannot be completed because you have exceeded your quota",
+          });
+        }
+        return res.status(204).send();
+      });
   }
 }
 
