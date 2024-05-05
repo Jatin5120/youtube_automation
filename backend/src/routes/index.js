@@ -6,7 +6,7 @@ const VideoController = require("../controllers");
 router.get("/", async (req, res) => {
   return res.json("Backend is working");
 });
-router.get("/videos", VideoController.getChannel);
+router.patch("/videos", VideoController.getChannel);
 router.get("/search", VideoController.searchChannels);
 router.get("/scrape", VideoController.getChannelsFromUrl);
 
