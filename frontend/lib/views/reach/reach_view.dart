@@ -124,20 +124,29 @@ class ReachView extends StatelessWidget {
                                     spacing: 16,
                                     children: controller.selectedFiles
                                         .map(
-                                          (e) => Column(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.description_rounded,
-                                                color: AppColors.titleDark,
+                                          (e) => DecoratedBox(
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(8),
+                                              color: AppColors.cardDark,
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(
+                                                    Icons.description_rounded,
+                                                    color: AppColors.titleDark,
+                                                  ),
+                                                  const SizedBox(height: 10),
+                                                  Text(
+                                                    e.name,
+                                                    style: context.textTheme.labelMedium?.withTitleColor,
+                                                  ),
+                                                ],
                                               ),
-                                              const SizedBox(height: 10),
-                                              Text(
-                                                e.name,
-                                                style: context.textTheme.labelMedium?.withTitleColor,
-                                              ),
-                                            ],
+                                            ),
                                           ),
                                         )
                                         .toList(),
