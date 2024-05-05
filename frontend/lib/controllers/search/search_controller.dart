@@ -28,7 +28,7 @@ class SearchController extends GetxController {
   var searchController = TextEditingController();
 
   void triggerInLoop() async {
-    for (var i = 0; i < 9; i++) {
+    for (var i = 0; i < 7; i++) {
       await search(true);
     }
     fetchDetails();
@@ -84,10 +84,7 @@ class SearchController extends GetxController {
   void fetchDetails() async {
     var list = channels.map((e) => e.channelId).toList();
     var parameters = {'q': list.encrypt()};
-    Get.toNamed(
-      AppRoutes.dashboard,
-      parameters: parameters,
-    );
+    RouteManagement.goToDashboard(parameters);
     if (!Get.isRegistered<DashboardController>()) {
       DashboardBinding().dependencies();
     }

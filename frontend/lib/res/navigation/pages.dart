@@ -8,6 +8,8 @@ class AppPages {
 
   static const String initial = AppRoutes.splash;
 
+  static Transition transition = Transition.noTransition;
+
   static GetPage get auth => GetPage<AuthView>(
         name: AuthView.route,
         page: AuthView.new,
@@ -20,7 +22,7 @@ class AppPages {
       name: SplashView.route,
       page: SplashView.new,
       binding: SplashBinding(),
-      transition: Transition.noTransition,
+      transition: transition,
     ),
     GetPage<DashboardView>(
       name: DashboardView.route,
@@ -29,19 +31,25 @@ class AppPages {
         DashboardBinding(),
         AnalysisBinding(),
       ],
-      transition: Transition.noTransition,
+      transition: transition,
     ),
     GetPage<AnalysisView>(
       name: AnalysisView.route,
       page: AnalysisView.new,
       binding: AnalysisBinding(),
-      transition: Transition.noTransition,
+      transition: transition,
     ),
     GetPage<SearchView>(
       name: SearchView.route,
       page: SearchView.new,
       binding: SearchBinding(),
-      transition: Transition.noTransition,
+      transition: transition,
+    ),
+    GetPage<ReachView>(
+      name: ReachView.route,
+      page: ReachView.new,
+      binding: ReachBinding(),
+      transition: transition,
     ),
   ];
 }
