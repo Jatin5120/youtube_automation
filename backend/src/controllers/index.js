@@ -7,7 +7,7 @@ class VideoController {
     let isId = useId == "true" || useId == true;
 
     if (!ids) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     const input = atob(ids);
@@ -18,7 +18,7 @@ class VideoController {
     );
 
     if (idList.length == 0) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     let pending = [];
@@ -33,16 +33,30 @@ class VideoController {
     }
 
     if (pending.length == 0) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     const internal = await Promise.allSettled(pending);
+
+    const isFailed = internal[0].status === "rejected";
+    if (isFailed) {
+      const reason = internal[0].reason;
+      const status = reason.status;
+
+      if (status == 403) {
+        return res.status(429).send({
+          error:
+            "The request cannot be completed because you have exceeded your quota",
+        });
+      }
+    }
+
     const channels = internal
       .filter((e) => e.status === "fulfilled")
       .map((e) => e.value);
 
     if (channels.length == 0) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     let pendingChannels = [];
@@ -66,7 +80,7 @@ class VideoController {
     const { url, variant } = req.query;
 
     if (!url) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     let usernames = await VideoHelper.getChannelsFromUrl(url);
@@ -81,7 +95,7 @@ class VideoController {
     }
 
     if (pending.length == 0) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     const internal = await Promise.allSettled(pending);
@@ -110,7 +124,7 @@ class VideoController {
     const { query, pageToken, variant } = req.query;
 
     if (!query) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     let result = await VideoService.searchChannels(query, pageToken, variant);

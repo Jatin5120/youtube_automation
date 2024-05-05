@@ -30,32 +30,19 @@ module.exports = class VideoService {
   }
 
   static async getChannelById(id, variant) {
-    try {
-      console.log("getChannelById");
-      const res = await google.youtube("v3").channels.list({
-        key: youtubeKey(variant),
-        part: [
-          "snippet",
-          "id",
-          "contentDetails",
-          "statistics",
-          "localizations",
-        ],
-        id: id,
-      });
+    const res = await google.youtube("v3").channels.list({
+      key: youtubeKey(variant),
+      part: ["snippet", "id", "contentDetails", "statistics"],
+      id: id,
+    });
 
-      if (res.data.items.length === 0) {
-        return null;
-      }
-      console.log(res.data.items.length);
-
-      var item = res.data.items[0];
-
-      return item;
-    } catch (e) {
-      console.log(e);
+    if (res.data.items.length === 0) {
       return null;
     }
+
+    var item = res.data.items[0];
+
+    return item;
   }
 
   static async getVideosDataByChannel(channel, variant) {
