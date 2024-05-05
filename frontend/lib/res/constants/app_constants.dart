@@ -17,38 +17,5 @@ class AppConstants {
 
   static const String youtubeBase = 'https://www.youtube.com/';
 
-  static const List<String> videoCategories = [
-    "Film & Animation",
-    "Autos & Vehicles",
-    "Music",
-    "Pets & Animals",
-    "Sports",
-    "Short Movies",
-    "Travel & Events",
-    "Gaming",
-    "Videoblogging",
-    "People & Blogs",
-    "Comedy",
-    "Entertainment",
-    "News & Politics",
-    "Howto & Style",
-    "Education",
-    "Science & Technology",
-    "Movies",
-    "Anime/Animation",
-    "Action/Adventure",
-    "Classics",
-    "Comedy",
-    "Documentary",
-    "Drama",
-    "Family",
-    "Foreign",
-    "Horror",
-    "Sci-Fi/Fantasy",
-    "Thriller",
-    "Shorts",
-    "Shows",
-    "Trailers",
-    "Nonprofits & Activism",
-  ];
+  static const List<String> targetCountries = ['US', "GB", "CA", "AU", "NZ", "IE", "DK"];
 }

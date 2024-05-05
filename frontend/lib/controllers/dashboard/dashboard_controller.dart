@@ -3,10 +3,11 @@ import 'dart:typed_data';
 
 import 'package:csv/csv.dart';
 import 'package:file_saver/file_saver.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:frontend/controllers/controllers.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/models/models.dart';
+import 'package:frontend/res/res.dart';
 import 'package:frontend/utils/utils.dart';
 import 'package:frontend/view_models/view_models.dart';
 import 'package:frontend/views/views.dart';
@@ -22,9 +23,13 @@ class DashboardController extends GetxController {
 
   var videos = <VideoModel>[];
 
+  var parsedVideos = <VideoModel>[];
+
   var tableController = ScrollController();
 
   var searchController = TextEditingController();
+
+  int get searchCount => searchController.text.trim().split(',').length;
 
   final Rx<ChannelBy> _channelBy = ChannelBy.username.obs;
   ChannelBy get channelBy => _channelBy.value;
@@ -51,6 +56,10 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    fetchChannels();
+  }
+
+  void fetchChannels() {
     var parameters = Get.parameters;
     if (parameters.isNotEmpty) {
       try {
@@ -108,25 +117,36 @@ class DashboardController extends GetxController {
   }
 
   void parseData() {
-    videos = videos.where((e) => e.subscriberCount > 100 && e.totalVideosLastMonth > 2 && e.totalVideosLastThreeMonths > 5).toList();
+    parsedVideos = videos
+        .where((e) =>
+            e.subscriberCount > 100 &&
+            e.totalVideosLastMonth > 2 &&
+            e.totalVideosLastThreeMonths > 5 &&
+            AppConstants.targetCountries.contains(e.country))
+        .toList();
+
+    parsedVideos = parsedVideos.toSet().toList();
   }
 
   void analyzeData() async {
     isAnalyzing = true;
-    for (var data in videos.indexed) {
+    for (var data in parsedVideos.indexed) {
       var video = data.$2;
       var index = data.$1;
-      analyzeProgress = (index / videos.length);
+      analyzeProgress = (index / parsedVideos.length);
       if (video.analyzedName.trim().isNotEmpty && video.analyzedTitle.trim().isNotEmpty) {
         continue;
       }
-      var title = await _analyticsController.analyzeTitle(video.latestVideoTitle);
-      var name = await _analyticsController.analyzeName(
-        username: video.userName,
-        channelName: video.channelName,
-        description: video.description,
-      );
-      videos[index] = video.copyWith(
+      var title = video.analyzedName.trim().isNotEmpty ? video.analyzedName.trim() : await _analyticsController.analyzeTitle(video.latestVideoTitle);
+      analyzeProgress = ((2 * index + 1) / (2 * parsedVideos.length));
+      var name = video.analyzedTitle.trim().isNotEmpty
+          ? video.analyzedTitle.trim()
+          : await _analyticsController.analyzeName(
+              username: video.userName,
+              channelName: video.channelName,
+              description: video.description,
+            );
+      parsedVideos[index] = video.copyWith(
         analyzedTitle: title,
         analyzedName: name,
       );
@@ -140,43 +160,86 @@ class DashboardController extends GetxController {
   // Download and save CSV to your Device
   void downloadCSV() async {
     Utility.showLoader();
+    final query = Get.find<SearchController>().searchController.text.trim();
     String file = const ListToCsvConverter().convert(
       [
         [
+          'Search Query',
           'Analyzed Name',
-          'Email',
-          'Last Video Analyzed Title',
-          'Channel Name',
+          'Analyzed Title',
+          'Email Id',
           'Instagram',
           'LinkedIn',
           'Twitter',
-          'UserName',
           'Channel Link',
-          'Channel Description',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          'Channel Name',
+          'UserName',
           'Subscriber Count',
           'Total Videos',
           'Total Videos Last Month',
           'Total Videos Last 3 Months',
           'Latest Video Title',
           'Last Upload Date',
-          'Uploaded this Month?',
           'Channel Country',
-          'isEnglish?',
-          'Default Language',
         ],
-        ...videos.map((e) => e.properties.toList()),
+        ...parsedVideos.map((e) => [
+              query,
+              ...e.properties,
+            ]),
       ],
     );
 
     Uint8List bytes = Uint8List.fromList(utf8.encode(file));
 
     await FileSaver.instance.saveFile(
-      name: 'videos-${DateTime.now()}',
+      name: 'lead-analysis-${DateTime.now()}',
       bytes: bytes,
       ext: 'csv',
       mimeType: MimeType.csv,
     );
     Utility.closeLoader();
-    Utility.showInfoDialog(ResponseModel.message('Channel data is downloaded', isSuccess: true));
+    Utility.showInfoDialog(
+      ResponseModel.message('Your Lead and Analysis data is downloaded'),
+      isSuccess: true,
+    );
   }
 }
+
+
+// TODO: Data for Lead gen
+/*
+   
+1. Search Query
+2. Analyzed Name
+3. Analyzed Title
+4. Email Id - E
+5. Twitter - E
+6. LinkedIn - E
+7. Instagram - E
+8. Channel link
+=============
+-----------
+Instagram username - (N/A)
+Email Content
+Dm Content
+Status - E
+Platform - E
+Sent Date - E
+-----------
+=============
+Channel Name
+UserName
+Subscriber Count
+Total Videos
+Total Videos Last Month
+Total Videos Last 3 Months
+Latest Video Title
+Last Upload Date
+Channel Country
+ */

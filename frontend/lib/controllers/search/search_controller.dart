@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/controllers/controllers.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/models/models.dart';
 import 'package:frontend/res/res.dart';
@@ -27,7 +28,7 @@ class SearchController extends GetxController {
   var searchController = TextEditingController();
 
   void triggerInLoop() async {
-    for (var i = 0; i < 7; i++) {
+    for (var i = 0; i < 9; i++) {
       await search(true);
     }
     fetchDetails();
@@ -87,5 +88,9 @@ class SearchController extends GetxController {
       AppRoutes.dashboard,
       parameters: parameters,
     );
+    if (!Get.isRegistered<DashboardController>()) {
+      DashboardBinding().dependencies();
+    }
+    Get.find<DashboardController>().fetchChannels();
   }
 }

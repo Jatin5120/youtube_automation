@@ -16,10 +16,13 @@ class DashboardViewModel {
   }) async {
     try {
       var ids = base64.encode(usernames.join(',').codeUnits);
+      var payload = {
+        'ids': ids,
+        'useId': useId,
+        'variant': variant.name,
+      };
       final res = await _repository.getVideosByChannelIdentifier(
-        ids: ids,
-        useId: useId,
-        variant: variant.name,
+        payload,
       );
       return (jsonDecode(res.data) as List? ?? []).map((e) => VideoModel.fromMap(e as Map<String, dynamic>)).toList();
     } catch (e, st) {
