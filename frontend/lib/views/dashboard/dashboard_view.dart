@@ -18,10 +18,11 @@ class DashboardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppHeader(
+      appBar: const AppHeader(
         label: 'Dashboard',
-        button1: (label: 'Search', onTap: () => Get.toNamed(AppRoutes.search)),
-        button2: (label: 'Analyze', onTap: () => Get.toNamed(AppRoutes.analysis)),
+        button1: (label: 'Search', onTap: RouteManagement.goToSearch),
+        button2: (label: 'Analyze', onTap: RouteManagement.goToAnalysis),
+        button3: (label: 'Reach', onTap: RouteManagement.goToReach),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(

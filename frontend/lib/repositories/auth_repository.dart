@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:frontend/models/models.dart';
+import 'package:frontend/res/res.dart';
 import 'package:frontend/utils/utils.dart';
 
 class AuthRepository {
@@ -20,7 +21,9 @@ class AuthRepository {
       AppLog.error(e);
       AppLog.error(st);
       var error = '';
-      if (e.code == 'user-not-found') {
+      if (e.code == 'network-request-failed') {
+        error = AppStrings.noInternet;
+      } else if (e.code == 'user-not-found') {
         error = 'No user found for that email.';
       } else if (e.code == 'wrong-password') {
         error = 'Wrong password provided for that user.';

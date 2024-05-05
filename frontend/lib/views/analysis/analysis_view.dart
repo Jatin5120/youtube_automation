@@ -15,10 +15,11 @@ class AnalysisView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppHeader(
+      appBar: const AppHeader(
         label: 'Analyze',
-        button1: (label: 'Dashboard', onTap: () => Get.toNamed(AppRoutes.dashboard)),
-        button2: (label: 'Search', onTap: () => Get.toNamed(AppRoutes.search)),
+        button1: (label: 'Dashboard', onTap: RouteManagement.goToDashboard),
+        button2: (label: 'Search', onTap: RouteManagement.goToSearch),
+        button3: (label: 'Reach', onTap: RouteManagement.goToReach),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(

@@ -17,10 +17,11 @@ class SearchView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppHeader(
+      appBar: const AppHeader(
         label: 'Search',
-        button1: (label: 'Dashboard', onTap: () => Get.toNamed(AppRoutes.dashboard)),
-        button2: (label: 'Analyze', onTap: () => Get.toNamed(AppRoutes.analysis)),
+        button1: (label: 'Dashboard', onTap: RouteManagement.goToDashboard),
+        button2: (label: 'Analyze', onTap: RouteManagement.goToAnalysis),
+        button3: (label: 'Reach', onTap: RouteManagement.goToReach),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(
@@ -94,11 +95,6 @@ class SearchView extends StatelessWidget {
       ),
     );
   }
-
-  // Download all data
-
-  // Download final list
-  // 1. Analyzed name, Email (empty), Analyzed title, Channel name, Instagram, LinkedIn, Twitter
 
   Widget buildTable(BuildContext context, List<ChannelModel> channels) {
     var tableModel = DaviModel<ChannelModel>(

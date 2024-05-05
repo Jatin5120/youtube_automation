@@ -41,6 +41,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^5.1.0
+  flutter_dropzone: ^4.0.0
   flutter_web_plugins:
     sdk: flutter
   get: ^4.6.6
