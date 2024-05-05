@@ -14,6 +14,7 @@ class DashboardRepository {
       Endpoints.videos,
       type: RequestType.patch,
       payload: payload,
+      shouldEncodePayload: false,
       showLoader: true,
     );
   }

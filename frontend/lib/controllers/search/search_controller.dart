@@ -28,15 +28,18 @@ class SearchController extends GetxController {
   var searchController = TextEditingController();
 
   void triggerInLoop() async {
-    for (var i = 0; i < 7; i++) {
-      await search(true);
+    for (var i = 0; i < 1; i++) {
+      var gotData = await search(true);
+      if (!gotData) {
+        break;
+      }
     }
     fetchDetails();
   }
 
-  Future<void> search([bool pagination = false]) async {
+  Future<bool> search([bool pagination = false]) async {
     if (searchController.text.trim().isEmpty) {
-      return;
+      return false;
     }
     if (!pagination) {
       channels.clear();
@@ -52,6 +55,7 @@ class SearchController extends GetxController {
     pageToken = res.$2;
     fetchedResult = true;
     update([SearchView.updateId]);
+    return res.$1.isNotEmpty;
   }
 
   // Download and save CSV to your Device
@@ -85,9 +89,8 @@ class SearchController extends GetxController {
     var list = channels.map((e) => e.channelId).toList();
     var parameters = {'q': list.encrypt()};
     RouteManagement.goToDashboard(parameters);
-    if (!Get.isRegistered<DashboardController>()) {
-      DashboardBinding().dependencies();
+    if (Get.isRegistered<DashboardController>()) {
+      Get.find<DashboardController>().fetchChannels();
     }
-    Get.find<DashboardController>().fetchChannels();
   }
 }

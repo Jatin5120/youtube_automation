@@ -18,12 +18,15 @@ class DashboardViewModel {
       var ids = base64.encode(usernames.join(',').codeUnits);
       var payload = {
         'ids': ids,
-        'useId': useId,
+        'useId': useId.toString(),
         'variant': variant.name,
       };
       final res = await _repository.getVideosByChannelIdentifier(
         payload,
       );
+      if (res.statusCode == 204) {
+        return [];
+      }
       return (jsonDecode(res.data) as List? ?? []).map((e) => VideoModel.fromMap(e as Map<String, dynamic>)).toList();
     } catch (e, st) {
       AppLog.error(e, st);

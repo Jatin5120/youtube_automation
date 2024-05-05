@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: cd frontend && flutter pub get
       - name: Building Development release
-        run: cd frontend && flutter build web -t lib/production.dart --dart-define API_KEY="${{ secrets.GEMINI_API_KEY }}" --dart-define API_KEY_VARIANT1="${{ secrets.GEMINI_API_KEY_VARIANT1 }}" --dart-define API_KEY_VARIANT2="${{ secrets.GEMINI_API_KEY_VARIANT2 }}" --dart-define API_KEY_VARIANT3="${{ secrets.GEMINI_API_KEY_VARIANT3 }}"
+        run: cd frontend && flutter build web -t lib/production.dart --dart-define API_KEY="${{ secrets.GEMINI_API_KEY }}" --dart-define API_KEY_VARIANT1="${{ secrets.GEMINI_API_KEY_VARIANT1 }}" --dart-define API_KEY_VARIANT2="${{ secrets.GEMINI_API_KEY_VARIANT2 }}" --dart-define API_KEY_VARIANT3="${{ secrets.GEMINI_API_KEY_VARIANT3 }}" --dart-define API_KEY_VARIANT4="${{ secrets.GEMINI_API_KEY_VARIANT4 }}" --dart-define API_KEY_VARIANT5="${{ secrets.GEMINI_API_KEY_VARIANT5 }}"
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           entrypoint: ./frontend
