@@ -22,7 +22,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool hasBottom;
 
   @override
-  Size get preferredSize => Size(Get.width, hasBottom ? 120 : 60);
+  Size get preferredSize => Size(Get.width, hasBottom && kVariant != Variant.development ? 120 : 60);
 
   @override
   Widget build(BuildContext context) {
