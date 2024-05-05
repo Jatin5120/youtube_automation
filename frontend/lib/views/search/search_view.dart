@@ -58,26 +58,34 @@ class SearchView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  if (controller.channels.isEmpty) ...[
-                    Text(
-                      controller.fetchedResult ? 'No videos found for "${controller.searchController.text.trim()}"' : 'Search to see results',
-                      textAlign: TextAlign.center,
-                      style: context.textTheme.headlineSmall?.withTitleColor,
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          if (controller.channels.isEmpty) ...[
+                            Text(
+                              controller.fetchedResult ? 'No videos found for "${controller.searchController.text.trim()}"' : 'Search to see results',
+                              textAlign: TextAlign.center,
+                              style: context.textTheme.headlineSmall?.withTitleColor,
+                            ),
+                          ] else ...[
+                            Text(
+                              '10 sample results out of ${controller.channels.length} result(s)',
+                              textAlign: TextAlign.center,
+                              style: context.textTheme.bodyMedium?.withTitleColor,
+                            ),
+                            const SizedBox(height: 16),
+                            buildTable(context, controller.channels),
+                            const SizedBox(height: 16),
+                            AppButton.small(
+                              onTap: controller.triggerInLoop,
+                              label: 'Fetch Details',
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                  ] else ...[
-                    Text(
-                      '10 sample results out of ${controller.channels.length} result(s)',
-                      textAlign: TextAlign.center,
-                      style: context.textTheme.bodyMedium?.withTitleColor,
-                    ),
-                    const SizedBox(height: 16),
-                    Flexible(child: buildTable(context, controller.channels)),
-                    const SizedBox(height: 16),
-                    AppButton.small(
-                      onTap: controller.triggerInLoop,
-                      label: 'Fetch Details',
-                    ),
-                  ],
+                  ),
                 ],
               ),
             );

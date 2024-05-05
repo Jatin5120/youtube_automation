@@ -68,51 +68,64 @@ class DashboardView extends StatelessWidget {
                         .toList(),
                   ),
                   const SizedBox(height: 16),
-                  if (controller.videos.isEmpty) ...[
-                    Text(
-                      controller.fetchedResult ? 'No videos found for "${controller.searchController.text.trim()}"' : 'Search to see results',
-                      textAlign: TextAlign.center,
-                      style: context.textTheme.headlineSmall?.withTitleColor,
-                    ),
-                  ] else ...[
-                    Text(
-                      '10 sample results out of ${controller.videos.length} result(s)',
-                      textAlign: TextAlign.center,
-                      style: context.textTheme.bodyMedium?.withTitleColor,
-                    ),
-                    const SizedBox(height: 16),
-                    Flexible(child: buildTable(context, controller.videos)),
-                    if (controller.videos.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      Obx(
-                        () => controller.isAnalyzing
-                            ? Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'This is gonna take some time, so sit back and relax',
-                                    style: context.textTheme.bodyLarge?.withTitleColor,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  LinearProgressIndicator(
-                                    value: controller.analyzeProgress,
-                                    color: AppColors.primary,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Analyzed ${(controller.analyzeProgress * 100).toStringAsFixed(2)}%',
-                                    style: context.textTheme.bodyLarge?.withTitleColor,
-                                  ),
-                                ],
-                              )
-                            : AppButton.small(
-                                onTap: controller.analyzeData,
-                                label: 'Analyze and Download csv',
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          if (controller.videos.isEmpty) ...[
+                            Text(
+                              controller.fetchedResult ? 'No videos found for ${controller.searchCount} Channels' : 'Search to see results',
+                              textAlign: TextAlign.center,
+                              style: context.textTheme.headlineSmall?.withTitleColor,
+                            ),
+                          ] else ...[
+                            Text(
+                              'Total ${controller.videos.length} video(s) found',
+                              textAlign: TextAlign.center,
+                              style: context.textTheme.bodyMedium?.withTitleColor,
+                            ),
+                            Text(
+                              '10 sample results out of ${controller.parsedVideos.length} filtered result(s)',
+                              textAlign: TextAlign.center,
+                              style: context.textTheme.bodyMedium?.withTitleColor,
+                            ),
+                            const SizedBox(height: 16),
+                            buildTable(context, controller.parsedVideos),
+                            if (controller.parsedVideos.isNotEmpty) ...[
+                              const SizedBox(height: 16),
+                              Obx(
+                                () => controller.isAnalyzing
+                                    ? Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'This is gonna take some time, so sit back and relax',
+                                            style: context.textTheme.bodyLarge?.withTitleColor,
+                                          ),
+                                          const SizedBox(height: 16),
+                                          LinearProgressIndicator(
+                                            value: controller.analyzeProgress,
+                                            color: Colors.deepOrange,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Analyzed ${(controller.analyzeProgress * 100).toStringAsFixed(2)}%',
+                                            style: context.textTheme.bodyLarge?.withTitleColor,
+                                          ),
+                                        ],
+                                      )
+                                    : AppButton.small(
+                                        onTap: controller.analyzeData,
+                                        label: 'Analysis Data',
+                                      ),
                               ),
+                            ],
+                          ],
+                        ],
                       ),
-                    ],
-                  ],
+                    ),
+                  ),
                 ],
               ),
             );
@@ -135,10 +148,6 @@ class DashboardView extends StatelessWidget {
           name: 'UserName',
           stringValue: (row) => row.userName,
         ),
-        // DaviColumn(
-        //   name: 'Analyzed Name',
-        //   stringValue: (row) => row.analyzedName,
-        // ),
         DaviColumn(
           name: 'Channel Link',
           cellBuilder: (context, row) => TapHandler(
@@ -184,35 +193,15 @@ class DashboardView extends StatelessWidget {
           stringValue: (row) => row.latestVideoTitle,
           grow: 2,
         ),
-        // DaviColumn(
-        //   name: 'Analyzed Title',
-        //   stringValue: (row) => row.analyzedTitle,
-        //   grow: 2,
-        // ),
         DaviColumn(
           name: 'Last Upload Date',
           stringValue: (row) => DateFormat('yyyy MMM dd, hh:mm:ss').format(row.lastUploadDate),
         ),
-        // DaviColumn(
-        //   name: 'Uploaded this Month?',
-        //   objectValue: (row) => row.uploadedThisMonth,
-        //   cellAlignment: Alignment.center,
-        // ),
         DaviColumn(
           name: 'Channel Country',
           stringValue: (row) => row.country,
           cellAlignment: Alignment.center,
         ),
-        // DaviColumn(
-        //   name: 'isEnglish?',
-        //   objectValue: (row) => row.isEnglish,
-        //   cellAlignment: Alignment.center,
-        // ),
-        // DaviColumn(
-        //   name: 'Default Language',
-        //   stringValue: (row) => row.language,
-        //   cellAlignment: Alignment.center,
-        // ),
       ],
     );
     return DaviTheme(

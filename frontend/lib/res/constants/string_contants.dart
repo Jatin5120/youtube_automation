@@ -15,15 +15,16 @@ class AppPrompts {
   const AppPrompts._();
 
   static String titlePrompt(String title) => '''Input: $title
-Output: Potential business insights from the video title
+Output: Phrase of Potential business insights from the video title that can be written in an email
 
 Instructions:
 1. Analyze the provided YouTube video title to extract specific insights or themes relevant to your business.
-2. Identify the main subject matter or message conveyed by the title, including any keywords, phrases, or tone used.
+2. Identify only one main subject matter or message conveyed by the title, including any keywords, phrases, or tone used.
 3. Consider potential subtopics or areas of interest suggested by the title.
 4. Craft a concise analysis aimed at generating interest or initiating conversation with the video owner as a potential client.
-5. Keep the output within 5-7 words.
-6. Do not include the words 'Input' and 'Output' in your Output''';
+5. Keep the output within 3-4 words.
+6. Do not include any special character.
+7. Do not include the words 'Input' and 'Output' in your Output''';
 
   static String namePrompt(String name, String channel, String description) => '''
 I want you to act as an Data extractor and extract name that I can address to in an email from the following details of a Youtube Channel. Decode the data and find the name of the Channel Owner if possible.

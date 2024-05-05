@@ -18,7 +18,6 @@ class VideoModel {
   final String analyzedName;
   final String language;
   final String country;
-  final bool isEnglish;
 
   const VideoModel({
     required this.subscriberCount,
@@ -36,29 +35,31 @@ class VideoModel {
     this.analyzedName = '',
     required this.language,
     required this.country,
-  }) : isEnglish = language == 'en';
+  });
 
   Iterable get properties => [
         analyzedName,
-        '',
         analyzedTitle,
-        channelName,
         '',
         '',
         '',
-        userName,
+        '',
         channelLink,
-        description,
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        channelName,
+        userName,
         subscriberCount,
         totalVideos,
         totalVideosLastMonth,
         totalVideosLastThreeMonths,
         latestVideoTitle,
         lastUploadDate,
-        uploadedThisMonth,
         country,
-        isEnglish,
-        language,
       ];
 
   VideoModel copyWith({
@@ -151,40 +152,41 @@ class VideoModel {
   @override
   bool operator ==(covariant VideoModel other) {
     if (identical(this, other)) return true;
-
-    return other.subscriberCount == subscriberCount &&
-        other.totalVideos == totalVideos &&
-        other.channelName == channelName &&
-        other.userName == userName &&
-        other.description == description &&
-        other.channelLink == channelLink &&
-        other.totalVideosLastMonth == totalVideosLastMonth &&
-        other.totalVideosLastThreeMonths == totalVideosLastThreeMonths &&
-        other.latestVideoTitle == latestVideoTitle &&
-        other.lastUploadDate == lastUploadDate &&
-        other.uploadedThisMonth == uploadedThisMonth &&
-        other.analyzedTitle == analyzedTitle &&
-        other.analyzedName == analyzedName &&
-        other.language == language &&
-        other.country == country;
+    return other.userName == userName;
+    // return other.subscriberCount == subscriberCount &&
+    //     other.totalVideos == totalVideos &&
+    //     other.channelName == channelName &&
+    //     other.userName == userName &&
+    //     other.description == description &&
+    //     other.channelLink == channelLink &&
+    //     other.totalVideosLastMonth == totalVideosLastMonth &&
+    //     other.totalVideosLastThreeMonths == totalVideosLastThreeMonths &&
+    //     other.latestVideoTitle == latestVideoTitle &&
+    //     other.lastUploadDate == lastUploadDate &&
+    //     other.uploadedThisMonth == uploadedThisMonth &&
+    //     other.analyzedTitle == analyzedTitle &&
+    //     other.analyzedName == analyzedName &&
+    //     other.language == language &&
+    //     other.country == country;
   }
 
   @override
   int get hashCode {
-    return subscriberCount.hashCode ^
-        totalVideos.hashCode ^
-        channelName.hashCode ^
-        userName.hashCode ^
-        description.hashCode ^
-        channelLink.hashCode ^
-        totalVideosLastMonth.hashCode ^
-        totalVideosLastThreeMonths.hashCode ^
-        latestVideoTitle.hashCode ^
-        lastUploadDate.hashCode ^
-        uploadedThisMonth.hashCode ^
-        analyzedTitle.hashCode ^
-        analyzedName.hashCode ^
-        language.hashCode ^
-        country.hashCode;
+    return userName.hashCode;
+    // return subscriberCount.hashCode ^
+    //     totalVideos.hashCode ^
+    //     channelName.hashCode ^
+    //     userName.hashCode ^
+    //     description.hashCode ^
+    //     channelLink.hashCode ^
+    //     totalVideosLastMonth.hashCode ^
+    //     totalVideosLastThreeMonths.hashCode ^
+    //     latestVideoTitle.hashCode ^
+    //     lastUploadDate.hashCode ^
+    //     uploadedThisMonth.hashCode ^
+    //     analyzedTitle.hashCode ^
+    //     analyzedName.hashCode ^
+    //     language.hashCode ^
+    //     country.hashCode;
   }
 }

@@ -7,14 +7,13 @@ class DashboardRepository {
 
   final ApiWrapper _apiWrapper;
 
-  Future<ResponseModel> getVideosByChannelIdentifier({
-    required String ids,
-    required bool useId,
-    required String variant,
-  }) async {
+  Future<ResponseModel> getVideosByChannelIdentifier(
+    Map<String, dynamic> payload,
+  ) async {
     return _apiWrapper.makeRequest(
-      '${Endpoints.videos}?ids=$ids&useId=$useId&variant=$variant',
-      type: RequestType.get,
+      Endpoints.videos,
+      type: RequestType.patch,
+      payload: payload,
       showLoader: true,
     );
   }
