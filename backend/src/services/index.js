@@ -1,47 +1,12 @@
-require("dotenv").config();
 const { google } = require("googleapis");
 const { isUploadedThisMonth, isUploadedInThreeMonth } = require("../utils");
+const { searchKey, youtubeKey } = require("../helper");
 
 module.exports = class VideoService {
-  static youtubeKey(variant) {
-    if (variant == "development") {
-      return process.env.YOUTUBE_API_KEY;
-    }
-    if (variant == "variant1") {
-      return process.env.YOUTUBE_API_KEY_VARIANT1;
-    }
-    if (variant == "variant2") {
-      return process.env.YOUTUBE_API_KEY_VARIANT2;
-    }
-    if (variant == "variant3") {
-      return process.env.YOUTUBE_API_KEY_VARIANT3;
-    }
-    return process.env.YOUTUBE_API_KEY;
-  }
-
-  static searchKey(variant) {
-    if (variant == "development") {
-      return process.env.SEARCH_API_KEY;
-    }
-    if (variant == "variant1") {
-      return process.env.SEARCH_API_KEY_VARIANT1;
-    }
-    if (variant == "variant2") {
-      return process.env.SEARCH_API_KEY_VARIANT2;
-    }
-    if (variant == "variant3") {
-      return process.env.SEARCH_API_KEY_VARIANT3;
-    }
-    return process.env.SEARCH_API_KEY;
-  }
-
   static async getChannelByUsername(username, useSearchAPI, variant) {
     try {
       const res = await google.youtube("v3").channels.list({
-        key:
-          useSearchAPI == true
-            ? this.searchKey(variant)
-            : this.youtubeKey(variant),
+        key: useSearchAPI == true ? searchKey(variant) : youtubeKey(variant),
         part: [
           "snippet",
           "id",
@@ -65,19 +30,32 @@ module.exports = class VideoService {
   }
 
   static async getChannelById(id, variant) {
-    const res = await google.youtube("v3").channels.list({
-      key: this.youtubeKey(variant),
-      part: ["snippet", "id", "contentDetails", "statistics"],
-      id: id,
-    });
+    try {
+      console.log("getChannelById");
+      const res = await google.youtube("v3").channels.list({
+        key: youtubeKey(variant),
+        part: [
+          "snippet",
+          "id",
+          "contentDetails",
+          "statistics",
+          "localizations",
+        ],
+        id: id,
+      });
 
-    if (res.data.items.length === 0) {
+      if (res.data.items.length === 0) {
+        return null;
+      }
+      console.log(res.data.items.length);
+
+      var item = res.data.items[0];
+
+      return item;
+    } catch (e) {
+      console.log(e);
       return null;
     }
-
-    var item = res.data.items[0];
-
-    return item;
   }
 
   static async getVideosDataByChannel(channel, variant) {
@@ -118,11 +96,12 @@ module.exports = class VideoService {
 
   static async getPlaylists(id, variant) {
     const res = await google.youtube("v3").playlists.list({
-      key: this.youtubeKey(variant),
+      key: youtubeKey(variant),
       part: ["contentDetails", "snippet"],
       id: id,
       maxResults: 1,
     });
+    console.log("getPlaylists");
     const language = res.data.items[0].snippet.defaultLanguage;
     var videos = await this.getPlaylistVideos(res.data.items[0].id, variant);
     return {
@@ -134,7 +113,7 @@ module.exports = class VideoService {
 
   static async getPlaylistVideos(id, variant) {
     const res = await google.youtube("v3").playlistItems.list({
-      key: this.youtubeKey(variant),
+      key: youtubeKey(variant),
       part: ["contentDetails", "snippet"],
       playlistId: id,
       maxResults: 50,
@@ -175,7 +154,7 @@ module.exports = class VideoService {
 
   static async searchChannels(query, pageToken, variant) {
     const res = await google.youtube("v3").search.list({
-      key: this.searchKey(variant),
+      key: searchKey(variant),
       part: ["snippet"],
       q: query,
       type: "channel",

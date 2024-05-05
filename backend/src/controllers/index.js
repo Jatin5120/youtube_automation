@@ -13,6 +13,10 @@ class VideoController {
     const input = atob(ids);
     const idList = input.split(",");
 
+    console.log(
+      `${variant}: ${idList.length} ${isId ? "channelId(s)" : "username(s)"}`
+    );
+
     if (idList.length == 0) {
       return res.status(204);
     }
@@ -36,6 +40,10 @@ class VideoController {
     const channels = internal
       .filter((e) => e.status === "fulfilled")
       .map((e) => e.value);
+
+    if (channels.length == 0) {
+      return res.status(204);
+    }
 
     let pendingChannels = [];
 
