@@ -88,7 +88,6 @@ module.exports = class VideoService {
       id: id,
       maxResults: 1,
     });
-    console.log("getPlaylists");
     const language = res.data.items[0].snippet.defaultLanguage;
     var videos = await this.getPlaylistVideos(res.data.items[0].id, variant);
     return {
