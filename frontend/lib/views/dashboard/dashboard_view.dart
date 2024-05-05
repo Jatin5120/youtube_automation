@@ -22,7 +22,7 @@ class DashboardView extends StatelessWidget {
         label: 'Dashboard',
         button1: (label: 'Search', onTap: RouteManagement.goToSearch),
         button2: (label: 'Analyze', onTap: RouteManagement.goToAnalysis),
-        button3: (label: 'Reach', onTap: RouteManagement.goToReach),
+        button3: (label: 'Messages', onTap: RouteManagement.goToReach),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(
@@ -85,14 +85,20 @@ class DashboardView extends StatelessWidget {
                               textAlign: TextAlign.center,
                               style: context.textTheme.bodyMedium?.withTitleColor,
                             ),
-                            Text(
-                              '10 sample results out of ${controller.parsedVideos.length} filtered result(s)',
-                              textAlign: TextAlign.center,
-                              style: context.textTheme.bodyMedium?.withTitleColor,
-                            ),
-                            const SizedBox(height: 16),
-                            buildTable(context, controller.parsedVideos),
-                            if (controller.parsedVideos.isNotEmpty) ...[
+                            if (controller.parsedVideos.isEmpty) ...[
+                              Text(
+                                '0 relavant filtered results',
+                                textAlign: TextAlign.center,
+                                style: context.textTheme.bodyMedium?.withTitleColor,
+                              ),
+                            ] else ...[
+                              Text(
+                                '10 sample results out of ${controller.parsedVideos.length} filtered result(s)',
+                                textAlign: TextAlign.center,
+                                style: context.textTheme.bodyMedium?.withTitleColor,
+                              ),
+                              const SizedBox(height: 16),
+                              buildTable(context, controller.parsedVideos),
                               const SizedBox(height: 16),
                               Obx(
                                 () => controller.isAnalyzing
@@ -118,7 +124,7 @@ class DashboardView extends StatelessWidget {
                                       )
                                     : AppButton.small(
                                         onTap: controller.analyzeData,
-                                        label: 'Analysis Data',
+                                        label: 'Analysis Data & Download',
                                       ),
                               ),
                             ],

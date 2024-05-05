@@ -13,6 +13,12 @@ function youtubeKey(variant) {
   if (variant == "variant3") {
     return process.env.YOUTUBE_API_KEY_VARIANT3;
   }
+  if (variant == "variant4") {
+    return process.env.YOUTUBE_API_KEY_VARIANT4;
+  }
+  if (variant == "variant5") {
+    return process.env.YOUTUBE_API_KEY_VARIANT5;
+  }
   return process.env.YOUTUBE_API_KEY;
 }
 
@@ -28,6 +34,12 @@ function searchKey(variant) {
   }
   if (variant == "variant3") {
     return process.env.SEARCH_API_KEY_VARIANT3;
+  }
+  if (variant == "variant4") {
+    return process.env.SEARCH_API_KEY_VARIANT4;
+  }
+  if (variant == "variant5") {
+    return process.env.SEARCH_API_KEY_VARIANT5;
   }
   return process.env.SEARCH_API_KEY;
 }
