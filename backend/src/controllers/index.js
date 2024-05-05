@@ -3,8 +3,8 @@ const VideoHelper = require("../helpers");
 
 class VideoController {
   static async getChannel(req, res) {
-    const { ids, useId, variant } = req.query;
-    let isId = useId == "true";
+    const { ids, useId, variant } = req.body;
+    let isId = useId == "true" || useId == true;
 
     if (!ids) {
       return res.status(204);
