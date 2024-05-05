@@ -8,6 +8,7 @@ const parser = express.json;
 
 app.use(cors());
 app.use(parser());
+app.use(express.urlencoded({ extended: true }));
 
 // Middlewares
 app.use(logger);
