@@ -1,8 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:csv/csv.dart';
-import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/controllers/controllers.dart';
 import 'package:frontend/main.dart';
@@ -61,8 +56,8 @@ class SearchController extends GetxController {
   // Download and save CSV to your Device
   void downloadCSV() async {
     Utility.showLoader();
-    String file = const ListToCsvConverter().convert(
-      [
+    Utility.downloadCSV(
+      data: [
         [
           'Channel Name',
           'Channel Link',
@@ -72,17 +67,8 @@ class SearchController extends GetxController {
         ],
         ...channels.map((e) => e.properties.toList()),
       ],
+      filename: 'channels',
     );
-
-    Uint8List bytes = Uint8List.fromList(utf8.encode(file));
-
-    await FileSaver.instance.saveFile(
-      name: 'channels-${DateTime.now()}',
-      bytes: bytes,
-      ext: 'csv',
-      mimeType: MimeType.csv,
-    );
-    Utility.closeLoader();
   }
 
   void fetchDetails() async {

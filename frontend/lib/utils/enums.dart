@@ -34,7 +34,11 @@ enum Variant {
   variant2('API_KEY_VARIANT2'),
   variant3('API_KEY_VARIANT3'),
   variant4('API_KEY_VARIANT4'),
-  variant5('API_KEY_VARIANT5');
+  variant5('API_KEY_VARIANT5'),
+  variant6('API_KEY_VARIANT6'),
+  variant7('API_KEY_VARIANT7'),
+  variant8('API_KEY_VARIANT8'),
+  variant9('API_KEY_VARIANT9');
 
   String? get appName {
     return switch (this) {
@@ -44,6 +48,10 @@ enum Variant {
       Variant.variant3 => 'Variant 3',
       Variant.variant4 => 'Variant 4',
       Variant.variant5 => 'Variant 5',
+      Variant.variant6 => 'Variant 6',
+      Variant.variant7 => 'Variant 7',
+      Variant.variant8 => 'Variant 8',
+      Variant.variant9 => 'Variant 9',
     };
   }
 
@@ -56,6 +64,10 @@ enum Variant {
         variant3,
         variant4,
         variant5,
+        variant6,
+        variant7,
+        variant8,
+        variant9,
       ];
 }
 
