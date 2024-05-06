@@ -45,6 +45,7 @@ class VideoModel {
         '',
         '',
         channelLink,
+        country,
         '',
         '',
         '',
@@ -59,7 +60,6 @@ class VideoModel {
         totalVideosLastThreeMonths,
         latestVideoTitle,
         lastUploadDate,
-        country,
       ];
 
   VideoModel copyWith({
