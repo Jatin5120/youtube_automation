@@ -303,6 +303,7 @@ class ApiWrapper {
       case 413:
       case 415:
       case 416:
+      case 429:
       case 522:
         if (response.statusCode == 401) {
           // UnAuthorized
