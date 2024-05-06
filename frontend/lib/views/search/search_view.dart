@@ -21,7 +21,7 @@ class SearchView extends StatelessWidget {
         label: 'Search',
         button1: (label: 'Dashboard', onTap: RouteManagement.goToDashboard),
         button2: (label: 'Analyze', onTap: RouteManagement.goToAnalysis),
-        button3: (label: 'Messages', onTap: RouteManagement.goToReach),
+        button3: (label: 'Messages', onTap: RouteManagement.goToMessages),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(

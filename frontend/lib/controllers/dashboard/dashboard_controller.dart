@@ -1,8 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:csv/csv.dart';
-import 'package:file_saver/file_saver.dart';
 import 'package:flutter/widgets.dart';
 import 'package:frontend/controllers/controllers.dart';
 import 'package:frontend/main.dart';
@@ -154,15 +149,15 @@ class DashboardController extends GetxController {
     analyzeProgress = 100;
     isAnalyzing = false;
     update([DashboardView.updateId]);
-    downloadCSV();
+    _downloadCSV();
   }
 
   // Download and save CSV to your Device
-  void downloadCSV() async {
-    Utility.showLoader();
+  void _downloadCSV() async {
     final query = Get.find<SearchController>().searchController.text.trim();
-    String file = const ListToCsvConverter().convert(
-      [
+
+    await Utility.downloadCSV(
+      data: [
         [
           'Search Query',
           'Analyzed Name',
@@ -193,17 +188,8 @@ class DashboardController extends GetxController {
               ...e.properties,
             ]),
       ],
+      filename: 'lead-analysis',
     );
-
-    Uint8List bytes = Uint8List.fromList(utf8.encode(file));
-
-    await FileSaver.instance.saveFile(
-      name: 'lead-analysis-${DateTime.now()}',
-      bytes: bytes,
-      ext: 'csv',
-      mimeType: MimeType.csv,
-    );
-    Utility.closeLoader();
     Utility.showInfoDialog(
       ResponseModel.message('Your Lead and Analysis data is downloaded'),
       isSuccess: true,

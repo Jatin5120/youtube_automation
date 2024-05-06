@@ -45,10 +45,10 @@ class AppPages {
       binding: SearchBinding(),
       transition: transition,
     ),
-    GetPage<ReachView>(
-      name: ReachView.route,
-      page: ReachView.new,
-      binding: ReachBinding(),
+    GetPage<MessagesView>(
+      name: MessagesView.route,
+      page: MessagesView.new,
+      binding: MessagesBinding(),
       transition: transition,
     ),
   ];
