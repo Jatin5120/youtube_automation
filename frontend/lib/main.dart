@@ -30,6 +30,10 @@ void _fetchKeys() {
     Variant.variant3: const String.fromEnvironment('API_KEY_VARIANT3', defaultValue: ''),
     Variant.variant4: const String.fromEnvironment('API_KEY_VARIANT4', defaultValue: ''),
     Variant.variant5: const String.fromEnvironment('API_KEY_VARIANT5', defaultValue: ''),
+    Variant.variant6: const String.fromEnvironment('API_KEY_VARIANT6', defaultValue: ''),
+    Variant.variant7: const String.fromEnvironment('API_KEY_VARIANT7', defaultValue: ''),
+    Variant.variant8: const String.fromEnvironment('API_KEY_VARIANT8', defaultValue: ''),
+    Variant.variant9: const String.fromEnvironment('API_KEY_VARIANT9', defaultValue: ''),
   };
 }
 

@@ -1,12 +1,12 @@
 const { google } = require("googleapis");
 const { isUploadedThisMonth, isUploadedInThreeMonth } = require("../utils");
-const { searchKey, youtubeKey } = require("../helper");
+const { youtubeKey } = require("../helper");
 
 module.exports = class VideoService {
   static async getChannelByUsername(username, useSearchAPI, variant) {
     try {
       const res = await google.youtube("v3").channels.list({
-        key: useSearchAPI == true ? searchKey(variant) : youtubeKey(variant),
+        key: youtubeKey(variant),
         part: [
           "snippet",
           "id",
@@ -140,7 +140,7 @@ module.exports = class VideoService {
 
   static async searchChannels(query, pageToken, variant) {
     const res = await google.youtube("v3").search.list({
-      key: searchKey(variant),
+      key: youtubeKey(variant),
       part: ["snippet"],
       q: query,
       type: "channel",
