@@ -14,6 +14,7 @@ class InputField extends StatelessWidget {
     this.minLines = 1,
     this.maxLines = 1,
     this.autofillHints,
+    this.onChanged,
   })  : assert(minLines > 0, 'minLines cannot be less than 1'),
         assert(maxLines > 0, 'maxLines cannot be less than 1'),
         assert(maxLines >= minLines, 'maxLines cannot be less than minLines');
@@ -27,6 +28,7 @@ class InputField extends StatelessWidget {
   final int maxLines;
   final Iterable<String>? autofillHints;
   final void Function(String)? onFieldSubmitted;
+  final void Function(String)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +50,7 @@ class InputField extends StatelessWidget {
       ),
       onFieldSubmitted: onFieldSubmitted,
       style: context.textTheme.bodyLarge?.withBodyColor,
+      onChanged: onChanged,
     );
   }
 }

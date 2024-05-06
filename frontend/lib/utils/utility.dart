@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:csv/csv.dart';
+import 'package:file_saver/file_saver.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/models/models.dart';
@@ -97,5 +99,24 @@ class Utility {
         ],
       ),
     );
+  }
+
+  static Future<void> downloadCSV({
+    required List<List<dynamic>> data,
+    String? filename,
+  }) async {
+    Utility.showLoader();
+
+    String file = const ListToCsvConverter().convert(data);
+
+    Uint8List bytes = Uint8List.fromList(utf8.encode(file));
+
+    await FileSaver.instance.saveFile(
+      name: '${filename ?? "data"}-${DateTime.now()}',
+      bytes: bytes,
+      ext: 'csv',
+      mimeType: MimeType.csv,
+    );
+    Utility.closeLoader();
   }
 }

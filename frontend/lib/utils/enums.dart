@@ -58,3 +58,17 @@ enum Variant {
         variant5,
       ];
 }
+
+enum ContentItem {
+  name,
+  title;
+
+  String get text => '{{${this.name}}}';
+
+  static List<ContentItem> remainingValues(String text) {
+    if (text.trim().isEmpty) {
+      return ContentItem.values;
+    }
+    return ContentItem.values.where((e) => !text.contains(e.text)).toList();
+  }
+}

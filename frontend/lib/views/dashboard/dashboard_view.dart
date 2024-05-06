@@ -22,7 +22,7 @@ class DashboardView extends StatelessWidget {
         label: 'Dashboard',
         button1: (label: 'Search', onTap: RouteManagement.goToSearch),
         button2: (label: 'Analyze', onTap: RouteManagement.goToAnalysis),
-        button3: (label: 'Messages', onTap: RouteManagement.goToReach),
+        button3: (label: 'Messages', onTap: RouteManagement.goToMessages),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(

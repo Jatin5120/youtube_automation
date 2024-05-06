@@ -7,16 +7,19 @@ class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
     this.onTap,
+    this.color,
     required this.label,
   }) : _small = false;
 
   const AppButton.small({
     super.key,
     this.onTap,
+    this.color,
     required this.label,
   }) : _small = true;
 
   final VoidCallback? onTap;
+  final Color? color;
   final String label;
   final bool _small;
 
@@ -43,7 +46,7 @@ class AppButton extends StatelessWidget {
               if (states.isDisabled) {
                 return Colors.grey;
               }
-              return AppColors.primary;
+              return color ?? AppColors.primary;
             },
           ),
           foregroundColor: MaterialStateColor.resolveWith(

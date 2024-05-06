@@ -28,7 +28,7 @@ class SearchController extends GetxController {
   var searchController = TextEditingController();
 
   void triggerInLoop() async {
-    for (var i = 0; i < 1; i++) {
+    for (var i = 0; i < 7; i++) {
       var gotData = await search(true);
       if (!gotData) {
         break;
