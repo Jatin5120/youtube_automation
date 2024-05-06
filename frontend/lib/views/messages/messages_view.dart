@@ -35,15 +35,15 @@ class MessagesView extends StatelessWidget {
         child: GetBuilder<MessagesController>(
           id: updateId,
           builder: (controller) {
-            return Column(
-              children: [
-                Text(
-                  'Tap on the chips to insert in the editing area or type the same text with double braces {{}} to insert. eg: {{text}}',
-                  style: context.textTheme.titleMedium?.withBodyColor,
-                ),
-                const SizedBox(height: 16),
-                Flexible(
-                  child: Row(
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  Text(
+                    'Tap on the chips to insert in the editing area or type the same text with double braces {{}} to insert. eg: {{text}}',
+                    style: context.textTheme.titleMedium?.withBodyColor,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
                     children: [
                       Flexible(
                         child: GetBuilder<MessagesController>(
@@ -72,136 +72,138 @@ class MessagesView extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
-                Flexible(
-                  child: Stack(
-                    children: [
-                      DropzoneView(
-                        operation: DragOperation.copy,
-                        cursor: CursorType.Default,
-                        mime: AppConstants.csvMimes,
-                        onCreated: (ctrl) => controller.dropzoneController = ctrl,
-                        onError: (ev) {
-                          Utility.showInfoDialog(ResponseModel.message('Error while uploading file(s) $ev'));
-                        },
-                        onDropMultiple: controller.uploadFiles,
-                        onDropInvalid: (ev) {
-                          Utility.showInfoDialog(ResponseModel.message('File type not support'));
-                        },
-                      ),
-                      Positioned.fill(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white),
-                          ),
-                          child: Obx(
-                            () => controller.selectedFiles.isEmpty
-                                ? Center(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.note_add_rounded,
-                                          color: AppColors.titleDark,
-                                          size: 40,
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Text(
-                                          'Drag a file to upload',
-                                          style: context.textTheme.labelLarge?.withTitleColor,
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : Wrap(
-                                    alignment: WrapAlignment.center,
-                                    crossAxisAlignment: WrapCrossAlignment.center,
-                                    runAlignment: WrapAlignment.center,
-                                    runSpacing: 16,
-                                    spacing: 16,
-                                    children: controller.selectedFiles
-                                        .map(
-                                          (e) => Stack(
-                                            clipBehavior: Clip.none,
-                                            children: [
-                                              DecoratedBox(
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(8),
-                                                  color: AppColors.cardDark,
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      const Icon(
-                                                        Icons.description_rounded,
-                                                        color: AppColors.titleDark,
-                                                      ),
-                                                      const SizedBox(height: 10),
-                                                      Text(
-                                                        e.name,
-                                                        style: context.textTheme.labelMedium?.withTitleColor,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              Positioned(
-                                                top: -8,
-                                                right: -8,
-                                                child: TapHandler(
-                                                  showArrowCursor: true,
-                                                  onTap: () => controller.removeFile(e),
-                                                  child: const DecoratedBox(
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.red,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: Padding(
-                                                      padding: EdgeInsets.all(2),
-                                                      child: Icon(
-                                                        Icons.close_rounded,
-                                                        size: 16,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    height: Get.height * 0.4,
+                    child: Stack(
+                      children: [
+                        DropzoneView(
+                          operation: DragOperation.copy,
+                          cursor: CursorType.Default,
+                          mime: AppConstants.csvMimes,
+                          onCreated: (ctrl) => controller.dropzoneController = ctrl,
+                          onError: (ev) {
+                            Utility.showInfoDialog(ResponseModel.message('Error while uploading file(s) $ev'));
+                          },
+                          onDropMultiple: controller.uploadFiles,
+                          onDropInvalid: (ev) {
+                            Utility.showInfoDialog(ResponseModel.message('File type not support'));
+                          },
+                        ),
+                        Positioned.fill(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white),
+                            ),
+                            child: Obx(
+                              () => controller.selectedFiles.isEmpty
+                                  ? Center(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.note_add_rounded,
+                                            color: AppColors.titleDark,
+                                            size: 40,
                                           ),
-                                        )
-                                        .toList(),
-                                  ),
+                                          const SizedBox(height: 10),
+                                          Text(
+                                            'Drag the csv file to upload',
+                                            style: context.textTheme.labelLarge?.withTitleColor,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : Wrap(
+                                      alignment: WrapAlignment.center,
+                                      crossAxisAlignment: WrapCrossAlignment.center,
+                                      runAlignment: WrapAlignment.center,
+                                      runSpacing: 16,
+                                      spacing: 16,
+                                      children: controller.selectedFiles
+                                          .map(
+                                            (e) => Stack(
+                                              clipBehavior: Clip.none,
+                                              children: [
+                                                DecoratedBox(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(8),
+                                                    color: AppColors.cardDark,
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        const Icon(
+                                                          Icons.description_rounded,
+                                                          color: AppColors.titleDark,
+                                                        ),
+                                                        const SizedBox(height: 10),
+                                                        Text(
+                                                          e.name,
+                                                          style: context.textTheme.labelMedium?.withTitleColor,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  top: -8,
+                                                  right: -8,
+                                                  child: TapHandler(
+                                                    showArrowCursor: true,
+                                                    onTap: () => controller.removeFile(e),
+                                                    child: const DecoratedBox(
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.red,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      child: Padding(
+                                                        padding: EdgeInsets.all(2),
+                                                        child: Icon(
+                                                          Icons.close_rounded,
+                                                          size: 16,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                            ),
                           ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: AppButton(
+                          label: 'Clear Files',
+                          color: AppColors.bodyLight,
+                          onTap: controller.clearFiles,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Flexible(
+                        child: AppButton(
+                          label: 'Generate Content & Download',
+                          onTap: controller.generateContent,
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Flexible(
-                      child: AppButton(
-                        label: 'Clear Files',
-                        color: AppColors.bodyLight,
-                        onTap: controller.clearFiles,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Flexible(
-                      child: AppButton(
-                        label: 'Generate Content & Download',
-                        onTap: controller.generateContent,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),

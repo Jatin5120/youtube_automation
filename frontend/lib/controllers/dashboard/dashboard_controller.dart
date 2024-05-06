@@ -154,7 +154,7 @@ class DashboardController extends GetxController {
 
   // Download and save CSV to your Device
   void _downloadCSV() async {
-    final query = Get.find<SearchController>().searchController.text.trim();
+    final query = Get.isRegistered<SearchController>() ? Get.find<SearchController>().searchController.text.trim() : '';
 
     await Utility.downloadCSV(
       data: [
@@ -167,9 +167,7 @@ class DashboardController extends GetxController {
           'LinkedIn',
           'Twitter',
           'Channel Link',
-          '',
-          '',
-          '',
+          'Channel Country',
           '',
           '',
           '',
@@ -181,7 +179,6 @@ class DashboardController extends GetxController {
           'Total Videos Last 3 Months',
           'Latest Video Title',
           'Last Upload Date',
-          'Channel Country',
         ],
         ...parsedVideos.map((e) => [
               query,

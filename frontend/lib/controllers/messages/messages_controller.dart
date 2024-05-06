@@ -26,7 +26,7 @@ class MessagesController extends GetxController {
   var nameIndex = 1;
   var titleIndex = 2;
 
-  var instaIndex = 6;
+  var instaIndex = 4;
 
   void uploadFiles(List<dynamic>? files) async {
     if (files == null || files.isEmpty) {
@@ -97,9 +97,8 @@ class MessagesController extends GetxController {
         emailContent,
         dmContent,
         ...List.generate(3, (_) => ''),
-        ...List.generate(6, (_) => ''),
       ];
-      row.insertAll(14, data);
+      row.insertAll(10, data);
       output.add(row);
     }
     var titles = <String>[
@@ -109,9 +108,8 @@ class MessagesController extends GetxController {
       'Status',
       'Platform',
       'Sent Date',
-      ...List.generate(6, (_) => ''),
     ];
-    header.insertAll(14, titles);
+    header.insertAll(10, titles);
     output.insert(0, header);
 
     await Utility.downloadCSV(
