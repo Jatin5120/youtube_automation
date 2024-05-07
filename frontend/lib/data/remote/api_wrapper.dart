@@ -146,7 +146,7 @@ class ApiWrapper {
         Utility.closeLoader();
       }
       await Future.delayed(const Duration(milliseconds: 100));
-      var res = ResponseModel.message(AppStrings.somethingWentWrong);
+      var res = ResponseModel.message('${AppStrings.somethingWentWrong}; $e');
 
       if (showDialog) {
         await Utility.showInfoDialog(res);
