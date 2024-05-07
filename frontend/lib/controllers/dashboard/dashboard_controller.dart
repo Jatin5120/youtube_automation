@@ -128,12 +128,15 @@ class DashboardController extends GetxController {
     for (var data in parsedVideos.indexed) {
       var video = data.$2;
       var index = data.$1;
-      analyzeProgress = (index / parsedVideos.length);
       if (video.analyzedName.trim().isNotEmpty && video.analyzedTitle.trim().isNotEmpty) {
         continue;
       }
+
       var title = video.analyzedName.trim().isNotEmpty ? video.analyzedName.trim() : await _analyticsController.analyzeTitle(video.latestVideoTitle);
-      analyzeProgress = ((2 * index + 1) / (2 * parsedVideos.length));
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      analyzeProgress = (index / parsedVideos.length);
+
       var name = video.analyzedTitle.trim().isNotEmpty
           ? video.analyzedTitle.trim()
           : await _analyticsController.analyzeName(
@@ -141,6 +144,10 @@ class DashboardController extends GetxController {
               channelName: video.channelName,
               description: video.description,
             );
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      analyzeProgress = ((2 * index + 1) / (2 * parsedVideos.length));
+
       parsedVideos[index] = video.copyWith(
         analyzedTitle: title,
         analyzedName: name,
