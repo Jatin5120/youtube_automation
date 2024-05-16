@@ -8,6 +8,5 @@ router.get("/", async (req, res) => {
 });
 router.patch("/videos", VideoController.getChannel);
 router.get("/search", VideoController.searchChannels);
-router.get("/scrape", VideoController.getChannelsFromUrl);
 
 module.exports = router;

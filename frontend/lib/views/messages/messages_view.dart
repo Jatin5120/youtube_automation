@@ -25,7 +25,6 @@ class MessagesView extends StatelessWidget {
         button1: (label: 'Dashboard', onTap: RouteManagement.goToDashboard),
         button2: (label: 'Search', onTap: RouteManagement.goToSearch),
         button3: (label: 'Analyze', onTap: RouteManagement.goToAnalysis),
-        hasBottom: false,
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(

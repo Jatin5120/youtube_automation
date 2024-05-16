@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' show Client;
 
 late String kApiKey;
-Rx<Variant> _kVariant = Variant.variant1.obs;
+Rx<Variant> _kVariant = Variant.development.obs;
 Variant get kVariant => _kVariant.value;
 set kVariant(Variant value) {
   if (kVariant == value) {
@@ -24,16 +24,8 @@ var _apiKeys = <Variant, String>{};
 
 void _fetchKeys() {
   _apiKeys = {
-    Variant.development: const String.fromEnvironment('API_KEY', defaultValue: ''),
-    Variant.variant1: const String.fromEnvironment('API_KEY_VARIANT1', defaultValue: ''),
-    Variant.variant2: const String.fromEnvironment('API_KEY_VARIANT2', defaultValue: ''),
-    Variant.variant3: const String.fromEnvironment('API_KEY_VARIANT3', defaultValue: ''),
-    Variant.variant4: const String.fromEnvironment('API_KEY_VARIANT4', defaultValue: ''),
-    Variant.variant5: const String.fromEnvironment('API_KEY_VARIANT5', defaultValue: ''),
-    Variant.variant6: const String.fromEnvironment('API_KEY_VARIANT6', defaultValue: ''),
-    Variant.variant7: const String.fromEnvironment('API_KEY_VARIANT7', defaultValue: ''),
-    Variant.variant8: const String.fromEnvironment('API_KEY_VARIANT8', defaultValue: ''),
-    Variant.variant9: const String.fromEnvironment('API_KEY_VARIANT9', defaultValue: ''),
+    Variant.development: const String.fromEnvironment('DEV_API_KEY', defaultValue: ''),
+    Variant.production: const String.fromEnvironment('API_KEY', defaultValue: ''),
   };
 }
 
