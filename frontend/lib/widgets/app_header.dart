@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/main.dart';
 import 'package:frontend/res/res.dart';
 import 'package:frontend/utils/utils.dart';
 import 'package:frontend/widgets/widgets.dart';
@@ -12,17 +11,15 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
     required this.button1,
     required this.button2,
     required this.button3,
-    this.hasBottom = true,
   });
 
   final String label;
   final NavButtonWrapper button1;
   final NavButtonWrapper button2;
   final NavButtonWrapper button3;
-  final bool hasBottom;
 
   @override
-  Size get preferredSize => Size(Get.width, hasBottom && kVariant != Variant.development ? 120 : 60);
+  Size get preferredSize => Size(Get.width, 60);
 
   @override
   Widget build(BuildContext context) {
@@ -56,38 +53,6 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ],
-      bottom: !hasBottom
-          ? null
-          : PreferredSize(
-              preferredSize: Size(Get.width * 0.5, 60),
-              child: Obx(
-                () {
-                  if (kVariant == Variant.development) {
-                    return const SizedBox.shrink();
-                  }
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
-                    child: Row(
-                      children: Variant.variants
-                          .map(
-                            (e) => Flexible(
-                              child: RadioListTile<Variant>(
-                                value: e,
-                                title: Text(e.appName ?? ''),
-                                groupValue: kVariant,
-                                onChanged: (value) {
-                                  kVariant = value ?? Variant.variant1;
-                                  setGeminiApiKey();
-                                },
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  );
-                },
-              ),
-            ),
     );
   }
 }
