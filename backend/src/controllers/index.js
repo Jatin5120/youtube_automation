@@ -86,6 +86,8 @@ class VideoController {
       .catch((error) => {
         const status = error.status;
 
+        console.log(error);
+
         if (status == 403) {
           return res.status(429).send({
             error:
