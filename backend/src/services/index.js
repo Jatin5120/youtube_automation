@@ -17,7 +17,11 @@ module.exports = class VideoService {
         forHandle: useSearchAPI == true ? username : `@${username}`,
       });
 
-      if (res.data.items.length === 0) {
+      if (
+        res.data == null ||
+        res.data.items == null ||
+        res.data.items.length === 0
+      ) {
         return null;
       }
 
@@ -36,7 +40,11 @@ module.exports = class VideoService {
       id: id,
     });
 
-    if (res.data.items.length === 0) {
+    if (
+      res.data == null ||
+      res.data.items == null ||
+      res.data.items.length === 0
+    ) {
       return null;
     }
 

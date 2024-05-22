@@ -27,7 +27,7 @@ class DashboardViewModel {
       if (res.statusCode == 204) {
         return [];
       }
-      return (jsonDecode(res.data) as List? ?? []).map((e) => VideoModel.fromMap(e as Map<String, dynamic>)).toList();
+      return (jsonDecode(res.data) as List? ?? []).where((e) => e != null).map((e) => VideoModel.fromMap(e as Map<String, dynamic>)).toList();
     } catch (e, st) {
       AppLog.error(e, st);
       AppLog.error(st);
