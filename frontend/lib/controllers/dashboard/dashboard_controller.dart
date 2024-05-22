@@ -121,6 +121,7 @@ class DashboardController extends GetxController {
         .toList();
 
     parsedVideos = parsedVideos.toSet().toList();
+    update([DashboardView.updateId]);
   }
 
   void analyzeData() async {
