@@ -190,11 +190,11 @@ class DashboardView extends StatelessWidget {
           intValue: (row) => row.totalVideosLastMonth,
           cellAlignment: Alignment.centerRight,
         ),
-        DaviColumn(
-          name: 'Total Videos Last 3 Months',
-          intValue: (row) => row.totalVideosLastThreeMonths,
-          cellAlignment: Alignment.centerRight,
-        ),
+        // DaviColumn(
+        //   name: 'Total Videos Last 3 Months',
+        //   intValue: (row) => row.totalVideosLastThreeMonths,
+        //   cellAlignment: Alignment.centerRight,
+        // ),
         DaviColumn(
           name: 'Latest Video Title',
           stringValue: (row) => row.latestVideoTitle,
