@@ -184,7 +184,7 @@ class DashboardController extends GetxController {
           'Subscriber Count',
           'Total Videos',
           'Total Videos Last Month',
-          'Total Videos Last 3 Months',
+          // 'Total Videos Last 3 Months',
           'Latest Video Title',
           'Last Upload Date',
         ],

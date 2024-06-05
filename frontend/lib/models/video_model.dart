@@ -54,7 +54,7 @@ class VideoModel {
         subscriberCount,
         totalVideos,
         totalVideosLastMonth,
-        totalVideosLastThreeMonths,
+        // totalVideosLastThreeMonths,
         latestVideoTitle,
         lastUploadDate,
       ];
