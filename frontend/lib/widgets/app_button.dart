@@ -30,18 +30,18 @@ class AppButton extends StatelessWidget {
       width: _small ? null : double.maxFinite,
       child: ElevatedButton(
         style: ButtonStyle(
-          padding: MaterialStateProperty.all(
+          padding: WidgetStateProperty.all(
             const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 8,
             ),
           ),
-          shape: MaterialStateProperty.all(
+          shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          backgroundColor: MaterialStateColor.resolveWith(
+          backgroundColor: WidgetStateColor.resolveWith(
             (states) {
               if (states.isDisabled) {
                 return Colors.grey;
@@ -49,7 +49,7 @@ class AppButton extends StatelessWidget {
               return color ?? AppColors.primary;
             },
           ),
-          foregroundColor: MaterialStateColor.resolveWith(
+          foregroundColor: WidgetStateColor.resolveWith(
             (states) {
               if (states.isDisabled) {
                 return Colors.black;
@@ -57,7 +57,7 @@ class AppButton extends StatelessWidget {
               return Colors.white;
             },
           ),
-          textStyle: MaterialStateProperty.all(context.textTheme.bodyMedium),
+          textStyle: WidgetStateProperty.all(context.textTheme.bodyMedium),
         ),
         onPressed: onTap,
         child: Text(label),

@@ -29,6 +29,6 @@ extension StringExtension on String {
   }
 }
 
-extension MaterialStateExtension on Set<MaterialState> {
-  bool get isDisabled => any((e) => [MaterialState.disabled].contains(e));
+extension WidgetStateExtension on Set<WidgetState> {
+  bool get isDisabled => any((e) => [WidgetState.disabled].contains(e));
 }
