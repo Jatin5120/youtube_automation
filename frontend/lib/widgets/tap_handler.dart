@@ -41,10 +41,10 @@ class TapHandler extends StatelessWidget {
                 ? null
                 : Colors.transparent,
         overlayColor: showArrowCursor
-            ? MaterialStateProperty.all(Colors.transparent)
+            ? WidgetStateProperty.all(Colors.transparent)
             : showSplash
                 ? null
-                : MaterialStateProperty.all(Colors.transparent),
+                : WidgetStateProperty.all(Colors.transparent),
         mouseCursor: mouseCursor ?? (showArrowCursor ? SystemMouseCursors.basic : null),
         onHover: onHover,
         onTap: onHover == null ? onTap : onTap ?? () {},
