@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:frontend/res/res.dart';
+import 'package:frontend/utils/utils.dart';
 
 class VideoModel {
   final int subscriberCount;
@@ -38,13 +39,13 @@ class VideoModel {
   });
 
   Iterable get properties => [
+        channelLink,
         analyzedName,
         analyzedTitle,
         '',
         '',
         '',
         '',
-        channelLink,
         country,
         '',
         '',
@@ -56,7 +57,7 @@ class VideoModel {
         totalVideosLastMonth,
         // totalVideosLastThreeMonths,
         latestVideoTitle,
-        lastUploadDate,
+        lastUploadDate.formatDate,
       ];
 
   VideoModel copyWith({

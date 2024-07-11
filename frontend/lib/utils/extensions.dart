@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/res/res.dart';
+import 'package:intl/intl.dart';
 
 extension StyleExtension on TextStyle {
   TextStyle get withTitleColor {
@@ -31,4 +32,8 @@ extension StringExtension on String {
 
 extension WidgetStateExtension on Set<WidgetState> {
   bool get isDisabled => any((e) => [WidgetState.disabled].contains(e));
+}
+
+extension DateExtension on DateTime {
+  String get formatDate => DateFormat('dd/MM/yy').format(this);
 }

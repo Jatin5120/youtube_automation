@@ -23,10 +23,10 @@ class MessagesController extends GetxController {
   var emailTEC = TextEditingController();
   var dmTEC = TextEditingController();
 
-  var nameIndex = 1;
-  var titleIndex = 2;
+  var nameIndex = 2;
+  var titleIndex = 3;
 
-  var instaIndex = 4;
+  var instaIndex = 5;
 
   void uploadFiles(List<dynamic>? files) async {
     if (files == null || files.isEmpty) {
@@ -98,7 +98,12 @@ class MessagesController extends GetxController {
         dmContent,
         ...List.generate(3, (_) => ''),
       ];
+      var emptyData = [
+        DateTime.now().formatDate,
+        ...List.generate(6, (_) => ''),
+      ];
       row.insertAll(10, data);
+      row.insertAll(0, emptyData);
       output.add(row);
     }
     var titles = <String>[
@@ -109,7 +114,17 @@ class MessagesController extends GetxController {
       'Platform',
       'Sent Date',
     ];
+    var emptyTitles = [
+      'First Connected Date',
+      'Last Connected Date',
+      'Notes',
+      'Which Channel',
+      'Which Subchannel',
+      'Stage',
+      'Sales Rep',
+    ];
     header.insertAll(10, titles);
+    header.insertAll(0, emptyTitles);
     output.insert(0, header);
 
     await Utility.downloadCSV(

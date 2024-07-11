@@ -50,7 +50,7 @@ class SearchController extends GetxController {
     pageToken = res.$2;
     fetchedResult = true;
     update([SearchView.updateId]);
-    return res.$1.isNotEmpty;
+    return res.$1.isNotEmpty && res.$2.isNotEmpty;
   }
 
   // Download and save CSV to your Device
