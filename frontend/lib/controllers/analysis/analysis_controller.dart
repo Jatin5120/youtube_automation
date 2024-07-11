@@ -52,9 +52,9 @@ class AnalysisController extends GetxController {
   Future<String?> analyzeTitle(String title) async {
     try {
       final prompt = AppPrompts.titlePrompt(title);
-      return await _getAnalysis(prompt);
+      return await _getAnalysis(prompt, 'Title');
     } catch (e) {
-      AppLog.error(e);
+      AppLog.error('Title: $e');
       return null;
     }
   }
@@ -66,20 +66,20 @@ class AnalysisController extends GetxController {
   }) async {
     try {
       final prompt = AppPrompts.namePrompt(username, channelName, description);
-      return await _getAnalysis(prompt);
+      return await _getAnalysis(prompt, 'Name');
     } catch (e) {
-      AppLog.error(e);
+      AppLog.error('Name: $e');
       return 'Team $channelName';
     }
   }
 
-  Future<String?> _getAnalysis(String prompt) async {
+  Future<String?> _getAnalysis(String prompt, String type) async {
     try {
       final content = [Content.text(prompt)];
       final response = await _model.generateContent(content);
       return response.text;
     } catch (e) {
-      AppLog.error(e);
+      AppLog.error('Analyzing $type: $e');
       return null;
     }
   }

@@ -134,7 +134,7 @@ class DashboardController extends GetxController {
       }
 
       var title = video.analyzedName.trim().isNotEmpty ? video.analyzedName.trim() : await _analyticsController.analyzeTitle(video.latestVideoTitle);
-      await Future.delayed(const Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 500));
 
       analyzeProgress = (index / parsedVideos.length);
 
@@ -145,7 +145,7 @@ class DashboardController extends GetxController {
               channelName: video.channelName,
               description: video.description,
             );
-      await Future.delayed(const Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 500));
 
       analyzeProgress = ((2 * index + 1) / (2 * parsedVideos.length));
 
@@ -168,13 +168,13 @@ class DashboardController extends GetxController {
       data: [
         [
           'Search Query',
+          'Channel Link',
           'Analyzed Name',
           'Analyzed Title',
           'Email Id',
           'Instagram',
           'LinkedIn',
           'Twitter',
-          'Channel Link',
           'Channel Country',
           '',
           '',
@@ -201,36 +201,3 @@ class DashboardController extends GetxController {
     );
   }
 }
-
-
-// TODO: Data for Lead gen
-/*
-   
-1. Search Query
-2. Analyzed Name
-3. Analyzed Title
-4. Email Id - E
-5. Twitter - E
-6. LinkedIn - E
-7. Instagram - E
-8. Channel link
-=============
------------
-Instagram username - (N/A)
-Email Content
-Dm Content
-Status - E
-Platform - E
-Sent Date - E
------------
-=============
-Channel Name
-UserName
-Subscriber Count
-Total Videos
-Total Videos Last Month
-Total Videos Last 3 Months
-Latest Video Title
-Last Upload Date
-Channel Country
- */
