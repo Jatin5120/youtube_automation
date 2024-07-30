@@ -28,6 +28,9 @@ class AppTheme {
     primaryColor: AppColors.primary,
     scaffoldBackgroundColor: AppColors.backgroundDark,
     canvasColor: AppColors.backgroundDark,
+    dividerTheme: const DividerThemeData(
+      color: AppColors.grey,
+    ),
     cardTheme: const CardTheme(
       color: AppColors.cardDark,
       elevation: 0,

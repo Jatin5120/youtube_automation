@@ -43,9 +43,56 @@ class AuthView extends StatelessWidget {
                       ),
                       const SizedBox(height: 32),
                       AppButton(
-                        onTap: controller.login,
+                        onTap: controller.loginWithEmail,
                         label: 'Login',
                       ),
+                      // Padding(
+                      //   padding: const EdgeInsets.all(16.0),
+                      //   child: Row(
+                      //     crossAxisAlignment: CrossAxisAlignment.center,
+                      //     children: [
+                      //       const Flexible(child: Divider()),
+                      //       const SizedBox(width: 8),
+                      //       Text(
+                      //         'OR',
+                      //         style: context.textTheme.labelLarge?.copyWith(
+                      //           color: context.theme.dividerTheme.color,
+                      //         ),
+                      //       ),
+                      //       const SizedBox(width: 8),
+                      //       const Flexible(child: Divider()),
+                      //     ],
+                      //   ),
+                      // ),
+                      // SizedBox(
+                      //   width: double.maxFinite,
+                      //   child: TapHandler(
+                      //     onTap: controller.loginWithGoogle,
+                      //     child: DecoratedBox(
+                      //       decoration: BoxDecoration(
+                      //         color: AppColors.cardLight,
+                      //         borderRadius: BorderRadius.circular(8),
+                      //       ),
+                      //       child: Padding(
+                      //         padding: const EdgeInsets.all(8.0),
+                      //         child: Row(
+                      //           mainAxisAlignment: MainAxisAlignment.center,
+                      //           children: [
+                      //             const AppSvg(
+                      //               AssetConstants.google,
+                      //               dimension: 24,
+                      //             ),
+                      //             const SizedBox(width: 8),
+                      //             Text(
+                      //               'Login with Google',
+                      //               style: context.textTheme.labelMedium,
+                      //             ),
+                      //           ],
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 );

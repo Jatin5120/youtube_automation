@@ -25,11 +25,31 @@
   <meta name="apple-mobile-web-app-title" content="Trisdel Youtube Automation">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
+  <meta name="google-signin-client_id" content="651649356769-7h0c8hfsubufhj9olve7u7u4kvkir2q0.apps.googleusercontent.com">
+
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png">
 
-  <title>frontend</title>
+  <title>Trisdel Media</title>
   <link rel="manifest" href="manifest.json">
+
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js" async defer></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js" async defer></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var firebaseConfig = {
+        apiKey: "AIzaSyA99luKVTLx4X6GbrnH3FM44wDTktkmrmY",
+        authDomain: "automation-f1555.firebaseapp.com",
+        projectId: "automation-f1555",
+        storageBucket: "automation-f1555.appspot.com",
+        messagingSenderId: "651649356769",
+        appId: "1:651649356769:web:ad19f450c5697aaf5538a0"
+      };
+      firebase.initializeApp(firebaseConfig);
+    });
+  </script>
 
   <script>
     // The value below is injected by flutter build, do not touch.

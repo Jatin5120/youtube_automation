@@ -48,9 +48,12 @@ Future<void> initialize() async {
   _fetchKeys();
   setGeminiApiKey();
   Get.put(ApiWrapper(Client()));
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Future.wait([
+    DBWrapper.i.init(),
+    Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ),
+  ]);
 }
 
 class MyApp extends StatelessWidget {

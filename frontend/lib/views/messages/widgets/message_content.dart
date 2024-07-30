@@ -49,20 +49,20 @@ class MessageContent extends StatelessWidget {
           maxLines: 10,
           onChanged: onChanged,
         ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: ContentItem.remainingValues(controller.text)
-              .map(
-                (e) => _InsertContent(
-                  e,
-                  controller: controller,
-                  onTap: () => _insertTextAtCursorPosition(e.text),
-                ),
-              )
-              .toList(),
-        ),
+        // const SizedBox(height: 8),
+        // Wrap(
+        //   spacing: 10,
+        //   runSpacing: 10,
+        //   children: ContentItem.remainingValues(controller.text)
+        //       .map(
+        //         (e) => _InsertContent(
+        //           e,
+        //           controller: controller,
+        //           onTap: () => _insertTextAtCursorPosition(e.text),
+        //         ),
+        //       )
+        //       .toList(),
+        // ),
       ],
     );
   }

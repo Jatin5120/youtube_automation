@@ -17,6 +17,8 @@ class AppColors {
   static const Color bodyLight = Color(0xFF333333);
   static const Color bodyDark = Color(0xFFDEDEDE);
 
+  static const Color grey = Colors.grey;
+
   static const Color success = MaterialColor(0xFF4DB143, {
     100: Color(0xFFC7E9C4),
     500: Color(0xFF4DB143),
