@@ -73,6 +73,26 @@ class AnalysisController extends GetxController {
     }
   }
 
+  Future<String?> generateDm({
+    required String title,
+    required String username,
+    required String description,
+    required String template,
+  }) async {
+    try {
+      final prompt = AppPrompts.dmPrompt(
+        title: title,
+        clientName: username,
+        clientDescription: description,
+        template: template,
+      );
+      return await _getAnalysis(prompt, 'DM');
+    } catch (e) {
+      AppLog.error('Name: $e');
+      return '';
+    }
+  }
+
   Future<String?> _getAnalysis(String prompt, String type) async {
     try {
       final content = [Content.text(prompt)];

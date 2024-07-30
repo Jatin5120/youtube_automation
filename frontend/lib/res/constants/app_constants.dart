@@ -6,7 +6,7 @@
 class AppConstants {
   const AppConstants._();
 
-  static const String name = 'YoutubeAutomation';
+  static const String name = 'TrisdelAutomation';
 
   static const Duration timeOutDuration = Duration(seconds: 180);
 
@@ -14,6 +14,11 @@ class AppConstants {
   static const double desktopBreakPoint = 1366;
   static const double tabletBreakPoint = 1024;
   static const double mobileBreakPoint = 612;
+
+  static const String nameColumnHead = 'Analyzed Name';
+  static const String titleColumnHead = 'Analyzed Title';
+  static const String instaColumnHead = 'Instagram';
+  static const String descriptionColumnHead = 'Description';
 
   static const String youtubeBase = 'https://www.youtube.com/';
 

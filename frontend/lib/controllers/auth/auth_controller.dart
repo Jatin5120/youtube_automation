@@ -12,14 +12,22 @@ class AuthController extends GetxController {
   var emailTEC = TextEditingController();
   var passwordTEC = TextEditingController();
 
-  void login() async {
+  void loginWithEmail() async {
     if (!(loginKey.currentState?.validate() ?? false)) {
       return;
     }
-    var isLoggedIn = await _viewModel.login(
+    var isLoggedIn = await _viewModel.loginWithEmail(
       emailTEC.text.trim(),
       passwordTEC.text.trim(),
     );
+
+    if (isLoggedIn) {
+      Get.offAllNamed(AppRoutes.dashboard);
+    }
+  }
+
+  void loginWithGoogle() async {
+    var isLoggedIn = await _viewModel.loginWithGoogle();
 
     if (isLoggedIn) {
       Get.offAllNamed(AppRoutes.dashboard);

@@ -14,7 +14,6 @@ class MessagesView extends StatelessWidget {
   static const String route = AppRoutes.messages;
 
   static const String updateId = 'messages-view';
-  static const String emailContentId = 'email-content-id';
   static const String dmContentId = 'dm-content-id';
 
   @override
@@ -42,34 +41,15 @@ class MessagesView extends StatelessWidget {
                     style: context.textTheme.titleMedium?.withBodyColor,
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Flexible(
-                        child: GetBuilder<MessagesController>(
-                          id: emailContentId,
-                          builder: (_) {
-                            return MessageContent(
-                              controller: controller.emailTEC,
-                              label: 'Email content',
-                              onChanged: (_) => controller.onEmailContentChange(),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Flexible(
-                        child: GetBuilder<MessagesController>(
-                          id: dmContentId,
-                          builder: (_) {
-                            return MessageContent(
-                              controller: controller.dmTEC,
-                              label: 'Dm content',
-                              onChanged: (_) => controller.onDmContentChange(),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                  GetBuilder<MessagesController>(
+                    id: dmContentId,
+                    builder: (_) {
+                      return MessageContent(
+                        controller: controller.dmTEC,
+                        label: 'Dm content',
+                        onChanged: (_) => controller.onDmContentChange(),
+                      );
+                    },
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
@@ -183,23 +163,47 @@ class MessagesView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Flexible(
-                        child: AppButton(
-                          label: 'Clear Files',
-                          color: AppColors.bodyLight,
-                          onTap: controller.clearFiles,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Flexible(
-                        child: AppButton(
-                          label: 'Generate Content & Download',
-                          onTap: controller.generateContent,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 16),
+                  Obx(
+                    () => controller.isGenerating
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'This is gonna take some time, so sit back and relax',
+                                style: context.textTheme.bodyLarge?.withTitleColor,
+                              ),
+                              const SizedBox(height: 16),
+                              LinearProgressIndicator(
+                                value: controller.generateProgress,
+                                color: Colors.deepOrange,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Analyzed ${(controller.generateProgress * 100).toStringAsFixed(2)}%',
+                                style: context.textTheme.bodyLarge?.withTitleColor,
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              Flexible(
+                                child: AppButton(
+                                  label: 'Clear Files',
+                                  color: AppColors.bodyLight,
+                                  onTap: controller.clearFiles,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Flexible(
+                                child: AppButton(
+                                  label: 'Generate Content & Download',
+                                  onTap: controller.generateContent,
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
                 ],
               ),

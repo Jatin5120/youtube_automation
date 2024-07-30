@@ -50,6 +50,7 @@ class VideoModel {
         '',
         '',
         '',
+        '',
         channelName,
         userName,
         subscriberCount,

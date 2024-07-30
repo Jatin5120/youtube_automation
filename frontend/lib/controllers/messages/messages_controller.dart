@@ -4,7 +4,9 @@ import 'dart:html';
 import 'package:csv/csv.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
+import 'package:frontend/controllers/controllers.dart';
 import 'package:frontend/models/models.dart';
+import 'package:frontend/res/res.dart';
 import 'package:frontend/utils/utils.dart';
 import 'package:frontend/views/views.dart';
 import 'package:get/get.dart';
@@ -16,17 +18,43 @@ class MessagesController extends GetxController {
   List<File> get selectedFiles => _selectedFiles;
   set selectedFiles(List<File> value) => _selectedFiles.value = value;
 
+  final RxBool _isGenerating = false.obs;
+  bool get isGenerating => _isGenerating.value;
+  set isGenerating(bool value) {
+    if (value == isGenerating) {
+      return;
+    }
+    _isGenerating.value = value;
+  }
+
+  final RxDouble _generateProgress = 0.0.obs;
+  double get generateProgress => _generateProgress.value;
+  set generateProgress(double value) {
+    if (value == generateProgress) {
+      return;
+    }
+    _generateProgress.value = value;
+  }
+
   var totalData = <List<dynamic>>[];
 
   var header = <String>[];
 
-  var emailTEC = TextEditingController();
+  // var emailTEC = TextEditingController();
   var dmTEC = TextEditingController();
 
-  var nameIndex = 2;
-  var titleIndex = 3;
+  var nameIndex = 0;
+  var titleIndex = 0;
+  var instaIndex = 0;
+  var descriptionIndex = 0;
 
-  var instaIndex = 5;
+  @override
+  void onInit() {
+    super.onInit();
+    if (!Get.isRegistered<AnalysisController>()) {
+      AnalysisBinding().dependencies();
+    }
+  }
 
   void uploadFiles(List<dynamic>? files) async {
     if (files == null || files.isEmpty) {
@@ -54,6 +82,10 @@ class MessagesController extends GetxController {
       rowsAsListOfValues.removeAt(0);
       totalData.addAll(rowsAsListOfValues);
     }
+    nameIndex = header.indexOf(AppConstants.nameColumnHead);
+    titleIndex = header.indexOf(AppConstants.titleColumnHead);
+    instaIndex = header.indexOf(AppConstants.instaColumnHead);
+    descriptionIndex = header.indexOf(AppConstants.descriptionColumnHead);
   }
 
   void clearFiles() {
@@ -66,36 +98,50 @@ class MessagesController extends GetxController {
     _readData();
   }
 
-  void onEmailContentChange() {
-    update([MessagesView.emailContentId]);
-  }
-
   void onDmContentChange() {
     update([MessagesView.dmContentId]);
   }
 
   void generateContent() async {
-    if (emailTEC.text.trim().isEmpty || dmTEC.text.trim().isEmpty) {
-      Utility.showInfoDialog(ResponseModel.message('Both Email Content and DM Content must be filled'));
+    if (dmTEC.text.trim().isEmpty) {
+      Utility.showInfoDialog(ResponseModel.message('DM Content Template must be filled'));
       return;
     }
     if (selectedFiles.isEmpty) {
       Utility.showInfoDialog(ResponseModel.message('No file is selected'));
       return;
     }
-    AppLog.info(header);
+    if (!Get.isRegistered<AnalysisController>()) {
+      AnalysisBinding().dependencies();
+    }
+    isGenerating = true;
+    final controller = Get.find<AnalysisController>();
+
     var output = <List<dynamic>>[];
-    for (var row in totalData) {
+    for (var rowData in totalData.indexed) {
+      final row = rowData.$2;
+      final index = rowData.$1;
       var title = row[titleIndex];
       var name = row[nameIndex];
       var instagram = row[instaIndex].toString();
-      var emailContent = emailTEC.text.split(ContentItem.name.text).join(name).split(ContentItem.title.text).join(title);
-      var dmContent = dmTEC.text.split(ContentItem.name.text).join(name).split(ContentItem.title.text).join(title);
+      var description = row[descriptionIndex];
+
+      generateProgress = (index / totalData.length);
+
+      final content = await controller.generateDm(
+        title: title,
+        username: name,
+        description: description,
+        template: dmTEC.text,
+      );
+
+      // var emailContent = emailTEC.text.split(ContentItem.name.text).join(name).split(ContentItem.title.text).join(title);
+
       var instaContent = instagram.isEmpty ? 'N/A' : instagram.split('com/').last.replaceAll('/', '');
       var data = <String>[
         instaContent,
-        emailContent,
-        dmContent,
+        content ?? '',
+        '',
         ...List.generate(3, (_) => ''),
       ];
       var emptyData = [
@@ -106,10 +152,12 @@ class MessagesController extends GetxController {
       row.insertAll(0, emptyData);
       output.add(row);
     }
+    generateProgress = 100;
+    isGenerating = false;
     var titles = <String>[
       'Instagram Username',
-      'Email Content',
-      'Dm Content',
+      'Personalized Message',
+      '',
       'Status',
       'Platform',
       'Sent Date',

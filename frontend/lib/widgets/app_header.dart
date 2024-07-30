@@ -8,15 +8,15 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   const AppHeader({
     super.key,
     required this.label,
-    required this.button1,
-    required this.button2,
-    required this.button3,
+    this.button1,
+    this.button2,
+    this.button3,
   });
 
   final String label;
-  final NavButtonWrapper button1;
-  final NavButtonWrapper button2;
-  final NavButtonWrapper button3;
+  final NavButtonWrapper? button1;
+  final NavButtonWrapper? button2;
+  final NavButtonWrapper? button3;
 
   @override
   Size get preferredSize => Size(Get.width, 60);
@@ -31,27 +31,33 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       backgroundColor: AppColors.backgroundDark,
       actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 16),
-          child: AppButton.small(
-            onTap: button1.onTap,
-            label: button1.label,
+        if (button1 != null) ...[
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: AppButton.small(
+              onTap: button1!.onTap,
+              label: button1!.label,
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 16),
-          child: AppButton.small(
-            onTap: button2.onTap,
-            label: button2.label,
+        ],
+        if (button2 != null) ...[
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: AppButton.small(
+              onTap: button2!.onTap,
+              label: button2!.label,
+            ),
           ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(right: context.width * 0.05),
-          child: AppButton.small(
-            onTap: button3.onTap,
-            label: button3.label,
+        ],
+        if (button3 != null) ...[
+          Padding(
+            padding: EdgeInsets.only(right: context.width * 0.05),
+            child: AppButton.small(
+              onTap: button3!.onTap,
+              label: button3!.label,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
