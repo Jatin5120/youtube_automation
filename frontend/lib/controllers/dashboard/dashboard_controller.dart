@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:frontend/controllers/controllers.dart';
 import 'package:frontend/main.dart';
@@ -25,6 +27,20 @@ class DashboardController extends GetxController {
   var searchController = TextEditingController();
 
   int get searchCount => searchController.text.trim().split(',').length;
+
+  // Loading states
+  final RxBool _isLoadingVideos = false.obs;
+  final RxBool _isProcessingData = false.obs;
+  final RxString _loadingMessage = ''.obs;
+  final RxInt _retryCount = 0.obs;
+
+  bool get isLoadingVideos => _isLoadingVideos.value;
+  bool get isProcessingData => _isProcessingData.value;
+  String get loadingMessage => _loadingMessage.value;
+  int get retryCount => _retryCount.value;
+
+  // Request debouncing
+  Timer? _debounceTimer;
 
   final Rx<ChannelBy> _channelBy = ChannelBy.username.obs;
   ChannelBy get channelBy => _channelBy.value;
@@ -54,6 +70,12 @@ class DashboardController extends GetxController {
     fetchChannels();
   }
 
+  @override
+  void onClose() {
+    _debounceTimer?.cancel();
+    super.onClose();
+  }
+
   void fetchChannels() {
     var parameters = Get.parameters;
     if (parameters.isNotEmpty) {
@@ -81,11 +103,127 @@ class DashboardController extends GetxController {
       return;
     }
 
-    videos = await _getVideosByChannelIdentifier();
-    fetchedResult = true;
-    parseData();
-    // analyzeData();
+    // Cancel previous debounce timer
+    _debounceTimer?.cancel();
+
+    // Set up debounced search
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+      await _performSearch();
+    });
+  }
+
+  Future<void> _performSearch() async {
+    // Validate input
+    final validationError = _validateInput();
+    if (validationError != null) {
+      Utility.showInfoDialog(
+        ResponseModel.message(validationError),
+        title: 'Invalid Input',
+      );
+      return;
+    }
+
+    _isLoadingVideos.value = true;
+    _loadingMessage.value = 'Fetching channel data...';
+    _retryCount.value = 0;
     update([DashboardView.updateId]);
+
+    try {
+      videos = await _getVideosWithRetry();
+      fetchedResult = true;
+      _isProcessingData.value = true;
+      _isLoadingVideos.value = false;
+      _loadingMessage.value = 'Processing data...';
+      update([DashboardView.updateId]);
+
+      parseData();
+
+      _isProcessingData.value = false;
+      _isLoadingVideos.value = false;
+      _loadingMessage.value = '';
+      update([DashboardView.updateId]);
+    } catch (e) {
+      _isLoadingVideos.value = false;
+      _isLoadingVideos.value = false;
+      _isProcessingData.value = false;
+      _loadingMessage.value = '';
+      update([DashboardView.updateId]);
+
+      Utility.showInfoDialog(
+        ResponseModel.message('Failed to fetch data: ${e.toString()}'),
+        title: 'Error',
+      );
+    }
+  }
+
+  String? _validateInput() {
+    final text = searchController.text.trim();
+    if (text.isEmpty) {
+      return 'Please enter channel names or IDs';
+    }
+
+    final channels = text
+        .replaceAll('@', '')
+        .replaceAll(',', ' ')
+        .replaceAll('  ', ' ')
+        .trim()
+        .split(' ')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    if (channels.isEmpty) {
+      return 'Please enter valid channel names or IDs';
+    }
+
+    // Validate channel format
+    for (final channel in channels) {
+      if (channelBy == ChannelBy.channelId) {
+        if (!_isValidChannelId(channel)) {
+          return 'Invalid channel ID format: $channel';
+        }
+      } else {
+        if (!_isValidUsername(channel)) {
+          return 'Invalid username format: $channel';
+        }
+      }
+    }
+
+    return null;
+  }
+
+  bool _isValidChannelId(String id) {
+    // YouTube channel ID format validation
+    return RegExp(r'^UC[a-zA-Z0-9_-]{22}$').hasMatch(id);
+  }
+
+  bool _isValidUsername(String username) {
+    // Username format validation (3-30 characters, alphanumeric and underscores)
+    return RegExp(r'^[a-zA-Z0-9_]{3,30}$').hasMatch(username);
+  }
+
+  Future<List<VideoModel>> _getVideosWithRetry() async {
+    const maxRetries = 3;
+
+    for (int attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        _retryCount.value = attempt;
+        update([DashboardView.updateId]);
+
+        return await _getVideosByChannelIdentifier();
+      } catch (e) {
+        if (attempt == maxRetries - 1) {
+          rethrow;
+        }
+
+        _loadingMessage.value = 'Retrying... (${attempt + 1}/$maxRetries)';
+        update([DashboardView.updateId]);
+
+        await Future.delayed(Duration(seconds: 2 * (attempt + 1)));
+      }
+    }
+
+    return [];
   }
 
   Future<List<VideoModel>> _getVideosByChannelIdentifier() async {

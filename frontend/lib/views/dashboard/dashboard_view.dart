@@ -22,7 +22,7 @@ class DashboardView extends StatelessWidget {
         label: 'Dashboard',
         button1: (label: 'Search', onTap: RouteManagement.goToSearch),
         button2: (label: 'Analyze', onTap: RouteManagement.goToAnalysis),
-        button3: (label: 'Messages', onTap: RouteManagement.goToMessages),
+        // button3: (label: 'Messages', onTap: RouteManagement.goToMessages),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(
@@ -53,84 +53,37 @@ class DashboardView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: ChannelBy.values
-                        .map((e) => Flexible(
-                              child: RadioListTile(
-                                value: e,
-                                groupValue: controller.channelBy,
-                                title: Text(
-                                  e.label,
-                                  style: context.textTheme.titleMedium?.withTitleColor,
+                  RadioGroup(
+                    onChanged: controller.onChannelByChanged,
+                    groupValue: controller.channelBy,
+                    child: Row(
+                      children: ChannelBy.values
+                          .map((e) => Flexible(
+                                child: RadioListTile(
+                                  value: e,
+                                  title: Text(
+                                    e.label,
+                                    style: context.textTheme.titleMedium?.withTitleColor,
+                                  ),
                                 ),
-                                onChanged: controller.onChannelByChanged,
-                              ),
-                            ))
-                        .toList(),
+                              ))
+                          .toList(),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Flexible(
                     child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          if (controller.videos.isEmpty) ...[
-                            Text(
-                              controller.fetchedResult ? 'No videos found for ${controller.searchCount} Channels' : 'Search to see results',
-                              textAlign: TextAlign.center,
-                              style: context.textTheme.headlineSmall?.withTitleColor,
-                            ),
-                          ] else ...[
-                            Text(
-                              'Total ${controller.videos.length} video(s) found',
-                              textAlign: TextAlign.center,
-                              style: context.textTheme.bodyMedium?.withTitleColor,
-                            ),
-                            if (controller.parsedVideos.isEmpty) ...[
-                              Text(
-                                '0 relavant filtered results',
-                                textAlign: TextAlign.center,
-                                style: context.textTheme.bodyMedium?.withTitleColor,
-                              ),
-                            ] else ...[
-                              Text(
-                                '10 sample results out of ${controller.parsedVideos.length} filtered result(s)',
-                                textAlign: TextAlign.center,
-                                style: context.textTheme.bodyMedium?.withTitleColor,
-                              ),
-                              const SizedBox(height: 16),
-                              buildTable(context, controller.parsedVideos),
-                              const SizedBox(height: 16),
-                              Obx(
-                                () => controller.isAnalyzing
-                                    ? Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            'This is gonna take some time, so sit back and relax',
-                                            style: context.textTheme.bodyLarge?.withTitleColor,
-                                          ),
-                                          const SizedBox(height: 16),
-                                          LinearProgressIndicator(
-                                            value: controller.analyzeProgress,
-                                            color: Colors.deepOrange,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            'Analyzed ${(controller.analyzeProgress * 100).toStringAsFixed(2)}%',
-                                            style: context.textTheme.bodyLarge?.withTitleColor,
-                                          ),
-                                        ],
-                                      )
-                                    : AppButton.small(
-                                        onTap: controller.analyzeData,
-                                        label: 'Analysis Data & Download',
-                                      ),
-                              ),
-                            ],
-                          ],
-                        ],
-                      ),
+                      child: Obx(() {
+                        if (controller.isLoadingVideos) {
+                          return _buildLoadingState(context, controller);
+                        } else if (controller.isProcessingData) {
+                          return _buildProcessingState(context, controller);
+                        } else if (controller.videos.isEmpty) {
+                          return _buildEmptyState(context, controller);
+                        } else {
+                          return _buildResultsState(context, controller);
+                        }
+                      }),
                     ),
                   ),
                 ],
@@ -222,7 +175,7 @@ class DashboardView extends StatelessWidget {
         ),
         row: RowThemeData(
           color: (_) => AppColors.cardDark,
-          hoverForeground: (_) => AppColors.primary.withOpacity(.2),
+          hoverForeground: (_) => AppColors.primary.withValues(alpha: .2),
           fillHeight: true,
         ),
         cell: CellThemeData(
@@ -235,6 +188,149 @@ class DashboardView extends StatelessWidget {
         visibleRowsCount: videos.take(10).length,
         unpinnedHorizontalScrollController: Get.find<DashboardController>().tableController,
       ),
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context, DashboardController controller) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(height: 40),
+        const CircularProgressIndicator(
+          color: AppColors.primary,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          controller.loadingMessage.isNotEmpty ? controller.loadingMessage : 'Loading channel data...',
+          textAlign: TextAlign.center,
+          style: context.textTheme.titleMedium?.withTitleColor,
+        ),
+        if (controller.retryCount > 0) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Retry attempt ${controller.retryCount}',
+            textAlign: TextAlign.center,
+            style: context.textTheme.bodySmall?.withTitleColor,
+          ),
+        ],
+        const SizedBox(height: 40),
+      ],
+    );
+  }
+
+  Widget _buildProcessingState(BuildContext context, DashboardController controller) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(height: 40),
+        const CircularProgressIndicator(
+          color: AppColors.primary,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          controller.loadingMessage.isNotEmpty ? controller.loadingMessage : 'Processing data...',
+          textAlign: TextAlign.center,
+          style: context.textTheme.titleMedium?.withTitleColor,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Found ${controller.videos.length} channels, filtering results...',
+          textAlign: TextAlign.center,
+          style: context.textTheme.bodySmall?.withTitleColor,
+        ),
+        const SizedBox(height: 40),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, DashboardController controller) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(height: 40),
+        Icon(
+          Icons.search,
+          size: 64,
+          color: AppColors.titleDark.withValues(alpha: 0.5),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          controller.fetchedResult ? 'No videos found for ${controller.searchCount} channels' : 'Search to see results',
+          textAlign: TextAlign.center,
+          style: context.textTheme.headlineSmall?.withTitleColor,
+        ),
+        if (controller.fetchedResult) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Try adjusting your search criteria or check if the channels exist',
+            textAlign: TextAlign.center,
+            style: context.textTheme.bodyMedium?.withTitleColor,
+          ),
+        ] else ...[
+          const SizedBox(height: 8),
+          Text(
+            'Enter channel names or IDs separated by commas',
+            textAlign: TextAlign.center,
+            style: context.textTheme.bodyMedium?.withTitleColor,
+          ),
+        ],
+        const SizedBox(height: 40),
+      ],
+    );
+  }
+
+  Widget _buildResultsState(BuildContext context, DashboardController controller) {
+    return Column(
+      children: [
+        Text(
+          'Total ${controller.videos.length} video(s) found',
+          textAlign: TextAlign.center,
+          style: context.textTheme.bodyMedium?.withTitleColor,
+        ),
+        if (controller.parsedVideos.isEmpty) ...[
+          Text(
+            '0 relevant filtered results',
+            textAlign: TextAlign.center,
+            style: context.textTheme.bodyMedium?.withTitleColor,
+          ),
+        ] else ...[
+          Text(
+            '10 sample results out of ${controller.parsedVideos.length} filtered result(s)',
+            textAlign: TextAlign.center,
+            style: context.textTheme.bodyMedium?.withTitleColor,
+          ),
+          const SizedBox(height: 16),
+          buildTable(context, controller.parsedVideos),
+          const SizedBox(height: 16),
+          Obx(
+            () => controller.isAnalyzing
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'This is gonna take some time, so sit back and relax',
+                        style: context.textTheme.bodyLarge?.withTitleColor,
+                      ),
+                      const SizedBox(height: 16),
+                      LinearProgressIndicator(
+                        value: controller.analyzeProgress,
+                        color: Colors.deepOrange,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Analyzed ${(controller.analyzeProgress * 100).toStringAsFixed(2)}%',
+                        style: context.textTheme.bodyLarge?.withTitleColor,
+                      ),
+                    ],
+                  )
+                : AppButton.small(
+                    onTap: controller.analyzeData,
+                    label: 'Analysis Data & Download',
+                  ),
+          ),
+        ],
+      ],
     );
   }
 }

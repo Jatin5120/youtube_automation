@@ -11,7 +11,7 @@ class AppTheme {
     primaryColor: AppColors.primary,
     scaffoldBackgroundColor: AppColors.backgroundLight,
     canvasColor: AppColors.backgroundLight,
-    cardTheme: const CardTheme(
+    cardTheme: const CardThemeData(
       color: AppColors.cardLight,
       elevation: 0,
     ),
@@ -28,7 +28,7 @@ class AppTheme {
     primaryColor: AppColors.primary,
     scaffoldBackgroundColor: AppColors.backgroundDark,
     canvasColor: AppColors.backgroundDark,
-    cardTheme: const CardTheme(
+    cardTheme: const CardThemeData(
       color: AppColors.cardDark,
       elevation: 0,
     ),

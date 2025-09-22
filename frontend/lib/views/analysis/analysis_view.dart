@@ -19,7 +19,7 @@ class AnalysisView extends StatelessWidget {
         label: 'Analyze',
         button1: (label: 'Dashboard', onTap: RouteManagement.goToDashboard),
         button2: (label: 'Search', onTap: RouteManagement.goToSearch),
-        button3: (label: 'Messages', onTap: RouteManagement.goToMessages),
+        // button3: (label: 'Messages', onTap: RouteManagement.goToMessages),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(

@@ -21,7 +21,7 @@ class SearchView extends StatelessWidget {
         label: 'Search',
         button1: (label: 'Dashboard', onTap: RouteManagement.goToDashboard),
         button2: (label: 'Analyze', onTap: RouteManagement.goToAnalysis),
-        button3: (label: 'Messages', onTap: RouteManagement.goToMessages),
+        // button3: (label: 'Messages', onTap: RouteManagement.goToMessages),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(
@@ -146,7 +146,7 @@ class SearchView extends StatelessWidget {
         ),
         row: RowThemeData(
           color: (_) => AppColors.cardDark,
-          hoverForeground: (_) => AppColors.primary.withOpacity(.2),
+          hoverForeground: (_) => AppColors.primary.withValues(alpha: .2),
           fillHeight: true,
         ),
         cell: CellThemeData(
