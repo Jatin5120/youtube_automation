@@ -8,6 +8,9 @@ const logger = require("./middleware");
 const app = express();
 const parser = express.json;
 
+// Trust proxy (required when behind a reverse proxy like Render, Cloudflare, etc.)
+app.set("trust proxy", 1);
+
 // Security middleware
 app.use(helmet());
 
