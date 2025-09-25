@@ -20,6 +20,10 @@ class AnalysisController extends GetxController {
   bool get isAnalizing => _isAnalizing.value;
   set isAnalizing(bool value) => _isAnalizing.value = value;
 
+  // Cache for analysis results to avoid duplicate API calls
+  final Map<String, String> _titleCache = {};
+  final Map<String, String> _nameCache = {};
+
   @override
   void onInit() {
     super.onInit();
@@ -31,7 +35,7 @@ class AnalysisController extends GetxController {
     var key = kVariant.key;
     apiKey = kApiKey.isEmpty ? dotenv.get(key, fallback: '') : kApiKey;
     _model = GenerativeModel(
-      model: 'gemini-pro',
+      model: 'gemini-2.5-flash-lite',
       apiKey: apiKey,
     );
   }
@@ -51,8 +55,21 @@ class AnalysisController extends GetxController {
 
   Future<String?> analyzeTitle(String title) async {
     try {
+      // Check cache first
+      final cacheKey = title.trim().toLowerCase();
+      if (_titleCache.containsKey(cacheKey)) {
+        return _titleCache[cacheKey];
+      }
+
       final prompt = AppPrompts.titlePrompt(title);
-      return await _getAnalysis(prompt, 'Title');
+      final result = await _getAnalysis(prompt, 'Title');
+
+      // Cache the result
+      if (result != null && result.isNotEmpty) {
+        _titleCache[cacheKey] = result;
+      }
+
+      return result;
     } catch (e) {
       AppLog.error('Title: $e');
       return null;
@@ -65,8 +82,20 @@ class AnalysisController extends GetxController {
     required String description,
   }) async {
     try {
+      // Check cache first
+      final cacheKey = '${username}_${channelName}_$description'.trim().toLowerCase();
+      if (_nameCache.containsKey(cacheKey)) {
+        return _nameCache[cacheKey];
+      }
+
       final prompt = AppPrompts.namePrompt(username, channelName, description);
-      return await _getAnalysis(prompt, 'Name');
+      final result = await _getAnalysis(prompt, 'Name');
+
+      // Cache the result
+      final finalResult = result ?? 'Team $channelName';
+      _nameCache[cacheKey] = finalResult;
+
+      return finalResult;
     } catch (e) {
       AppLog.error('Name: $e');
       return 'Team $channelName';
@@ -82,5 +111,19 @@ class AnalysisController extends GetxController {
       AppLog.error('Analyzing $type: $e');
       return null;
     }
+  }
+
+  // Clear cache when needed (e.g., when starting a new analysis session)
+  void clearCache() {
+    _titleCache.clear();
+    _nameCache.clear();
+  }
+
+  // Get cache statistics for debugging
+  Map<String, int> getCacheStats() {
+    return {
+      'titleCache': _titleCache.length,
+      'nameCache': _nameCache.length,
+    };
   }
 }

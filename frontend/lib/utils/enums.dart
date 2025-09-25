@@ -34,6 +34,8 @@ enum Variant {
 
   const Variant(this.key);
   final String key;
+
+  Variant get other => this == development ? production : development;
 }
 
 enum ContentItem {

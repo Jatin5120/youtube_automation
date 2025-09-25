@@ -326,7 +326,7 @@ class DashboardView extends StatelessWidget {
                   )
                 : AppButton.small(
                     onTap: controller.analyzeData,
-                    label: 'Analysis Data & Download',
+                    label: 'Analyze Data & Download',
                   ),
           ),
         ],

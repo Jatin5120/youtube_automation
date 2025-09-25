@@ -264,38 +264,113 @@ class DashboardController extends GetxController {
 
   void analyzeData() async {
     isAnalyzing = true;
+    analyzeProgress = 0.0;
+    update([DashboardView.updateId]);
+
+    // Clear cache at the start of analysis to ensure fresh results
+    _analyticsController.clearCache();
+
+    // Filter videos that need analysis
+    final videosToAnalyze = <int, VideoModel>{};
     for (var data in parsedVideos.indexed) {
       var video = data.$2;
       var index = data.$1;
+
+      // Skip if both are already analyzed
       if (video.analyzedName.trim().isNotEmpty && video.analyzedTitle.trim().isNotEmpty) {
         continue;
       }
 
-      var title = video.analyzedName.trim().isNotEmpty ? video.analyzedName.trim() : await _analyticsController.analyzeTitle(video.latestVideoTitle);
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      analyzeProgress = (index / parsedVideos.length);
-
-      var name = video.analyzedTitle.trim().isNotEmpty
-          ? video.analyzedTitle.trim()
-          : await _analyticsController.analyzeName(
-              username: video.userName,
-              channelName: video.channelName,
-              description: video.description,
-            );
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      analyzeProgress = ((2 * index + 1) / (2 * parsedVideos.length));
-
-      parsedVideos[index] = video.copyWith(
-        analyzedTitle: title,
-        analyzedName: name,
-      );
+      videosToAnalyze[index] = video;
     }
+
+    if (videosToAnalyze.isEmpty) {
+      isAnalyzing = false;
+      analyzeProgress = 100;
+      update([DashboardView.updateId]);
+      _downloadCSV();
+      return;
+    }
+
+    // Process videos in parallel batches for better performance
+    const batchSize = 1; // Process 5 videos at a time
+    final batches = <List<MapEntry<int, VideoModel>>>[];
+
+    final entries = videosToAnalyze.entries.toList();
+    for (int i = 0; i < entries.length; i += batchSize) {
+      final end = (i + batchSize < entries.length) ? i + batchSize : entries.length;
+      batches.add(entries.sublist(i, end));
+    }
+
+    int completedVideos = 0;
+    final totalVideos = videosToAnalyze.length;
+
+    for (final batch in batches) {
+      // Process batch in parallel
+      final futures = batch.map((entry) => _analyzeVideo(entry.key, entry.value));
+      final results = await Future.wait(futures);
+
+      // Update results
+      for (int i = 0; i < batch.length; i++) {
+        final index = batch[i].key;
+        final result = results[i];
+        parsedVideos[index] = result;
+        completedVideos++;
+      }
+
+      // Update progress
+      analyzeProgress = completedVideos / totalVideos;
+      update([DashboardView.updateId]);
+
+      // Small delay between batches to prevent rate limiting
+      if (batches.indexOf(batch) < batches.length - 1) {
+        await Future.delayed(const Duration(milliseconds: 1000));
+      }
+    }
+
     analyzeProgress = 100;
     isAnalyzing = false;
     update([DashboardView.updateId]);
     _downloadCSV();
+  }
+
+  Future<VideoModel> _analyzeVideo(int index, VideoModel video) async {
+    // Analyze title and name in parallel if both are needed
+    final needsTitle = video.analyzedTitle.trim().isEmpty;
+    final needsName = video.analyzedName.trim().isEmpty;
+
+    if (needsTitle && needsName) {
+      // Both need analysis - run in parallel
+      final title = await _analyticsController.analyzeTitle(video.latestVideoTitle);
+
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      final name = await _analyticsController.analyzeName(
+        username: video.userName,
+        channelName: video.channelName,
+        description: video.description,
+      );
+
+      return video.copyWith(
+        analyzedTitle: title ?? '',
+        analyzedName: name ?? 'Team ${video.channelName}',
+      );
+    } else if (needsTitle) {
+      // Only title needs analysis
+      final title = await _analyticsController.analyzeTitle(video.latestVideoTitle);
+      return video.copyWith(analyzedTitle: title ?? '');
+    } else if (needsName) {
+      // Only name needs analysis
+      final name = await _analyticsController.analyzeName(
+        username: video.userName,
+        channelName: video.channelName,
+        description: video.description,
+      );
+      return video.copyWith(analyzedName: name ?? 'Team ${video.channelName}');
+    }
+
+    // Both already analyzed
+    return video;
   }
 
   // Download and save CSV to your Device
