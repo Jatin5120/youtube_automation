@@ -2,7 +2,7 @@
 # https://github.com/firebase/firebase-tools
 
 name: Building and Deploy to Firebase Hosting
-"on":
+on:
   push:
     branches:
       - main
@@ -22,10 +22,15 @@ jobs:
       - name: Install dependencies
         run: cd frontend && flutter pub get
 
-      - name: Building Development release
+      - name: Create .env file with API_KEY
+        run: |
+          echo "API_KEY=${{ secrets.API_KEY }}" > frontend/.env
+
+      - name: Building Production release
         run: cd frontend && flutter build web -t lib/production.dart --dart-define API_KEY="${{ secrets.API_KEY }}"
 
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           entrypoint: ./frontend
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
