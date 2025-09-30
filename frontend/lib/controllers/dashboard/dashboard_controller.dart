@@ -343,7 +343,7 @@ class DashboardController extends GetxController {
       // Both need analysis - run in parallel
       final title = await _analyticsController.analyzeTitle(video.latestVideoTitle);
 
-      await Future.delayed(const Duration(milliseconds: 200));
+      await Future.delayed(const Duration(milliseconds: 500));
 
       final name = await _analyticsController.analyzeName(
         username: video.userName,
