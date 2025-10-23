@@ -2,7 +2,7 @@
 module.exports = {
   // OpenAI Configuration
   OPENAI: {
-    MODEL: "gpt-4o-mini",
+    MODEL: "gpt-4.1-nano",
     TEMPERATURE: 0.1, // Lower temperature for more consistent structured output
     TOP_P: 0.8,
     MAX_TOKENS: 800, // Reduced back to normal since no reasoning overhead

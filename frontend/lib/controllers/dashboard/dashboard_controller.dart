@@ -289,7 +289,6 @@ class DashboardController extends GetxController {
           update([DashboardView.updateId]);
         },
         onBatchResult: (batchData) {
-          AppLog.success('Batch result: $batchData');
           for (var video in batchData) {
             analyzedByUserName[video.channelId] = (video.analyzedTitle, video.analyzedName);
           }

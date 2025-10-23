@@ -30,7 +30,6 @@ function validateApiKeys() {
     youtubeKey("development");
     youtubeKey("production");
     openaiKey();
-    Logger.info("All API keys validated successfully");
   } catch (error) {
     Logger.error("API key validation failed", error);
     throw error;
