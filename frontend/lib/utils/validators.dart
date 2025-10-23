@@ -1,5 +1,13 @@
 import 'package:get/get.dart';
 
+class ValidationException implements Exception {
+  final String message;
+  const ValidationException(this.message);
+
+  @override
+  String toString() => message;
+}
+
 class AppValidators {
   const AppValidators._();
 
@@ -61,5 +69,49 @@ class AppValidators {
       }
     }
     return null;
+  }
+
+  static String? validateChannelId(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Channel ID is required';
+    }
+
+    // YouTube channel ID format: UC followed by 22 characters
+    if (!RegExp(r'^UC[a-zA-Z0-9_-]{22}$').hasMatch(value)) {
+      return 'Invalid channel ID format';
+    }
+
+    return null;
+  }
+
+  static String? validateUsername(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Username is required';
+    }
+
+    // Username: 3-30 alphanumeric and underscores
+    if (!RegExp(r'^[a-zA-Z0-9_]{3,30}$').hasMatch(value)) {
+      return 'Invalid username format (3-30 characters, alphanumeric and underscores only)';
+    }
+
+    return null;
+  }
+
+  static List<String>? validateChannelList(String input, bool isChannelId) {
+    final channels =
+        input.replaceAll('@', '').replaceAll(',', ' ').replaceAll(RegExp(r'\s+'), ' ').trim().split(' ').where((e) => e.isNotEmpty).toList();
+
+    if (channels.isEmpty) {
+      return null;
+    }
+
+    for (final channel in channels) {
+      final error = isChannelId ? validateChannelId(channel) : validateUsername(channel);
+      if (error != null) {
+        throw ValidationException('$error: $channel');
+      }
+    }
+
+    return channels;
   }
 }

@@ -62,7 +62,6 @@ class SearchController extends GetxController {
           'Channel Name',
           'Channel Link',
           'Channel Id',
-          'Title',
           'Channel Description',
         ],
         ...channels.map((e) => e.properties.toList()),

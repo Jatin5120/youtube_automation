@@ -1,4 +1,5 @@
 import 'package:frontend/controllers/controllers.dart';
+import 'package:frontend/data/data.dart';
 import 'package:frontend/repositories/repositories.dart';
 import 'package:frontend/view_models/view_models.dart';
 import 'package:get/get.dart';
@@ -6,12 +7,15 @@ import 'package:get/get.dart';
 class DashboardBinding implements Bindings {
   @override
   void dependencies() {
+    Get.lazyPut(() => ChannelStreamRepository(Get.find<SSEClient>()));
+
     Get.put<DashboardController>(
       DashboardController(
         DashboardViewModel(
           DashboardRepository(
             Get.find(),
           ),
+          Get.find<ChannelStreamRepository>(),
         ),
       ),
     );

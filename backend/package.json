@@ -18,7 +18,8 @@
     "express-validator": "^7.0.1",
     "googleapis": "^133.0.0",
     "helmet": "^7.1.0",
-    "puppeteer": "^22.6.1"
+    "node-fetch": "^3.3.2",
+    "openai": "^6.3.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

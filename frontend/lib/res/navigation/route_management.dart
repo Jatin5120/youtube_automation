@@ -15,6 +15,4 @@ class RouteManagement {
   static void goToAnalysis() => Get.toNamed(AppRoutes.analysis);
 
   static void goToSearch() => Get.toNamed(AppRoutes.search);
-
-  static void goToMessages() => Get.toNamed(AppRoutes.messages);
 }

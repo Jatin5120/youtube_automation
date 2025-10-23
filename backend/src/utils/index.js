@@ -12,4 +12,7 @@ function isUploadedInThreeMonth(date) {
   return diff <= 90;
 }
 
-module.exports = { isUploadedThisMonth, isUploadedInThreeMonth };
+module.exports = {
+  isUploadedThisMonth,
+  isUploadedInThreeMonth,
+};

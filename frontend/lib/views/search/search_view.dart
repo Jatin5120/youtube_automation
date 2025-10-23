@@ -19,9 +19,9 @@ class SearchView extends StatelessWidget {
     return Scaffold(
       appBar: const AppHeader(
         label: 'Search',
-        button1: (label: 'Dashboard', onTap: RouteManagement.goToDashboard),
-        button2: (label: 'Analyze', onTap: RouteManagement.goToAnalysis),
-        // button3: (label: 'Messages', onTap: RouteManagement.goToMessages),
+        buttons: [
+          (label: 'Dashboard', onTap: RouteManagement.goToDashboard),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(
@@ -123,10 +123,6 @@ class SearchView extends StatelessWidget {
         DaviColumn(
           name: 'Channel Id',
           stringValue: (row) => row.channelId,
-        ),
-        DaviColumn(
-          name: 'Title',
-          stringValue: (row) => row.title,
         ),
         DaviColumn(
           name: 'Channel Description',

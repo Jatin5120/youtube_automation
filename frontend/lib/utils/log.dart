@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 
 import '../res/res.dart';
@@ -19,11 +21,11 @@ class AppLog {
   ///- `AppLog.success()` - for success log
   AppLog.error(this.message, [this.stackTrace]) {
     if (kDebugMode) {
-      print(
+      log(
         '\x1B[31m[${AppConstants.name}] - $message\x1B[0m',
-        // stackTrace: stackTrace,
-        // name: 'Error',
-        // level: 1200,
+        stackTrace: stackTrace,
+        name: 'Error',
+        level: 1200,
       );
     }
   }
@@ -44,11 +46,11 @@ class AppLog {
   ///- `AppLog.error()` - for error log
   AppLog.success(this.message, [this.stackTrace]) {
     if (kDebugMode) {
-      print(
+      log(
         '\x1B[32m[${AppConstants.name}] - $message\x1B[0m',
-        // stackTrace: stackTrace,
-        // name: 'Success',
-        // level: 800,
+        stackTrace: stackTrace,
+        name: 'Success',
+        level: 800,
       );
     }
   }
@@ -69,11 +71,11 @@ class AppLog {
   ///- `AppLog.error()` - for error log
   AppLog.info(this.message, [this.stackTrace]) {
     if (kDebugMode) {
-      print(
+      log(
         '\x1B[33m[${AppConstants.name}] - $message\x1B[0m',
-        // stackTrace: stackTrace,
-        // name: 'Info',
-        // level: 900,
+        stackTrace: stackTrace,
+        name: 'Info',
+        level: 900,
       );
     }
   }
@@ -94,10 +96,10 @@ class AppLog {
   ///- `AppLog.error()` - for error log
   AppLog(this.message, [this.stackTrace]) {
     if (kDebugMode) {
-      print(
+      log(
         '\x1B[37m[${AppConstants.name}] - $message\x1B[0m',
-        // stackTrace: stackTrace,
-        // level: 700,
+        stackTrace: stackTrace,
+        level: 700,
       );
     }
   }

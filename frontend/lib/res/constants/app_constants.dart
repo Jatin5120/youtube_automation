@@ -27,4 +27,16 @@ class AppConstants {
     'text/x-comma-separated-values',
     'text/tab-separated-values',
   ];
+
+  // Analysis configuration
+  static const int analysisBatchSize = 5;
+  static const int maxRetryAttempts = 3;
+  static const int retryDelaySeconds = 2;
+  static const Duration searchDebounceDelay = Duration(milliseconds: 500);
+
+  // Validation constants
+  static const int minChannelIdLength = 24;
+  static const int maxChannelIdLength = 24;
+  static const int minUsernameLength = 3;
+  static const int maxUsernameLength = 30;
 }

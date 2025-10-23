@@ -22,12 +22,8 @@ jobs:
       - name: Install dependencies
         run: cd frontend && flutter pub get
 
-      - name: Create .env file with API_KEY
-        run: |
-          echo "API_KEY=${{ secrets.API_KEY }}" > frontend/.env
-
       - name: Building Production release
-        run: cd frontend && flutter build web -t lib/production.dart --dart-define API_KEY="${{ secrets.API_KEY }}"
+        run: cd frontend && flutter build web -t lib/production.dart"
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0

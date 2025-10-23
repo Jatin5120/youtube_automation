@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:frontend/res/res.dart';
 import 'package:frontend/utils/utils.dart';
 
-class VideoModel {
+class ChannelDetailsModel {
+  final String channelId;
   final int subscriberCount;
   final int totalVideos;
   final String channelName;
@@ -13,14 +14,15 @@ class VideoModel {
   final int totalVideosLastMonth;
   final int totalVideosLastThreeMonths;
   final String latestVideoTitle;
-  final DateTime lastUploadDate;
+  final DateTime? lastUploadDate;
   final bool uploadedThisMonth;
   final String analyzedTitle;
   final String analyzedName;
   final String language;
   final String country;
 
-  const VideoModel({
+  const ChannelDetailsModel({
+    required this.channelId,
     required this.subscriberCount,
     required this.totalVideos,
     required this.channelName,
@@ -39,6 +41,7 @@ class VideoModel {
   });
 
   Iterable get properties => [
+        channelId,
         channelLink,
         analyzedName,
         analyzedTitle,
@@ -57,10 +60,11 @@ class VideoModel {
         totalVideosLastMonth,
         // totalVideosLastThreeMonths,
         latestVideoTitle,
-        lastUploadDate.formatDate,
+        lastUploadDate?.formatDate,
       ];
 
-  VideoModel copyWith({
+  ChannelDetailsModel copyWith({
+    String? channelId,
     int? subscriberCount,
     int? totalVideos,
     String? channelName,
@@ -77,7 +81,8 @@ class VideoModel {
     String? language,
     String? country,
   }) {
-    return VideoModel(
+    return ChannelDetailsModel(
+      channelId: channelId ?? this.channelId,
       subscriberCount: subscriberCount ?? this.subscriberCount,
       totalVideos: totalVideos ?? this.totalVideos,
       channelName: channelName ?? this.channelName,
@@ -98,6 +103,7 @@ class VideoModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'channelId': channelId,
       'subscriberCount': subscriberCount,
       'totalVideos': totalVideos,
       'channelName': channelName,
@@ -107,7 +113,7 @@ class VideoModel {
       'totalVideosLastMonth': totalVideosLastMonth,
       'totalVideosLastThreeMonths': totalVideosLastThreeMonths,
       'latestVideoTitle': latestVideoTitle,
-      'lastUploadDate': lastUploadDate.millisecondsSinceEpoch,
+      'lastUploadDate': lastUploadDate?.millisecondsSinceEpoch,
       'uploadedThisMonth': uploadedThisMonth,
       'analyzedTitle': analyzedTitle,
       'analyzedName': analyzedName,
@@ -116,8 +122,9 @@ class VideoModel {
     };
   }
 
-  factory VideoModel.fromMap(Map<String, dynamic> map) {
-    var model = VideoModel(
+  factory ChannelDetailsModel.fromMap(Map<String, dynamic> map) {
+    var model = ChannelDetailsModel(
+      channelId: map['channelId'] as String? ?? '',
       subscriberCount: int.parse(map['subscriberCount'] as String? ?? '0'),
       totalVideos: int.parse(map['totalVideos'] as String? ?? '0'),
       channelName: map['channelName'] as String? ?? '',
@@ -127,10 +134,12 @@ class VideoModel {
       totalVideosLastMonth: map['totalVideosLastMonth'] as int? ?? 0,
       totalVideosLastThreeMonths: map['totalVideosLastThreeMonths'] as int? ?? 0,
       latestVideoTitle: map['latestVideoTitle'] as String? ?? '',
-      lastUploadDate: DateTime.parse(map['lastUploadDate'] as String),
+      lastUploadDate: map['lastUploadDate'] != null ? DateTime.parse(map['lastUploadDate'] as String) : null,
       uploadedThisMonth: map['uploadedThisMonth'] as bool? ?? false,
       language: map['language'] as String? ?? 'N/A',
       country: map['country'] as String? ?? 'N/A',
+      analyzedTitle: map['analyzedTitle'] as String? ?? '',
+      analyzedName: map['analyzedName'] as String? ?? '',
     );
     model = model.copyWith(
       channelLink: '${AppConstants.youtubeBase}${model.userName}',
@@ -140,17 +149,17 @@ class VideoModel {
 
   String toJson() => json.encode(toMap());
 
-  factory VideoModel.fromJson(String source) => VideoModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory ChannelDetailsModel.fromJson(String source) => ChannelDetailsModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'VideoModel(subscriberCount: $subscriberCount, totalVideos: $totalVideos, channelName: $channelName, userName: $userName, decription: $description, channelLink: $channelLink, totalVideosLastMonth: $totalVideosLastMonth, totalVideosLastThreeMonths: $totalVideosLastThreeMonths, latestVideoTitle: $latestVideoTitle, lastUploadDate: $lastUploadDate, uploadedThisMonth: $uploadedThisMonth, analyzedTitle: $analyzedTitle, analyzedName: $analyzedTitle, language: $language, country: $country)';
+    return 'ChannelDetailsModel(channelId: $channelId, subscriberCount: $subscriberCount, totalVideos: $totalVideos, channelName: $channelName, userName: $userName, decription: $description, channelLink: $channelLink, totalVideosLastMonth: $totalVideosLastMonth, totalVideosLastThreeMonths: $totalVideosLastThreeMonths, latestVideoTitle: $latestVideoTitle, lastUploadDate: $lastUploadDate, uploadedThisMonth: $uploadedThisMonth, analyzedTitle: $analyzedTitle, analyzedName: $analyzedTitle, language: $language, country: $country)';
   }
 
   @override
-  bool operator ==(covariant VideoModel other) {
+  bool operator ==(covariant ChannelDetailsModel other) {
     if (identical(this, other)) return true;
-    return other.userName == userName;
+    return other.channelId == channelId;
     // return other.subscriberCount == subscriberCount &&
     //     other.totalVideos == totalVideos &&
     //     other.channelName == channelName &&
@@ -170,7 +179,7 @@ class VideoModel {
 
   @override
   int get hashCode {
-    return userName.hashCode;
+    return channelId.hashCode;
     // return subscriberCount.hashCode ^
     //     totalVideos.hashCode ^
     //     channelName.hashCode ^

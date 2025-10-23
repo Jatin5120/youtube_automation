@@ -4,56 +4,18 @@ import 'package:frontend/models/models.dart';
 import 'package:frontend/repositories/repositories.dart';
 import 'package:frontend/utils/utils.dart';
 
-class CacheManager {
-  static final Map<String, List<VideoModel>> _cache = {};
-  static const Duration _cacheExpiry = Duration(minutes: 30);
-  static final Map<String, DateTime> _cacheTimestamps = {};
-
-  static List<VideoModel>? getCachedData(String key) {
-    final timestamp = _cacheTimestamps[key];
-    if (timestamp == null) return null;
-
-    if (DateTime.now().difference(timestamp) > _cacheExpiry) {
-      _cache.remove(key);
-      _cacheTimestamps.remove(key);
-      return null;
-    }
-
-    return _cache[key];
-  }
-
-  static void setCachedData(String key, List<VideoModel> data) {
-    _cache[key] = data;
-    _cacheTimestamps[key] = DateTime.now();
-  }
-
-  static void clearCache() {
-    _cache.clear();
-    _cacheTimestamps.clear();
-  }
-}
-
 class DashboardViewModel {
-  const DashboardViewModel(this._repository);
+  const DashboardViewModel(this._repository, this._channelStreamRepository);
 
   final DashboardRepository _repository;
+  final ChannelStreamRepository _channelStreamRepository;
 
-  Future<List<VideoModel>> getVideosByChannelIdentifier({
+  Future<List<ChannelDetailsModel>> getVideosByChannelIdentifier({
     required List<String> usernames,
     required bool useId,
     required Variant variant,
   }) async {
     try {
-      // Create cache key
-      final cacheKey = '${usernames.join(',')}_${useId}_${variant.name}';
-
-      // Check cache first
-      final cachedData = CacheManager.getCachedData(cacheKey);
-      if (cachedData != null) {
-        AppLog.info('Cache hit for key: $cacheKey');
-        return cachedData;
-      }
-
       var ids = base64.encode(usernames.join(',').codeUnits);
       var payload = {
         'ids': ids,
@@ -65,15 +27,17 @@ class DashboardViewModel {
         payload,
       );
 
-      if (res.statusCode == 204) {
-        CacheManager.setCachedData(cacheKey, []);
+      if (res.hasError) {
+        AppLog.error(res.data);
         return [];
       }
 
-      final videos = (jsonDecode(res.data) as List? ?? []).where((e) => e != null).map((e) => VideoModel.fromMap(e as Map<String, dynamic>)).toList();
+      if (res.statusCode == 204) {
+        return [];
+      }
 
-      // Cache the result
-      CacheManager.setCachedData(cacheKey, videos);
+      final videos =
+          (jsonDecode(res.data) as List? ?? []).where((e) => e != null).map((e) => ChannelDetailsModel.fromMap(e as Map<String, dynamic>)).toList();
 
       return videos;
     } catch (e, st) {
@@ -82,4 +46,23 @@ class DashboardViewModel {
       return [];
     }
   }
+
+  void streamChannelDetails({
+    required List<String> channels,
+    required bool useId,
+    required String variant,
+    required Function(int current, int total, String message) onProgress,
+    required Function(List<ChannelDetailsModel> batchData) onBatchResult,
+    required Function() onComplete,
+    required Function(String error) onError,
+  }) =>
+      _channelStreamRepository.streamChannelDetails(
+        channels: channels,
+        useId: useId,
+        variant: variant,
+        onProgress: onProgress,
+        onBatchResult: onBatchResult,
+        onComplete: onComplete,
+        onError: onError,
+      );
 }

@@ -1,13 +1,44 @@
-require("dotenv").config();
+const config = require("../config");
+const Logger = require("../utils/logger");
 
 function youtubeKey(variant) {
-  if (variant == "development") {
-    return process.env.DEV_YOUTUBE_API_KEY;
+  const key =
+    config.apiKeys.youtube[variant] || config.apiKeys.youtube.production;
+
+  if (!key) {
+    Logger.error(`YouTube API key not found for variant: ${variant}`);
+    throw new Error(`YouTube API key not configured for variant: ${variant}`);
   }
-  if (variant == "production") {
-    return process.env.YOUTUBE_API_KEY;
-  }
-  return process.env.YOUTUBE_API_KEY;
+
+  return key;
 }
 
-module.exports = { youtubeKey };
+function openaiKey() {
+  const key = config.apiKeys.openai;
+
+  if (!key) {
+    Logger.error("OpenAI API key not found");
+    throw new Error("OpenAI API key not configured");
+  }
+
+  return key;
+}
+
+// Validate all required API keys on startup
+function validateApiKeys() {
+  try {
+    youtubeKey("development");
+    youtubeKey("production");
+    openaiKey();
+    Logger.info("All API keys validated successfully");
+  } catch (error) {
+    Logger.error("API key validation failed", error);
+    throw error;
+  }
+}
+
+module.exports = {
+  youtubeKey,
+  openaiKey,
+  validateApiKeys,
+};

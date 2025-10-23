@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:davi/davi.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/controllers/controllers.dart';
@@ -20,9 +22,9 @@ class DashboardView extends StatelessWidget {
     return Scaffold(
       appBar: const AppHeader(
         label: 'Dashboard',
-        button1: (label: 'Search', onTap: RouteManagement.goToSearch),
-        button2: (label: 'Analyze', onTap: RouteManagement.goToAnalysis),
-        // button3: (label: 'Messages', onTap: RouteManagement.goToMessages),
+        buttons: [
+          (label: 'Search', onTap: RouteManagement.goToSearch),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(
@@ -78,7 +80,7 @@ class DashboardView extends StatelessWidget {
                           return _buildLoadingState(context, controller);
                         } else if (controller.isProcessingData) {
                           return _buildProcessingState(context, controller);
-                        } else if (controller.videos.isEmpty) {
+                        } else if (controller.channels.isEmpty) {
                           return _buildEmptyState(context, controller);
                         } else {
                           return _buildResultsState(context, controller);
@@ -95,9 +97,9 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget buildTable(BuildContext context, List<VideoModel> videos) {
-    var tableModel = DaviModel<VideoModel>(
-      rows: videos.take(10).toList(),
+  Widget buildTable(BuildContext context, List<ChannelDetailsModel> channels) {
+    var tableModel = DaviModel<ChannelDetailsModel>(
+      rows: channels.take(10).toList(),
       multiSortEnabled: true,
       columns: [
         DaviColumn(
@@ -155,7 +157,9 @@ class DashboardView extends StatelessWidget {
         ),
         DaviColumn(
           name: 'Last Upload Date',
-          stringValue: (row) => DateFormat('yyyy MMM dd, hh:mm:ss').format(row.lastUploadDate),
+          stringValue: (row) => DateFormat('yyyy MMM dd, hh:mm:ss').format(
+            row.lastUploadDate ?? DateTime.now(),
+          ),
         ),
         DaviColumn(
           name: 'Channel Country',
@@ -182,10 +186,10 @@ class DashboardView extends StatelessWidget {
           textStyle: context.textTheme.bodyMedium?.withTitleColor,
         ),
       ),
-      child: Davi<VideoModel>(
+      child: Davi<ChannelDetailsModel>(
         tableModel,
         columnWidthBehavior: ColumnWidthBehavior.scrollable,
-        visibleRowsCount: videos.take(10).length,
+        visibleRowsCount: channels.take(10).length,
         unpinnedHorizontalScrollController: Get.find<DashboardController>().tableController,
       ),
     );
@@ -234,7 +238,7 @@ class DashboardView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Found ${controller.videos.length} channels, filtering results...',
+          'Found ${controller.channels.length} channels, filtering results...',
           textAlign: TextAlign.center,
           style: context.textTheme.bodySmall?.withTitleColor,
         ),
@@ -283,11 +287,11 @@ class DashboardView extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'Total ${controller.videos.length} video(s) found',
+          'Total ${controller.channels.length} channel(s) found',
           textAlign: TextAlign.center,
           style: context.textTheme.bodyMedium?.withTitleColor,
         ),
-        if (controller.parsedVideos.isEmpty) ...[
+        if (controller.parsedChannels.isEmpty) ...[
           Text(
             '0 relevant filtered results',
             textAlign: TextAlign.center,
@@ -295,12 +299,12 @@ class DashboardView extends StatelessWidget {
           ),
         ] else ...[
           Text(
-            '10 sample results out of ${controller.parsedVideos.length} filtered result(s)',
+            '${min(10, controller.parsedChannels.length)} sample results out of ${controller.parsedChannels.length} filtered result(s)',
             textAlign: TextAlign.center,
             style: context.textTheme.bodyMedium?.withTitleColor,
           ),
           const SizedBox(height: 16),
-          buildTable(context, controller.parsedVideos),
+          buildTable(context, controller.parsedChannels),
           const SizedBox(height: 16),
           Obx(
             () => controller.isAnalyzing

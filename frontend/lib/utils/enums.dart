@@ -29,25 +29,8 @@ enum ChannelBy {
 }
 
 enum Variant {
-  development('DEV_API_KEY'),
-  production('API_KEY');
-
-  const Variant(this.key);
-  final String key;
+  development,
+  production;
 
   Variant get other => this == development ? production : development;
-}
-
-enum ContentItem {
-  name,
-  title;
-
-  String get text => '{{${this.name}}}';
-
-  static List<ContentItem> remainingValues(String text) {
-    if (text.trim().isEmpty) {
-      return ContentItem.values;
-    }
-    return ContentItem.values.where((e) => !text.contains(e.text)).toList();
-  }
 }

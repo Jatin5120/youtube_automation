@@ -1,58 +1,65 @@
 const express = require("express");
 const router = express.Router();
 
-const VideoController = require("../controllers");
+const {
+  VideoController,
+  HealthController,
+  QuotaController,
+} = require("../controllers");
+const AnalysisController = require("../controllers/analysisController");
 const {
   validateChannelRequest,
   validateSearchRequest,
+  validateAnalysisRequest,
+  validateChannelStreamRequest,
 } = require("../middleware/validation");
-const { channelCache, searchCache, videoCache } = require("../utils/cache");
-const quotaManager = require("../utils/quota");
+const { timeout } = require("../middleware");
+const config = require("../config");
 
-router.get("/", async (req, res) => {
-  return res.json({
-    message: "Backend is working",
-    timestamp: new Date().toISOString(),
-    version: "1.0.0",
-  });
-});
+// Health check endpoints
+router.get("/", HealthController.getRoot);
+router.get("/health", HealthController.getHealth);
+router.get("/wakeup", HealthController.wakeup);
 
-// Cache statistics endpoint
-router.get("/cache/stats", (req, res) => {
-  const stats = {
-    channelCache: channelCache.getStats(),
-    searchCache: searchCache.getStats(),
-    videoCache: videoCache.getStats(),
-    timestamp: new Date().toISOString(),
-  };
-
-  res.json(stats);
-});
+// Enhanced cache statistics endpoint
+router.get("/cache/stats", VideoController.getCacheStats);
 
 // Quota status endpoint
-router.get("/quota/status", (req, res) => {
-  const quotaStatus = quotaManager.getQuotaStatus();
-  res.json({
-    ...quotaStatus,
-    isLow: quotaManager.isQuotaLow(),
-    isExhausted: quotaManager.isQuotaExhausted(),
-    timestamp: new Date().toISOString(),
-  });
-});
+router.get("/quota/status", QuotaController.getQuotaStatus);
 
-// Clear cache endpoint (for development/testing)
-router.delete("/cache", (req, res) => {
-  channelCache.clear();
-  searchCache.clear();
-  videoCache.clear();
+// Enhanced cache management endpoints
+router.delete("/cache", VideoController.invalidateCache);
+router.post("/cache/invalidate", VideoController.invalidateCache);
 
-  res.json({
-    message: "All caches cleared",
-    timestamp: new Date().toISOString(),
-  });
-});
+router.patch(
+  "/videos",
+  timeout(config.timeout.default),
+  validateChannelRequest,
+  VideoController.getChannel
+);
+router.get(
+  "/search",
+  timeout(config.timeout.default),
+  validateSearchRequest,
+  VideoController.searchChannels
+);
 
-router.patch("/videos", validateChannelRequest, VideoController.getChannel);
-router.get("/search", validateSearchRequest, VideoController.searchChannels);
+// Analysis routes
+const analysisController = new AnalysisController();
+
+router.post(
+  "/analyze/stream",
+  timeout(config.timeout.sse),
+  validateAnalysisRequest,
+  analysisController.analyzeStream.bind(analysisController)
+);
+
+// Channel streaming endpoint for large batches
+router.post(
+  "/videos/stream",
+  timeout(config.timeout.sse),
+  validateChannelStreamRequest,
+  VideoController.getChannelStream
+);
 
 module.exports = router;

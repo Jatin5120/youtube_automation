@@ -10,7 +10,6 @@ import 'package:frontend/utils/utils.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' show Client;
 
-late String kApiKey;
 Rx<Variant> _kVariant = Variant.development.obs;
 Variant get kVariant => _kVariant.value;
 set kVariant(Variant value) {
@@ -18,19 +17,6 @@ set kVariant(Variant value) {
     return;
   }
   _kVariant.value = value;
-}
-
-var _apiKeys = <Variant, String>{};
-
-void _fetchKeys() {
-  _apiKeys = {
-    Variant.development: const String.fromEnvironment('DEV_API_KEY', defaultValue: ''),
-    Variant.production: const String.fromEnvironment('API_KEY', defaultValue: ''),
-  };
-}
-
-void setGeminiApiKey() {
-  kApiKey = _apiKeys[kVariant]!;
 }
 
 void start(Variant variant) async {
@@ -45,12 +31,26 @@ void start(Variant variant) async {
 Future<void> initialize() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
-  _fetchKeys();
-  setGeminiApiKey();
-  Get.put(ApiWrapper(Client()));
+
+  // Initialize API wrapper and repositories
+  final client = Client();
+  Get.put(ApiWrapper(client));
+  Get.put(SSEClient(client));
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Wake up the server to prevent Render.com from spinning it down
+  try {
+    final wakeupService = WakeupService(Get.find<ApiWrapper>());
+    await wakeupService.wakeupServer();
+  } catch (e) {
+    // Silently fail - wakeup is not critical for app functionality
+    if (kDebugMode) {
+      print('Wakeup failed: $e');
+    }
+  }
 }
 
 class MyApp extends StatelessWidget {

@@ -33,22 +33,10 @@ class AppPages {
       ],
       transition: transition,
     ),
-    GetPage<AnalysisView>(
-      name: AnalysisView.route,
-      page: AnalysisView.new,
-      binding: AnalysisBinding(),
-      transition: transition,
-    ),
     GetPage<SearchView>(
       name: SearchView.route,
       page: SearchView.new,
       binding: SearchBinding(),
-      transition: transition,
-    ),
-    GetPage<MessagesView>(
-      name: MessagesView.route,
-      page: MessagesView.new,
-      binding: MessagesBinding(),
       transition: transition,
     ),
   ];

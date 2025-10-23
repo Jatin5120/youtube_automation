@@ -1,7 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
-import 'package:frontend/controllers/controllers.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:frontend/controllers/controllers.dart' as controllers;
+import 'package:frontend/data/data.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/models/models.dart';
 import 'package:frontend/res/res.dart';
@@ -14,13 +16,13 @@ class DashboardController extends GetxController {
   DashboardController(this._viewModel);
   final DashboardViewModel _viewModel;
 
-  AnalysisController get _analyticsController => Get.find();
+  controllers.AnalysisController get _analyticsController => Get.find<controllers.AnalysisController>();
 
   var fetchedResult = false;
 
-  var videos = <VideoModel>[];
+  var channels = <ChannelDetailsModel>[];
 
-  var parsedVideos = <VideoModel>[];
+  var parsedChannels = <ChannelDetailsModel>[];
 
   var tableController = ScrollController();
 
@@ -41,6 +43,9 @@ class DashboardController extends GetxController {
 
   // Request debouncing
   Timer? _debounceTimer;
+
+  // Server wakeup timer to keep Render.com server alive
+  Timer? _wakeupTimer;
 
   final Rx<ChannelBy> _channelBy = ChannelBy.username.obs;
   ChannelBy get channelBy => _channelBy.value;
@@ -68,11 +73,13 @@ class DashboardController extends GetxController {
   void onInit() {
     super.onInit();
     fetchChannels();
+    _startWakeupTimer();
   }
 
   @override
   void onClose() {
     _debounceTimer?.cancel();
+    _wakeupTimer?.cancel();
     super.onClose();
   }
 
@@ -107,158 +114,121 @@ class DashboardController extends GetxController {
     _debounceTimer?.cancel();
 
     // Set up debounced search
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+    _debounceTimer = Timer(AppConstants.searchDebounceDelay, () async {
       await _performSearch();
     });
   }
 
   Future<void> _performSearch() async {
-    // Validate input
-    final validationError = _validateInput();
-    if (validationError != null) {
-      Utility.showInfoDialog(
-        ResponseModel.message(validationError),
-        title: 'Invalid Input',
-      );
-      return;
-    }
-
-    _isLoadingVideos.value = true;
-    _loadingMessage.value = 'Fetching channel data...';
-    _retryCount.value = 0;
-    update([DashboardView.updateId]);
-
     try {
-      videos = await _getVideosWithRetry();
+      final channels = AppValidators.validateChannelList(searchController.text, channelBy == ChannelBy.channelId);
+
+      if (channels == null) {
+        _showError('Please enter valid channel names or IDs');
+        return;
+      }
+
+      _setLoadingState(true, 'Fetching channel data...');
+
+      this.channels = await _getVideosWithRetry(channels);
       fetchedResult = true;
-      _isProcessingData.value = true;
-      _isLoadingVideos.value = false;
-      _loadingMessage.value = 'Processing data...';
-      update([DashboardView.updateId]);
 
+      _setLoadingState(false, 'Processing data...');
       parseData();
-
-      _isProcessingData.value = false;
-      _isLoadingVideos.value = false;
-      _loadingMessage.value = '';
-      update([DashboardView.updateId]);
+      _setLoadingState(false, '');
+    } on ValidationException catch (e) {
+      _setLoadingState(false, '');
+      _showError(e.message);
     } catch (e) {
-      _isLoadingVideos.value = false;
-      _isLoadingVideos.value = false;
-      _isProcessingData.value = false;
-      _loadingMessage.value = '';
-      update([DashboardView.updateId]);
-
-      Utility.showInfoDialog(
-        ResponseModel.message('Failed to fetch data: ${e.toString()}'),
-        title: 'Error',
-      );
+      _setLoadingState(false, '');
+      _showError('Failed to fetch data: ${e.toString()}');
     }
   }
 
-  String? _validateInput() {
-    final text = searchController.text.trim();
-    if (text.isEmpty) {
-      return 'Please enter channel names or IDs';
-    }
-
-    final channels = text
-        .replaceAll('@', '')
-        .replaceAll(',', ' ')
-        .replaceAll('  ', ' ')
-        .trim()
-        .split(' ')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
-    if (channels.isEmpty) {
-      return 'Please enter valid channel names or IDs';
-    }
-
-    // Validate channel format
-    for (final channel in channels) {
-      if (channelBy == ChannelBy.channelId) {
-        if (!_isValidChannelId(channel)) {
-          return 'Invalid channel ID format: $channel';
-        }
-      } else {
-        if (!_isValidUsername(channel)) {
-          return 'Invalid username format: $channel';
-        }
-      }
-    }
-
-    return null;
+  void _setLoadingState(bool isLoading, String message) {
+    _isLoadingVideos.value = isLoading;
+    _isProcessingData.value = isLoading;
+    _loadingMessage.value = message;
+    update([DashboardView.updateId]);
   }
 
-  bool _isValidChannelId(String id) {
-    // YouTube channel ID format validation
-    return RegExp(r'^UC[a-zA-Z0-9_-]{22}$').hasMatch(id);
-  }
-
-  bool _isValidUsername(String username) {
-    // Username format validation (3-30 characters, alphanumeric and underscores)
-    return RegExp(r'^[a-zA-Z0-9_]{3,30}$').hasMatch(username);
-  }
-
-  Future<List<VideoModel>> _getVideosWithRetry() async {
-    const maxRetries = 3;
-
-    for (int attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        _retryCount.value = attempt;
-        update([DashboardView.updateId]);
-
-        return await _getVideosByChannelIdentifier();
-      } catch (e) {
-        if (attempt == maxRetries - 1) {
-          rethrow;
-        }
-
-        _loadingMessage.value = 'Retrying... (${attempt + 1}/$maxRetries)';
-        update([DashboardView.updateId]);
-
-        await Future.delayed(Duration(seconds: 2 * (attempt + 1)));
-      }
-    }
-
-    return [];
-  }
-
-  Future<List<VideoModel>> _getVideosByChannelIdentifier() async {
-    var userNames = searchController.text
-        .trim()
-        .replaceAll('@', '')
-        .replaceAll(',', ' ')
-        .replaceAll('  ', ' ')
-        .trim()
-        .split(' ')
-        .map(
-          (e) => e.trim(),
-        )
-        .toList();
-
-    if (userNames.isEmpty) {
-      return [];
-    }
-    return await _viewModel.getVideosByChannelIdentifier(
-      usernames: userNames,
-      useId: channelBy == ChannelBy.channelId,
-      variant: kVariant,
+  void _showError(String message) {
+    Utility.showInfoDialog(
+      ResponseModel.message(message),
+      title: 'Error',
     );
   }
 
+  Future<List<ChannelDetailsModel>> _getVideosWithRetry(List<String> channels) async {
+    for (int attempt = 0; attempt < AppConstants.maxRetryAttempts; attempt++) {
+      try {
+        _retryCount.value = attempt;
+        update([DashboardView.updateId]);
+        return await _getVideosByChannelIdentifier(channels);
+      } catch (e) {
+        if (attempt == AppConstants.maxRetryAttempts - 1) {
+          rethrow;
+        }
+        _loadingMessage.value = 'Retrying... (${attempt + 1}/${AppConstants.maxRetryAttempts})';
+        update([DashboardView.updateId]);
+        await Future.delayed(Duration(seconds: AppConstants.retryDelaySeconds * (attempt + 1)));
+      }
+    }
+    return [];
+  }
+
+  Future<List<ChannelDetailsModel>> _getVideosByChannelIdentifier(List<String> channels) async {
+    if (channels.isEmpty) {
+      return [];
+    }
+
+    if (channels.length <= 100) {
+      return await _viewModel.getVideosByChannelIdentifier(
+        usernames: channels,
+        useId: channelBy == ChannelBy.channelId,
+        variant: kVariant,
+      );
+    }
+
+    // Use streaming for large batches
+
+    _loadingMessage.value = 'Fetching channel details (0%)...';
+    update([DashboardView.updateId]);
+    final List<ChannelDetailsModel> streamingVideos = [];
+    final Completer<List<ChannelDetailsModel>> streamingCompleter = Completer<List<ChannelDetailsModel>>();
+
+    _viewModel.streamChannelDetails(
+      channels: channels,
+      useId: channelBy == ChannelBy.channelId,
+      variant: kVariant.name,
+      onProgress: (current, total, message) {
+        final progress = total > 0 ? (current * 100 / total).round() : 0;
+        _loadingMessage.value = 'Fetching channel details ($progress%)...';
+        update([DashboardView.updateId]);
+      },
+      onBatchResult: (batchData) {
+        streamingVideos.addAll(batchData);
+      },
+      onComplete: () {
+        streamingCompleter.complete(streamingVideos);
+      },
+      onError: (error) {
+        streamingCompleter.completeError(error);
+      },
+    );
+    return streamingCompleter.future;
+  }
+
   void parseData() {
-    parsedVideos = videos
+    parsedChannels = channels
         .where((e) =>
             e.subscriberCount > 100 &&
             e.totalVideosLastMonth > 2 &&
             e.totalVideosLastThreeMonths > 5 &&
             AppConstants.targetCountries.contains(e.country))
+        .toSet()
         .toList();
 
-    parsedVideos = parsedVideos.toSet().toList();
     update([DashboardView.updateId]);
   }
 
@@ -267,12 +237,9 @@ class DashboardController extends GetxController {
     analyzeProgress = 0.0;
     update([DashboardView.updateId]);
 
-    // Clear cache at the start of analysis to ensure fresh results
-    _analyticsController.clearCache();
-
     // Filter videos that need analysis
-    final videosToAnalyze = <int, VideoModel>{};
-    for (var data in parsedVideos.indexed) {
+    final videosToAnalyze = <int, ChannelDetailsModel>{};
+    for (var data in parsedChannels.indexed) {
       var video = data.$2;
       var index = data.$1;
 
@@ -292,95 +259,92 @@ class DashboardController extends GetxController {
       return;
     }
 
-    // Process videos in parallel batches for better performance
-    const batchSize = 1; // Process 5 videos at a time
-    final batches = <List<MapEntry<int, VideoModel>>>[];
+    // Prepare channel data for batch analysis
+    final channels = videosToAnalyze.values
+        .map((video) => ChannelAnalysisItem(
+              channelId: video.channelId,
+              title: video.latestVideoTitle,
+              channelName: video.channelName,
+              userName: video.userName,
+              description: video.description,
+            ))
+        .toList();
 
-    final entries = videosToAnalyze.entries.toList();
-    for (int i = 0; i < entries.length; i += batchSize) {
-      final end = (i + batchSize < entries.length) ? i + batchSize : entries.length;
-      batches.add(entries.sublist(i, end));
+    // Use new channel-based batch analysis with SSE
+    try {
+      // Collect analyzed results first, merge after complete
+      final Map<String, (String, String)> analyzedByUserName = {};
+
+      await _analyticsController.analyzeChannelsBatch(
+        channels: channels,
+        batchSize: AppConstants.analysisBatchSize,
+        onResult: (video) {
+          if (video == null) {
+            return;
+          }
+          analyzedByUserName[video.channelId] = (video.analyzedTitle, video.analyzedName);
+        },
+        onProgress: (current, total, message) {
+          analyzeProgress = current / total;
+          update([DashboardView.updateId]);
+        },
+        onBatchResult: (batchData) {
+          AppLog.success('Batch result: $batchData');
+          for (var video in batchData) {
+            analyzedByUserName[video.channelId] = (video.analyzedTitle, video.analyzedName);
+          }
+        },
+        onComplete: () {
+          for (var i = 0; i < parsedChannels.length; i++) {
+            final v = parsedChannels[i];
+            final result = analyzedByUserName[v.channelId];
+            if (result != null) {
+              parsedChannels[i] = v.copyWith(
+                analyzedTitle: result.$1,
+                analyzedName: result.$2,
+              );
+            }
+          }
+          analyzeProgress = 100;
+          isAnalyzing = false;
+          update([DashboardView.updateId]);
+          _downloadCSV();
+        },
+        onError: (error) {
+          _handleAnalysisError(error);
+        },
+      );
+    } catch (e) {
+      _handleAnalysisError(e.toString());
     }
-
-    int completedVideos = 0;
-    final totalVideos = videosToAnalyze.length;
-
-    for (final batch in batches) {
-      // Process batch in parallel
-      final futures = batch.map((entry) => _analyzeVideo(entry.key, entry.value));
-      final results = await Future.wait(futures);
-
-      // Update results
-      for (int i = 0; i < batch.length; i++) {
-        final index = batch[i].key;
-        final result = results[i];
-        parsedVideos[index] = result;
-        completedVideos++;
-      }
-
-      // Update progress
-      analyzeProgress = completedVideos / totalVideos;
-      update([DashboardView.updateId]);
-
-      // Small delay between batches to prevent rate limiting
-      if (batches.indexOf(batch) < batches.length - 1) {
-        await Future.delayed(const Duration(milliseconds: 1000));
-      }
-    }
-
-    analyzeProgress = 100;
-    isAnalyzing = false;
-    update([DashboardView.updateId]);
-    _downloadCSV();
   }
 
-  Future<VideoModel> _analyzeVideo(int index, VideoModel video) async {
-    // Analyze title and name in parallel if both are needed
-    final needsTitle = video.analyzedTitle.trim().isEmpty;
-    final needsName = video.analyzedName.trim().isEmpty;
+  // Fallback method for when backend analysis fails
+  void _handleAnalysisError(String error) {
+    AppLog.error('Analysis failed: $error');
+    isAnalyzing = false;
+    analyzeProgress = 0.0;
+    update([DashboardView.updateId]);
 
-    if (needsTitle && needsName) {
-      // Both need analysis - run in parallel
-      final title = await _analyticsController.analyzeTitle(video.latestVideoTitle);
-
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      final name = await _analyticsController.analyzeName(
-        username: video.userName,
-        channelName: video.channelName,
-        description: video.description,
-      );
-
-      return video.copyWith(
-        analyzedTitle: title ?? '',
-        analyzedName: name ?? 'Team ${video.channelName}',
-      );
-    } else if (needsTitle) {
-      // Only title needs analysis
-      final title = await _analyticsController.analyzeTitle(video.latestVideoTitle);
-      return video.copyWith(analyzedTitle: title ?? '');
-    } else if (needsName) {
-      // Only name needs analysis
-      final name = await _analyticsController.analyzeName(
-        username: video.userName,
-        channelName: video.channelName,
-        description: video.description,
-      );
-      return video.copyWith(analyzedName: name ?? 'Team ${video.channelName}');
-    }
-
-    // Both already analyzed
-    return video;
+    // Show error message to user
+    Get.snackbar(
+      'Analysis Error',
+      'Failed to analyze videos. Please try again.',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
   }
 
   // Download and save CSV to your Device
   void _downloadCSV() async {
-    final query = Get.isRegistered<SearchController>() ? Get.find<SearchController>().searchController.text.trim() : '';
+    final query = Get.isRegistered<controllers.SearchController>() ? Get.find<controllers.SearchController>().searchController.text.trim() : '';
 
     await Utility.downloadCSV(
       data: [
         [
           'Search Query',
+          'Channel ID',
           'Channel Link',
           'Analyzed Name',
           'Analyzed Title',
@@ -401,7 +365,7 @@ class DashboardController extends GetxController {
           'Latest Video Title',
           'Last Upload Date',
         ],
-        ...parsedVideos.map((e) => [
+        ...parsedChannels.map((e) => [
               query,
               ...e.properties,
             ]),
@@ -412,5 +376,20 @@ class DashboardController extends GetxController {
       ResponseModel.message('Your Lead and Analysis data is downloaded'),
       isSuccess: true,
     );
+  }
+
+  /// Start periodic wakeup timer to keep Render.com server alive
+  void _startWakeupTimer() {
+    _wakeupTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
+      try {
+        final wakeupService = WakeupService(Get.find<ApiWrapper>());
+        await wakeupService.wakeupServer();
+      } catch (e) {
+        // Silently fail - wakeup is not critical
+        if (kDebugMode) {
+          print('Periodic wakeup failed: $e');
+        }
+      }
+    });
   }
 }
