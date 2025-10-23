@@ -23,7 +23,7 @@ jobs:
         run: cd frontend && flutter pub get
 
       - name: Building Production release
-        run: cd frontend && flutter build web -t lib/production.dart"
+        run: cd frontend && flutter build web -t lib/production.dart
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
