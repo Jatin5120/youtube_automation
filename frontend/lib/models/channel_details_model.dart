@@ -5,6 +5,7 @@ import 'package:frontend/utils/utils.dart';
 
 class ChannelDetailsModel {
   final String channelId;
+  final String email;
   final int subscriberCount;
   final int totalVideos;
   final String channelName;
@@ -23,6 +24,7 @@ class ChannelDetailsModel {
 
   const ChannelDetailsModel({
     required this.channelId,
+    required this.email,
     required this.subscriberCount,
     required this.totalVideos,
     required this.channelName,
@@ -45,6 +47,7 @@ class ChannelDetailsModel {
         channelLink,
         analyzedName,
         analyzedTitle,
+        email,
         '',
         '',
         '',
@@ -65,6 +68,7 @@ class ChannelDetailsModel {
 
   ChannelDetailsModel copyWith({
     String? channelId,
+    String? email,
     int? subscriberCount,
     int? totalVideos,
     String? channelName,
@@ -83,6 +87,7 @@ class ChannelDetailsModel {
   }) {
     return ChannelDetailsModel(
       channelId: channelId ?? this.channelId,
+      email: email ?? this.email,
       subscriberCount: subscriberCount ?? this.subscriberCount,
       totalVideos: totalVideos ?? this.totalVideos,
       channelName: channelName ?? this.channelName,
@@ -104,6 +109,7 @@ class ChannelDetailsModel {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'channelId': channelId,
+      'email': email,
       'subscriberCount': subscriberCount,
       'totalVideos': totalVideos,
       'channelName': channelName,
@@ -125,6 +131,7 @@ class ChannelDetailsModel {
   factory ChannelDetailsModel.fromMap(Map<String, dynamic> map) {
     var model = ChannelDetailsModel(
       channelId: map['channelId'] as String? ?? '',
+      email: map['email'] as String? ?? '',
       subscriberCount: int.parse(map['subscriberCount'] as String? ?? '0'),
       totalVideos: int.parse(map['totalVideos'] as String? ?? '0'),
       channelName: map['channelName'] as String? ?? '',
@@ -153,7 +160,7 @@ class ChannelDetailsModel {
 
   @override
   String toString() {
-    return 'ChannelDetailsModel(channelId: $channelId, subscriberCount: $subscriberCount, totalVideos: $totalVideos, channelName: $channelName, userName: $userName, decription: $description, channelLink: $channelLink, totalVideosLastMonth: $totalVideosLastMonth, totalVideosLastThreeMonths: $totalVideosLastThreeMonths, latestVideoTitle: $latestVideoTitle, lastUploadDate: $lastUploadDate, uploadedThisMonth: $uploadedThisMonth, analyzedTitle: $analyzedTitle, analyzedName: $analyzedTitle, language: $language, country: $country)';
+    return 'ChannelDetailsModel(channelId: $channelId, email: $email, subscriberCount: $subscriberCount, totalVideos: $totalVideos, channelName: $channelName, userName: $userName, decription: $description, channelLink: $channelLink, totalVideosLastMonth: $totalVideosLastMonth, totalVideosLastThreeMonths: $totalVideosLastThreeMonths, latestVideoTitle: $latestVideoTitle, lastUploadDate: $lastUploadDate, uploadedThisMonth: $uploadedThisMonth, analyzedTitle: $analyzedTitle, analyzedName: $analyzedTitle, language: $language, country: $country)';
   }
 
   @override

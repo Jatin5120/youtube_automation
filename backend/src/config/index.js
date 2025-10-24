@@ -16,6 +16,7 @@ const config = {
       production: process.env.YOUTUBE_API_KEY,
     },
     openai: process.env.OPENAI_API_KEY,
+    apify: process.env.APIFY_API_TOKEN,
   },
 
   // Rate Limiting
@@ -38,6 +39,13 @@ const config = {
       lowThreshold: parseFloat(process.env.YOUTUBE_QUOTA_LOW_THRESHOLD) || 0.8,
     },
     batchSize: parseInt(process.env.YOUTUBE_BATCH_SIZE) || 50,
+  },
+
+  // Apify Configuration
+  apify: {
+    actorId: "exporter24/youtube-email-bulk-scraper",
+    timeout: parseInt(process.env.APIFY_TIMEOUT) || 300000, // 5 minutes
+    maxRetries: parseInt(process.env.APIFY_MAX_RETRIES) || 3,
   },
 
   // Logging Configuration

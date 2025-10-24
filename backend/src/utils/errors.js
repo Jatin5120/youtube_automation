@@ -34,6 +34,15 @@ class OpenAIError extends Error {
   }
 }
 
+class ApifyError extends Error {
+  constructor(message, originalError = null, statusCode = 500) {
+    super(message);
+    this.name = "ApifyError";
+    this.originalError = originalError;
+    this.statusCode = statusCode;
+  }
+}
+
 // Error response formatter
 function formatErrorResponse(error, includeStack = false) {
   const response = {
@@ -59,5 +68,6 @@ module.exports = {
   ValidationError,
   CacheError,
   OpenAIError,
+  ApifyError,
   formatErrorResponse,
 };

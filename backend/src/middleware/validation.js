@@ -173,9 +173,64 @@ const validateChannelStreamRequest = [
   },
 ];
 
+// Validation for email channel IDs request
+const validateEmailChannelIdsRequest = [
+  body("channelIds")
+    .isArray({ min: 1, max: 100 })
+    .withMessage("channelIds must be an array with 1-100 elements"),
+  body("channelIds.*")
+    .notEmpty()
+    .withMessage("Each channelId must not be empty")
+    .isString()
+    .withMessage("Each channelId must be a string")
+    .matches(/^UC[a-zA-Z0-9_-]{22}$/)
+    .withMessage("Each channelId must be a valid YouTube channel ID (UC...)"),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        error: "Validation failed",
+        details: errors.array(),
+        timestamp: new Date().toISOString(),
+      });
+    }
+    next();
+  },
+];
+
+// Validation for email usernames request
+const validateEmailUsernamesRequest = [
+  body("usernames")
+    .isArray({ min: 1, max: 100 })
+    .withMessage("usernames must be an array with 1-100 elements"),
+  body("usernames.*")
+    .notEmpty()
+    .withMessage("Each username must not be empty")
+    .isString()
+    .withMessage("Each username must be a string")
+    .trim()
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage(
+      "Each username must contain only alphanumeric characters, underscores, and hyphens"
+    ),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        error: "Validation failed",
+        details: errors.array(),
+        timestamp: new Date().toISOString(),
+      });
+    }
+    next();
+  },
+];
+
 module.exports = {
   validateChannelRequest,
   validateSearchRequest,
   validateAnalysisRequest,
-  validateChannelStreamRequest, // Add this
+  validateChannelStreamRequest,
+  validateEmailChannelIdsRequest,
+  validateEmailUsernamesRequest,
 };

@@ -5,12 +5,14 @@ const { MemoryCache } = require("../utils/cache");
 const config = require("../config/analysis");
 const Logger = require("../utils/logger");
 const { AnalysisError } = require("../utils/errors");
+const EmailsService = require("./emailsService");
 
 class AnalysisService {
   constructor() {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
+    this.emailsService = new EmailsService();
 
     // Initialize cache with configuration
     this.analysisCache = new MemoryCache(
@@ -116,6 +118,37 @@ class AnalysisService {
     }
   }
 
+  async _getEmailsFromChannels(channels) {
+    const channelIds = channels.map((channel) => channel.channelId);
+    const emails = await this.emailsService.fromChannelIds(channelIds);
+    return emails;
+  }
+
+  async _getResponseFromOpenAI(prompt, controller) {
+    const response = await this.openai.chat.completions.create(
+      {
+        model: this.config.OPENAI.MODEL,
+        messages: [
+          { role: "system", content: prompt.systemPrompt },
+          { role: "user", content: prompt.userPrompt },
+        ],
+        max_completion_tokens: this.config.OPENAI.MAX_TOKENS,
+        temperature: this.config.OPENAI.TEMPERATURE,
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "channel_analysis",
+            schema: this.config.RESPONSE_SCHEMA,
+          },
+        },
+      },
+      {
+        signal: controller.signal,
+      }
+    );
+    return response;
+  }
+
   // New method: Process batch of channels in single AI call
   async analyzeChannelsBatch(channels, batchSize = null) {
     // Input validation
@@ -167,27 +200,12 @@ class AnalysisService {
           this.config.OPENAI.TIMEOUT
         );
 
-        const response = await this.openai.chat.completions.create(
-          {
-            model: this.config.OPENAI.MODEL,
-            messages: [
-              { role: "system", content: prompt.systemPrompt },
-              { role: "user", content: prompt.userPrompt },
-            ],
-            max_completion_tokens: this.config.OPENAI.MAX_TOKENS,
-            temperature: this.config.OPENAI.TEMPERATURE,
-            response_format: {
-              type: "json_schema",
-              json_schema: {
-                name: "channel_analysis",
-                schema: this.config.RESPONSE_SCHEMA,
-              },
-            },
-          },
-          {
-            signal: controller.signal,
-          }
-        );
+        const data = await Promise.all([
+          this._getEmailsFromChannels(channels),
+          this._getResponseFromOpenAI(prompt, controller),
+        ]);
+        const emails = data[0];
+        const response = data[1];
 
         clearTimeout(timeoutId);
 
@@ -229,6 +247,11 @@ class AnalysisService {
 
         // Validate response
         this._validateBatchResponse(result, channels);
+
+        result.results = result.results.map((result, index) => ({
+          ...result,
+          email: index < emails.length ? emails[index] : "",
+        }));
 
         // Cache result
         this.analysisCache.set(cacheKey, result);
@@ -289,8 +312,6 @@ class AnalysisService {
       const totalChannels = channels.length;
       let processedCount = 0;
 
-      const startTime = Date.now();
-
       onProgress(config.EVENTS.STARTED, {
         current: 0,
         total: totalChannels,
@@ -319,6 +340,7 @@ class AnalysisService {
               userName: result.userName,
               analyzedTitle: result.analyzedTitle,
               analyzedName: result.analyzedName,
+              email: result.email,
             }))
           );
         } else {
@@ -345,6 +367,7 @@ class AnalysisService {
             userName: result.userName,
             analyzedTitle: result.analyzedTitle,
             analyzedName: result.analyzedName,
+            email: result.email,
           }))
         );
 
@@ -360,13 +383,6 @@ class AnalysisService {
         }
       }
 
-      const endTime = Date.now();
-      const totalTime = endTime - startTime;
-      const avgTimePerChannel = (totalTime / totalChannels).toFixed(2);
-
-      Logger.info(
-        `Batch analysis completed: ${processedCount}/${totalChannels} channels processed in ${totalTime}ms (${avgTimePerChannel}ms/channel)`
-      );
       onComplete();
     } catch (error) {
       Logger.error("Fatal error in batch processing:", error);

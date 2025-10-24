@@ -273,16 +273,16 @@ class DashboardController extends GetxController {
     // Use new channel-based batch analysis with SSE
     try {
       // Collect analyzed results first, merge after complete
-      final Map<String, (String, String)> analyzedByUserName = {};
+      final Map<String, ChannelDetailsModel> channelsById = {};
 
       await _analyticsController.analyzeChannelsBatch(
         channels: channels,
         batchSize: AppConstants.analysisBatchSize,
-        onResult: (video) {
-          if (video == null) {
+        onResult: (channel) {
+          if (channel == null) {
             return;
           }
-          analyzedByUserName[video.channelId] = (video.analyzedTitle, video.analyzedName);
+          channelsById[channel.channelId] = channel;
         },
         onProgress: (current, total, message) {
           analyzeProgress = current / total;
@@ -290,17 +290,18 @@ class DashboardController extends GetxController {
         },
         onBatchResult: (batchData) {
           for (var video in batchData) {
-            analyzedByUserName[video.channelId] = (video.analyzedTitle, video.analyzedName);
+            channelsById[video.channelId] = video;
           }
         },
         onComplete: () {
           for (var i = 0; i < parsedChannels.length; i++) {
             final v = parsedChannels[i];
-            final result = analyzedByUserName[v.channelId];
+            final result = channelsById[v.channelId];
             if (result != null) {
               parsedChannels[i] = v.copyWith(
-                analyzedTitle: result.$1,
-                analyzedName: result.$2,
+                analyzedTitle: result.analyzedTitle,
+                analyzedName: result.analyzedName,
+                email: result.email,
               );
             }
           }

@@ -49,6 +49,15 @@ Base path: `/api`
     ```
   - SSE events: `started`, `progress`, `batch`, `complete`, `error`
 
+### Email Fetching
+
+- `POST /api/emails/channels` — Fetch emails from YouTube channel IDs
+  - Body: `{ "channelIds": ["UC...", "UC..."] }`
+- `POST /api/emails/usernames` — Fetch emails from YouTube usernames
+  - Body: `{ "usernames": ["username1", "username2"] }`
+
+> **Note**: Email fetching requires Apify API token. See [Email Implementation Documentation](docs/EMAIL_IMPLEMENTATION.md) for details.
+
 ### Cache
 
 - `GET /api/cache/stats` — Cache metrics
@@ -69,6 +78,7 @@ Create `.env` with the following keys:
 OPENAI_API_KEY=sk-...
 DEV_YOUTUBE_API_KEY=...
 YOUTUBE_API_KEY=...
+APIFY_API_TOKEN=apify_...  # Required for email fetching
 NODE_ENV=development
 PORT=3000
 TRUST_PROXY=false
@@ -104,6 +114,7 @@ src/
 │   └── index.js            # Central config/env
 ├── controllers/
 │   ├── analysisController.js
+│   ├── emailsController.js # Email fetching controller
 │   ├── healthController.js
 │   ├── quotaController.js
 │   └── videoController.js
@@ -117,6 +128,7 @@ src/
 │   └── index.js
 ├── services/
 │   ├── analysisService.js
+│   ├── emailsService.js    # Email fetching service
 │   ├── videoService.js
 │   ├── youtubeService.js
 │   └── index.js
@@ -127,6 +139,8 @@ src/
     ├── logger.js
     ├── prompts.js
     └── retry.js
+docs/
+└── EMAIL_IMPLEMENTATION.md  # Email fetching documentation
 ```
 
 ## Scripts

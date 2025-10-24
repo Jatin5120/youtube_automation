@@ -5,6 +5,7 @@ const {
   VideoController,
   HealthController,
   QuotaController,
+  EmailsController,
 } = require("../controllers");
 const AnalysisController = require("../controllers/analysisController");
 const {
@@ -12,6 +13,8 @@ const {
   validateSearchRequest,
   validateAnalysisRequest,
   validateChannelStreamRequest,
+  validateEmailChannelIdsRequest,
+  validateEmailUsernamesRequest,
 } = require("../middleware/validation");
 const { timeout } = require("../middleware");
 const config = require("../config");
@@ -60,6 +63,23 @@ router.post(
   timeout(config.timeout.sse),
   validateChannelStreamRequest,
   VideoController.getChannelStream
+);
+
+// Email endpoints
+const emailsController = new EmailsController();
+
+router.post(
+  "/emails/channels",
+  timeout(config.timeout.default),
+  validateEmailChannelIdsRequest,
+  emailsController.getEmailsFromChannelIds.bind(emailsController)
+);
+
+router.post(
+  "/emails/usernames",
+  timeout(config.timeout.default),
+  validateEmailUsernamesRequest,
+  emailsController.getEmailsFromUsernames.bind(emailsController)
 );
 
 module.exports = router;
