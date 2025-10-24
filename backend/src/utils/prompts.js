@@ -145,10 +145,10 @@ ${channelData}
 4. Output ONLY the JSON object. No markdown/code fences/commentary. Do not include reasoning
 5. Process all ${channels.length} channels in the exact order provided
 
-**Expected Output**: JSON object with results array containing id, title, and name for each channel.
+**Expected Output**: JSON object with results array containing channelId, userName, analyzedTitle, and analyzedName for each channel.
 
 **Quality Standards**:
-- Titles: 2-4 words, business-relevant, actionable
+- Titles: 3-6 words, business-relevant, actionable
 - Names: Professional, personal, email-ready
 - Maintain consistency across similar channel types`,
   };
