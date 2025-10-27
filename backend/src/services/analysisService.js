@@ -122,12 +122,42 @@ class AnalysisService {
   }
 
   async _getEmailsFromChannels(channels) {
-    const channelIds = channels.map((channel) => channel.channelId);
-    const emails = await this.emailsService.fromChannelIds(channelIds);
-    return emails;
+    const emailPromises = channels.map((channel) =>
+      this.emailsService.fromChannelIds([channel.channelId])
+    );
+    const emailsArray = await Promise.all(emailPromises);
+
+    // const emailsArray = [];
+    // for (const channel of channels) {
+    //   const emailArr = await this.emailsService.fromChannelIds([
+    //     channel.channelId,
+    //   ]);
+    //   emailsArray.push(emailArr);
+    // }
+
+    return emailsArray.map((arr) => arr[0] || "");
   }
 
-  async _getResponseFromOpenAI(prompt, controller) {
+  async _getResponseFromOpenAI(channels) {
+    const prompt = getCombinedBatchPrompt(channels);
+
+    const result = await this._getAnalysisResponseFromOpenAI(prompt, channels);
+
+    result.results = await this._getEmailResponseFromOpenAI(
+      result.results,
+      channels
+    );
+
+    return result;
+  }
+
+  async _getAnalysisResponseFromOpenAI(prompt, channels) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      this.config.OPENAI.TIMEOUT
+    );
+
     const response = await this.openai.chat.completions.create(
       {
         model: this.config.OPENAI.MODEL,
@@ -149,10 +179,46 @@ class AnalysisService {
         signal: controller.signal,
       }
     );
-    return response;
+
+    clearTimeout(timeoutId);
+
+    if (!response.choices || response.choices.length === 0) {
+      Logger.error("OpenAI response has no choices", { response });
+      throw new AnalysisError("No response choices from AI", "NO_CHOICES");
+    }
+
+    if (!response.choices[0].message || !response.choices[0].message.content) {
+      Logger.error("OpenAI response has no message content", {
+        choice: response.choices[0],
+      });
+      throw new AnalysisError("No message content from AI", "NO_CONTENT");
+    }
+
+    let result;
+    try {
+      const content = response.choices[0].message.content.trim();
+      if (!content) {
+        throw new Error("Empty content received from AI");
+      }
+      result = JSON.parse(content);
+    } catch (parseError) {
+      Logger.error("Failed to parse OpenAI response", {
+        error: parseError.message,
+        content: response.choices[0].message.content,
+        contentLength: response.choices[0].message.content.length,
+      });
+      throw new AnalysisError(
+        `Invalid response format from AI: ${parseError.message}`,
+        "PARSE_ERROR"
+      );
+    }
+
+    this._validateBatchResponse(result, channels);
+
+    return result;
   }
 
-  async _generateEmailsForBatch(analysisResults, channels) {
+  async _getEmailResponseFromOpenAI(analysisResults, channels) {
     if (!analysisResults || analysisResults.length === 0) {
       return analysisResults.map((r) => ({ ...r, emailMessage: "" }));
     }
@@ -202,6 +268,21 @@ class AnalysisService {
       );
 
       clearTimeout(timeoutId);
+
+      if (!response.choices || response.choices.length === 0) {
+        Logger.error("OpenAI response has no choices", { response });
+        throw new AnalysisError("No response choices from AI", "NO_CHOICES");
+      }
+
+      if (
+        !response.choices[0].message ||
+        !response.choices[0].message.content
+      ) {
+        Logger.error("OpenAI response has no message content", {
+          choice: response.choices[0],
+        });
+        throw new AnalysisError("No message content from AI", "NO_CONTENT");
+      }
 
       const content = response.choices[0].message.content;
 
@@ -270,73 +351,17 @@ class AnalysisService {
       }
 
       try {
-        const prompt = getCombinedBatchPrompt(channels);
-
-        // Add timeout to OpenAI request
-        const controller = new AbortController();
-        const timeoutId = setTimeout(
-          () => controller.abort(),
-          this.config.OPENAI.TIMEOUT
-        );
-
         const data = await Promise.all([
           this._getEmailsFromChannels(channels),
-          this._getResponseFromOpenAI(prompt, controller),
+          this._getResponseFromOpenAI(channels),
         ]);
         const emails = data[0];
-        const response = data[1];
-
-        clearTimeout(timeoutId);
-
-        // Validate response structure
-        if (!response.choices || response.choices.length === 0) {
-          Logger.error("OpenAI response has no choices", { response });
-          throw new AnalysisError("No response choices from AI", "NO_CHOICES");
-        }
-
-        if (
-          !response.choices[0].message ||
-          !response.choices[0].message.content
-        ) {
-          Logger.error("OpenAI response has no message content", {
-            choice: response.choices[0],
-          });
-          throw new AnalysisError("No message content from AI", "NO_CONTENT");
-        }
-
-        // Safe JSON parsing with error handling
-        let result;
-        try {
-          const content = response.choices[0].message.content.trim();
-          if (!content) {
-            throw new Error("Empty content received from AI");
-          }
-          result = JSON.parse(content);
-        } catch (parseError) {
-          Logger.error("Failed to parse OpenAI response", {
-            error: parseError.message,
-            content: response.choices[0].message.content,
-            contentLength: response.choices[0].message.content.length,
-          });
-          throw new AnalysisError(
-            `Invalid response format from AI: ${parseError.message}`,
-            "PARSE_ERROR"
-          );
-        }
-
-        // Validate response
-        this._validateBatchResponse(result, channels);
+        const result = data[1];
 
         result.results = result.results.map((result, index) => ({
           ...result,
           email: index < emails.length ? emails[index] : "",
         }));
-
-        // Generate email messages
-        result.results = await this._generateEmailsForBatch(
-          result.results,
-          channels
-        );
 
         // Cache result
         this.analysisCache.set(cacheKey, result);
