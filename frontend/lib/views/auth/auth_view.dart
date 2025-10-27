@@ -30,16 +30,37 @@ class AuthView extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      AppText(
+                        'Welcome Back!',
+                        style: context.textTheme.titleSmall?.withTitleColor.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      AppText(
+                        'Please sign in to continue',
+                        style: context.textTheme.labelLarge?.withBodyColor,
+                      ),
+                      const SizedBox(height: 40),
                       InputField(
                         controller: controller.emailTEC,
                         validator: AppValidators.emailValidator,
                         hint: 'Email id',
                       ),
-                      const SizedBox(height: 16),
-                      InputField(
-                        controller: controller.passwordTEC,
-                        validator: AppValidators.passwordValidator,
-                        hint: 'Password',
+                      const SizedBox(height: 12),
+                      Obx(
+                        () => InputField(
+                          controller: controller.passwordTEC,
+                          validator: AppValidators.passwordValidator,
+                          hint: 'Password',
+                          obscureText: controller.isObscurePassword,
+                          suffixIcon: IconButton(
+                            icon: Icon(controller.isObscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded),
+                            onPressed: () {
+                              controller.isObscurePassword = !controller.isObscurePassword;
+                            },
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 32),
                       AppButton(

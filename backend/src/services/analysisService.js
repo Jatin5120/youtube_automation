@@ -1,6 +1,9 @@
 const OpenAI = require("openai");
 const crypto = require("crypto");
-const { getCombinedBatchPrompt } = require("../utils/prompts");
+const {
+  getCombinedBatchPrompt,
+  getBatchEmailPrompt,
+} = require("../utils/prompts");
 const { MemoryCache } = require("../utils/cache");
 const config = require("../config/analysis");
 const Logger = require("../utils/logger");
@@ -66,8 +69,8 @@ class AnalysisService {
       .update(
         JSON.stringify(
           channels.map((ch) => ({
-            id: ch.id,
-            title: ch.title,
+            id: ch.channelId,
+            videoTitle: ch.videoTitle,
             channelName: ch.channelName,
           }))
         )
@@ -149,6 +152,82 @@ class AnalysisService {
     return response;
   }
 
+  async _generateEmailsForBatch(analysisResults, channels) {
+    if (!analysisResults || analysisResults.length === 0) {
+      return analysisResults.map((r) => ({ ...r, emailMessage: "" }));
+    }
+
+    try {
+      // Prepare email inputs
+      const emailInputs = analysisResults.map((result) => {
+        const channel = channels.find(
+          (ch) => ch.channelId === result.channelId
+        );
+        return {
+          channelId: result.channelId,
+          analyzedName: result.analyzedName,
+          analyzedTitle: result.analyzedTitle,
+          videoDescription: channel?.videoDescription || "",
+        };
+      });
+
+      const prompt = getBatchEmailPrompt(emailInputs);
+
+      // Timeout control
+      const controller = new AbortController();
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        this.config.OPENAI.TIMEOUT
+      );
+
+      const response = await this.openai.chat.completions.create(
+        {
+          model: this.config.OPENAI.MODEL,
+          messages: [
+            { role: "system", content: prompt.systemPrompt },
+            { role: "user", content: prompt.userPrompt },
+          ],
+          max_completion_tokens:
+            this.config.OPENAI.EMAIL_MAX_TOKENS * (emailInputs.length + 1),
+          temperature: this.config.OPENAI.EMAIL_TEMPERATURE,
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "email_analysis",
+              schema: this.config.EMAIL_RESPONSE_SCHEMA,
+            },
+          },
+        },
+        { signal: controller.signal }
+      );
+
+      clearTimeout(timeoutId);
+
+      const content = response.choices[0].message.content;
+
+      const emailData = JSON.parse(content);
+
+      // Merge emails into results
+      const messages = analysisResults.map((result) => {
+        const emailObj = emailData.results?.find(
+          (e) => e.channelId === result.channelId
+        );
+        return {
+          ...result,
+          emailMessage: emailObj?.emailMessage || "",
+        };
+      });
+      return messages;
+    } catch (error) {
+      Logger.error("Email generation failed for batch", {
+        error: error,
+        count: analysisResults.length,
+      });
+      // Return results with empty emailMessage on failure
+      return analysisResults.map((r) => ({ ...r, emailMessage: "" }));
+    }
+  }
+
   // New method: Process batch of channels in single AI call
   async analyzeChannelsBatch(channels, batchSize = null) {
     // Input validation
@@ -161,9 +240,9 @@ class AnalysisService {
 
     // Validate each channel has required fields
     for (const channel of channels) {
-      if (!channel.userName || !channel.title || !channel.channelName) {
+      if (!channel.userName || !channel.videoTitle || !channel.channelName) {
         throw new AnalysisError(
-          "Each channel must have userName, title, and channelName",
+          "Each channel must have userName, videoTitle, and channelName",
           "INVALID_CHANNEL"
         );
       }
@@ -253,6 +332,12 @@ class AnalysisService {
           email: index < emails.length ? emails[index] : "",
         }));
 
+        // Generate email messages
+        result.results = await this._generateEmailsForBatch(
+          result.results,
+          channels
+        );
+
         // Cache result
         this.analysisCache.set(cacheKey, result);
 
@@ -341,6 +426,7 @@ class AnalysisService {
               analyzedTitle: result.analyzedTitle,
               analyzedName: result.analyzedName,
               email: result.email,
+              emailMessage: result.emailMessage,
             }))
           );
         } else {
@@ -368,6 +454,7 @@ class AnalysisService {
             analyzedTitle: result.analyzedTitle,
             analyzedName: result.analyzedName,
             email: result.email,
+            emailMessage: result.emailMessage,
           }))
         );
 

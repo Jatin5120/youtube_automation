@@ -46,11 +46,13 @@ class DashboardView extends StatelessWidget {
                           onFieldSubmitted: (_) => controller.getVideos(),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      FloatingActionButton(
-                        onPressed: controller.getVideos,
-                        elevation: 0,
-                        child: const Icon(Icons.search),
+                      const SizedBox(width: 16),
+                      SizedBox(
+                        width: 80,
+                        child: AppButton(
+                          onTap: controller.getVideos,
+                          label: 'Find',
+                        ),
                       ),
                     ],
                   ),
@@ -127,7 +129,7 @@ class DashboardView extends StatelessWidget {
         ),
         DaviColumn(
           name: 'Channel Description',
-          stringValue: (row) => row.description,
+          stringValue: (row) => row.channelDescription,
           grow: 2,
         ),
         DaviColumn(
@@ -169,23 +171,7 @@ class DashboardView extends StatelessWidget {
       ],
     );
     return DaviTheme(
-      data: DaviThemeData(
-        header: const HeaderThemeData(
-          color: AppColors.primary,
-        ),
-        headerCell: HeaderCellThemeData(
-          alignment: Alignment.center,
-          textStyle: context.textTheme.titleSmall?.withTitleColor,
-        ),
-        row: RowThemeData(
-          color: (_) => AppColors.cardDark,
-          hoverForeground: (_) => AppColors.primary.withValues(alpha: .2),
-          fillHeight: true,
-        ),
-        cell: CellThemeData(
-          textStyle: context.textTheme.bodyMedium?.withTitleColor,
-        ),
-      ),
+      data: AppTheme.daviTheme,
       child: Davi<ChannelDetailsModel>(
         tableModel,
         columnWidthBehavior: ColumnWidthBehavior.scrollable,
@@ -200,9 +186,7 @@ class DashboardView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(height: 40),
-        const CircularProgressIndicator(
-          color: AppColors.primary,
-        ),
+        const AppLoader(),
         const SizedBox(height: 16),
         Text(
           controller.loadingMessage.isNotEmpty ? controller.loadingMessage : 'Loading channel data...',
@@ -227,9 +211,7 @@ class DashboardView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(height: 40),
-        const CircularProgressIndicator(
-          color: AppColors.primary,
-        ),
+        const AppLoader(),
         const SizedBox(height: 16),
         Text(
           controller.loadingMessage.isNotEmpty ? controller.loadingMessage : 'Processing data...',
@@ -263,21 +245,14 @@ class DashboardView extends StatelessWidget {
           textAlign: TextAlign.center,
           style: context.textTheme.headlineSmall?.withTitleColor,
         ),
-        if (controller.fetchedResult) ...[
-          const SizedBox(height: 8),
-          Text(
-            'Try adjusting your search criteria or check if the channels exist',
-            textAlign: TextAlign.center,
-            style: context.textTheme.bodyMedium?.withTitleColor,
-          ),
-        ] else ...[
-          const SizedBox(height: 8),
-          Text(
-            'Enter channel names or IDs separated by commas',
-            textAlign: TextAlign.center,
-            style: context.textTheme.bodyMedium?.withTitleColor,
-          ),
-        ],
+        const SizedBox(height: 8),
+        Text(
+          controller.fetchedResult
+              ? 'Try adjusting your search criteria or check if the channels exist'
+              : 'Enter channel names or IDs separated by commas',
+          textAlign: TextAlign.center,
+          style: context.textTheme.bodyMedium?.withTitleColor,
+        ),
         const SizedBox(height: 40),
       ],
     );

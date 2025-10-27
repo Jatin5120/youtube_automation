@@ -9,8 +9,8 @@ import 'package:frontend/utils/utils.dart';
 import 'package:http/http.dart' show Client, Response, MultipartRequest, MultipartFile;
 
 /// API WRAPPER to call all the IsmLiveApis and handle the status codes
-class ApiWrapper {
-  const ApiWrapper(this.client);
+class ApiClient {
+  const ApiClient(this.client);
 
   final Client client;
 

@@ -490,7 +490,7 @@ class YouTubeService {
         const data = res.data.items.map((e) => ({
           channelId: e.snippet.channelId,
           channelName: e.snippet.channelTitle,
-          description: e.snippet.description,
+          channelDescription: e.snippet.description,
         }));
 
         const result = { data, nextPageToken };

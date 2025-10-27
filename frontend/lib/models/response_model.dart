@@ -1,10 +1,20 @@
 import 'dart:convert';
 
 class ResponseModel {
-  factory ResponseModel.error() => const ResponseModel(
-        data: '',
-        statusCode: 1000,
+  factory ResponseModel.error(
+    String error, {
+    int statusCode = 1000,
+  }) =>
+      ResponseModel(
+        data: error,
         hasError: true,
+        statusCode: statusCode,
+      );
+
+  factory ResponseModel.success(String message) => ResponseModel(
+        data: message,
+        hasError: false,
+        statusCode: 200,
       );
 
   factory ResponseModel.message(

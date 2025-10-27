@@ -12,6 +12,15 @@ class AuthController extends GetxController {
   var emailTEC = TextEditingController();
   var passwordTEC = TextEditingController();
 
+  final RxBool _isObscurePassword = true.obs;
+  bool get isObscurePassword => _isObscurePassword.value;
+  set isObscurePassword(bool value) {
+    if (value == isObscurePassword) {
+      return;
+    }
+    _isObscurePassword.value = value;
+  }
+
   void login() async {
     if (!(loginKey.currentState?.validate() ?? false)) {
       return;

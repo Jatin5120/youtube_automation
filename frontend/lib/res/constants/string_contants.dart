@@ -1,6 +1,11 @@
 class AppStrings {
   const AppStrings._();
 
+  static const String appName = 'Trisdel Media';
+  static const String authTitle = 'Login - $appName';
+  static const String messagesTitle = 'Dashboard - $appName';
+  static const String splashTitle = appName;
+
   static const String timeoutError =
       'Oops! The request took too long to process. Please check your internet connection and try again. If the issue persists, you can contact our support team for assistance.';
 

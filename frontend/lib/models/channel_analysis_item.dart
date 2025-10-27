@@ -1,35 +1,39 @@
 class ChannelAnalysisItem {
   final String channelId;
-  final String title; // Video title
   final String? userName;
   final String channelName;
-  final String? description;
+  final String? channelDescription;
+  final String videoTitle;
+  final String? videoDescription;
 
   const ChannelAnalysisItem({
     required this.channelId,
-    required this.title,
+    required this.videoTitle,
     required this.channelName,
     this.userName,
-    this.description,
+    this.channelDescription,
+    this.videoDescription,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'channelId': channelId,
-      'title': title,
+      'videoTitle': videoTitle,
       'channelName': channelName,
       if (userName != null) 'userName': userName,
-      if (description != null) 'description': description,
+      if (channelDescription != null) 'channelDescription': channelDescription,
+      if (videoDescription != null) 'videoDescription': videoDescription,
     };
   }
 
   factory ChannelAnalysisItem.fromJson(Map<String, dynamic> json) {
     return ChannelAnalysisItem(
       channelId: json['channelId'] as String,
-      title: json['title'] as String,
+      videoTitle: json['videoTitle'] as String,
       channelName: json['channelName'] as String,
       userName: json['userName'] as String?,
-      description: json['description'] as String?,
+      channelDescription: json['channelDescription'] as String?,
+      videoDescription: json['videoDescription'] as String?,
     );
   }
 }

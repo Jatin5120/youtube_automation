@@ -1,12 +1,12 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:frontend/data/data.dart';
+import 'package:frontend/app.dart';
 import 'package:frontend/firebase_options.dart';
-import 'package:frontend/res/res.dart';
-import 'package:frontend/utils/utils.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' show Client;
 
@@ -34,7 +34,7 @@ Future<void> initialize() async {
 
   // Initialize API wrapper and repositories
   final client = Client();
-  Get.put(ApiWrapper(client));
+  Get.put(ApiClient(client));
   Get.put(SSEClient(client));
 
   await Firebase.initializeApp(
@@ -43,8 +43,8 @@ Future<void> initialize() async {
 
   // Wake up the server to prevent Render.com from spinning it down
   try {
-    final wakeupService = WakeupService(Get.find<ApiWrapper>());
-    await wakeupService.wakeupServer();
+    final wakeupService = WakeupService(Get.find<ApiClient>());
+    unawaited(wakeupService.wakeupServer());
   } catch (e) {
     // Silently fail - wakeup is not critical for app functionality
     if (kDebugMode) {

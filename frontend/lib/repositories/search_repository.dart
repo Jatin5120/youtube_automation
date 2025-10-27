@@ -5,7 +5,7 @@ import 'package:frontend/utils/utils.dart';
 class SearchRepository {
   SearchRepository(this._apiWrapper);
 
-  final ApiWrapper _apiWrapper;
+  final ApiClient _apiWrapper;
 
   Future<ResponseModel> searchChannels({
     required String query,

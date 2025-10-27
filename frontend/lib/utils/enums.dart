@@ -19,7 +19,7 @@ enum ChannelBy {
     switch (this) {
       case ChannelBy.username:
       case ChannelBy.channelId:
-        return '$label must be separated by comma or space';
+        return 'Channels $label should be separated by comma or space';
       // case ChannelBy.url:
       //   return 'Enter Single $label';
     }

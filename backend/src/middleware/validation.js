@@ -97,9 +97,9 @@ const validateAnalysisRequest = [
     .notEmpty()
     .withMessage("Each channel must have an channelId"),
 
-  body("channels.*.title")
+  body("channels.*.videoTitle")
     .notEmpty()
-    .withMessage("Each channel must have a title"),
+    .withMessage("Each channel must have a videoTitle"),
 
   body("channels.*.channelName")
     .notEmpty()

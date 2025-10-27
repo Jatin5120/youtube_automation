@@ -5,7 +5,7 @@ import 'package:frontend/utils/utils.dart';
 class WakeupService {
   WakeupService(this._apiWrapper);
 
-  final ApiWrapper _apiWrapper;
+  final ApiClient _apiWrapper;
 
   /// Call the wakeup endpoint to keep the server alive
   /// This should be called when the app starts to prevent Render.com from spinning down the server

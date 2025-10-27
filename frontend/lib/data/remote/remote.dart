@@ -1,4 +1,4 @@
-export 'api_wrapper.dart';
-export 'apis.dart';
+export 'api_client.dart';
+export 'endpoints.dart';
 export 'sse_client.dart';
 export 'wakeup_service.dart';

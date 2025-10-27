@@ -263,10 +263,11 @@ class DashboardController extends GetxController {
     final channels = videosToAnalyze.values
         .map((video) => ChannelAnalysisItem(
               channelId: video.channelId,
-              title: video.latestVideoTitle,
+              videoTitle: video.latestVideoTitle,
               channelName: video.channelName,
               userName: video.userName,
-              description: video.description,
+              channelDescription: video.channelDescription,
+              videoDescription: video.latestVideoDescription,
             ))
         .toList();
 
@@ -302,6 +303,7 @@ class DashboardController extends GetxController {
                 analyzedTitle: result.analyzedTitle,
                 analyzedName: result.analyzedName,
                 email: result.email,
+                emailMessage: result.emailMessage,
               );
             }
           }
@@ -364,6 +366,7 @@ class DashboardController extends GetxController {
           // 'Total Videos Last 3 Months',
           'Latest Video Title',
           'Last Upload Date',
+          'Email Message',
         ],
         ...parsedChannels.map((e) => [
               query,
@@ -382,7 +385,7 @@ class DashboardController extends GetxController {
   void _startWakeupTimer() {
     _wakeupTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
       try {
-        final wakeupService = WakeupService(Get.find<ApiWrapper>());
+        final wakeupService = WakeupService(Get.find<ApiClient>());
         await wakeupService.wakeupServer();
       } catch (e) {
         // Silently fail - wakeup is not critical

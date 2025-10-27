@@ -38,16 +38,18 @@ class SearchView extends StatelessWidget {
                     children: [
                       Flexible(
                         child: InputField(
-                          hint: 'Enter your query to search',
+                          hint: 'Enter your query to search channels',
                           controller: controller.searchController,
                           onFieldSubmitted: (_) => controller.search(),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      FloatingActionButton(
-                        onPressed: controller.search,
-                        elevation: 0,
-                        child: const Icon(Icons.search),
+                      const SizedBox(width: 16),
+                      SizedBox(
+                        width: 80,
+                        child: AppButton(
+                          onTap: controller.search,
+                          label: 'Search',
+                        ),
                       ),
                       if (controller.channels.isNotEmpty) ...[
                         const SizedBox(width: 16),
@@ -64,10 +66,17 @@ class SearchView extends StatelessWidget {
                       child: Column(
                         children: [
                           if (controller.channels.isEmpty) ...[
-                            Text(
-                              controller.fetchedResult ? 'No videos found for "${controller.searchController.text.trim()}"' : 'Search to see results',
-                              textAlign: TextAlign.center,
-                              style: context.textTheme.headlineSmall?.withTitleColor,
+                            SizedBox(
+                              height: context.height * 0.8,
+                              child: Center(
+                                child: Text(
+                                  controller.fetchedResult
+                                      ? 'No videos found for "${controller.searchController.text.trim()}"'
+                                      : 'Search to see results',
+                                  textAlign: TextAlign.center,
+                                  style: context.textTheme.headlineSmall?.withTitleColor,
+                                ),
+                              ),
                             ),
                           ] else ...[
                             Text(
@@ -76,7 +85,7 @@ class SearchView extends StatelessWidget {
                               style: context.textTheme.bodyMedium?.withTitleColor,
                             ),
                             const SizedBox(height: 16),
-                            buildTable(context, controller.channels),
+                            _ChannelTable(channels: controller.channels),
                             const SizedBox(height: 16),
                             AppButton.small(
                               onTap: controller.triggerInLoop,
@@ -95,8 +104,14 @@ class SearchView extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget buildTable(BuildContext context, List<ChannelModel> channels) {
+class _ChannelTable extends StatelessWidget {
+  const _ChannelTable({required this.channels});
+  final List<ChannelModel> channels;
+
+  @override
+  Widget build(BuildContext context) {
     var tableModel = DaviModel<ChannelModel>(
       rows: channels.take(10).toList(),
       multiSortEnabled: true,
@@ -126,29 +141,13 @@ class SearchView extends StatelessWidget {
         ),
         DaviColumn(
           name: 'Channel Description',
-          stringValue: (row) => row.description,
+          stringValue: (row) => row.channelDescription,
           grow: 2,
         ),
       ],
     );
     return DaviTheme(
-      data: DaviThemeData(
-        header: const HeaderThemeData(
-          color: AppColors.primary,
-        ),
-        headerCell: HeaderCellThemeData(
-          alignment: Alignment.center,
-          textStyle: context.textTheme.titleSmall?.withTitleColor,
-        ),
-        row: RowThemeData(
-          color: (_) => AppColors.cardDark,
-          hoverForeground: (_) => AppColors.primary.withValues(alpha: .2),
-          fillHeight: true,
-        ),
-        cell: CellThemeData(
-          textStyle: context.textTheme.bodyMedium?.withTitleColor,
-        ),
-      ),
+      data: AppTheme.daviTheme,
       child: Davi<ChannelModel>(
         tableModel,
         columnWidthBehavior: ColumnWidthBehavior.fit,

@@ -5,7 +5,7 @@ import 'package:frontend/utils/utils.dart';
 class DashboardRepository {
   DashboardRepository(this._apiWrapper);
 
-  final ApiWrapper _apiWrapper;
+  final ApiClient _apiWrapper;
 
   Future<ResponseModel> getVideosByChannelIdentifier(
     Map<String, dynamic> payload,

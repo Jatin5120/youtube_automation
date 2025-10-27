@@ -5,13 +5,13 @@ import 'package:frontend/res/res.dart';
 class ChannelModel {
   final String channelId;
   final String channelName;
-  final String description;
+  final String channelDescription;
   final String channelLink;
 
   const ChannelModel({
     required this.channelId,
     required this.channelName,
-    required this.description,
+    required this.channelDescription,
     required this.channelLink,
   });
 
@@ -19,19 +19,19 @@ class ChannelModel {
         channelName,
         channelLink,
         channelId,
-        description,
+        channelDescription,
       ];
 
   ChannelModel copyWith({
     String? channelId,
     String? channelName,
-    String? description,
+    String? channelDescription,
     String? channelLink,
   }) {
     return ChannelModel(
       channelId: channelId ?? this.channelId,
       channelName: channelName ?? this.channelName,
-      description: description ?? this.description,
+      channelDescription: channelDescription ?? this.channelDescription,
       channelLink: channelLink ?? this.channelLink,
     );
   }
@@ -40,7 +40,7 @@ class ChannelModel {
     return <String, dynamic>{
       'channelId': channelId,
       'channelName': channelName,
-      'description': description,
+      'channelDescription': channelDescription,
       'channelLink': channelLink,
     };
   }
@@ -49,7 +49,7 @@ class ChannelModel {
     return ChannelModel(
       channelId: map['channelId'] as String,
       channelName: map['channelName'] as String,
-      description: map['description'] as String,
+      channelDescription: map['channelDescription'] as String,
       channelLink: '${AppConstants.youtubeBase}channel/${map['channelId']}',
     );
   }
@@ -60,18 +60,21 @@ class ChannelModel {
 
   @override
   String toString() {
-    return 'ChannelModel(channelId: $channelId, channelName: $channelName, description: $description, channelLink: $channelLink)';
+    return 'ChannelModel(channelId: $channelId, channelName: $channelName, channelDescription: $channelDescription, channelLink: $channelLink)';
   }
 
   @override
   bool operator ==(covariant ChannelModel other) {
     if (identical(this, other)) return true;
 
-    return other.channelId == channelId && other.channelName == channelName && other.description == description && other.channelLink == channelLink;
+    return other.channelId == channelId &&
+        other.channelName == channelName &&
+        other.channelDescription == channelDescription &&
+        other.channelLink == channelLink;
   }
 
   @override
   int get hashCode {
-    return channelId.hashCode ^ channelName.hashCode ^ description.hashCode ^ channelLink.hashCode;
+    return channelId.hashCode ^ channelName.hashCode ^ channelDescription.hashCode ^ channelLink.hashCode;
   }
 }

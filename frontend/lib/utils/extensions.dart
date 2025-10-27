@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:frontend/res/res.dart';
+import 'package:frontend/app.dart';
 import 'package:intl/intl.dart';
 
 extension StyleExtension on TextStyle {
@@ -16,6 +16,12 @@ extension StyleExtension on TextStyle {
       color: AppColors.bodyDark,
     );
   }
+}
+
+extension ResponseExtension on ResponseModel {
+  T body<T>() => jsonDecode(data)['data'] as T;
+
+  String get message => jsonDecode(data)['data'] as String;
 }
 
 extension ObjectExtension on Object {

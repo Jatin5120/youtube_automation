@@ -35,7 +35,7 @@ class VideoService {
       return null;
     }
 
-    const description = channel.snippet.description;
+    const channelDescription = channel.snippet.description;
     const subscriberCount = channel.statistics.subscriberCount;
     const totalVideos = channel.statistics.videoCount;
     const channelId = channel.contentDetails.relatedPlaylists.uploads;
@@ -55,7 +55,7 @@ class VideoService {
       channelId,
       subscriberCount,
       totalVideos,
-      description,
+      channelDescription,
       channelName: channel.snippet.title,
       userName: channel.snippet.customUrl,
       country: channel.snippet.country,
@@ -64,6 +64,7 @@ class VideoService {
         ? videosLastThreeMonths.length
         : 0,
       latestVideoTitle: videosThisMonth[0].snippet.title,
+      latestVideoDescription: videosThisMonth[0].snippet.description,
       lastUploadDate: videosThisMonth[0].snippet.publishedAt,
       language: playlist.language,
       uploadedThisMonth: uploadedThisMonth,

@@ -1,5 +1,7 @@
+import 'package:davi/davi.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/res/res.dart';
+import 'package:frontend/utils/utils.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
@@ -14,6 +16,12 @@ class AppTheme {
     cardTheme: const CardThemeData(
       color: AppColors.cardLight,
       elevation: 0,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.backgroundLight,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: true,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: AppColors.primary,
@@ -32,6 +40,12 @@ class AppTheme {
       color: AppColors.cardDark,
       elevation: 0,
     ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.backgroundDark,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: true,
+    ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: AppColors.primary,
     ),
@@ -39,33 +53,53 @@ class AppTheme {
     inputDecorationTheme: _inputTheme,
   );
 
-  static final TextTheme _textTheme = GoogleFonts.getTextTheme('Roboto');
+  static final TextTheme _textTheme = GoogleFonts.interTextTheme();
 
   static final InputDecorationTheme _inputTheme = InputDecorationTheme(
     isDense: true,
     filled: true,
-    fillColor: AppColors.cardDark,
+    fillColor: AppColors.backgroundDark,
     enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide.none,
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(
+        color: AppColors.cardDark,
+      ),
     ),
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(8),
       borderSide: const BorderSide(
-        color: AppColors.primary,
+        color: AppColors.cardLight,
       ),
     ),
     errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(8),
       borderSide: const BorderSide(
         color: AppColors.error,
       ),
     ),
     focusedErrorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(8),
       borderSide: const BorderSide(
         color: AppColors.error,
       ),
+    ),
+  );
+
+  static final DaviThemeData daviTheme = DaviThemeData(
+    header: const HeaderThemeData(
+      color: AppColors.cardDark,
+    ),
+    headerCell: HeaderCellThemeData(
+      alignment: Alignment.center,
+      textStyle: _textTheme.titleSmall?.withTitleColor,
+    ),
+    row: RowThemeData(
+      color: (_) => AppColors.backgroundDark,
+      hoverForeground: (_) => AppColors.cardDark.withValues(alpha: 0.2),
+      fillHeight: true,
+    ),
+    cell: CellThemeData(
+      textStyle: _textTheme.bodyMedium?.withTitleColor,
     ),
   );
 }

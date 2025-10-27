@@ -3,10 +3,12 @@ module.exports = {
   // OpenAI Configuration
   OPENAI: {
     MODEL: "gpt-4.1-nano",
-    TEMPERATURE: 0.1, // Lower temperature for more consistent structured output
+    TEMPERATURE: 0.1,
     TOP_P: 0.8,
-    MAX_TOKENS: 800, // Reduced back to normal since no reasoning overhead
-    TIMEOUT: 15000, // Reduced timeout since no reasoning delays
+    MAX_TOKENS: 800,
+    TIMEOUT: 15000,
+    EMAIL_TEMPERATURE: 0.7,
+    EMAIL_MAX_TOKENS: 90,
   },
 
   // Cache Configuration
@@ -40,6 +42,24 @@ module.exports = {
             analyzedName: { type: "string" },
           },
           required: ["channelId", "userName", "analyzedTitle", "analyzedName"],
+        },
+      },
+    },
+    required: ["results"],
+  },
+
+  EMAIL_RESPONSE_SCHEMA: {
+    type: "object",
+    properties: {
+      results: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            channelId: { type: "string" },
+            emailMessage: { type: "string" },
+          },
+          required: ["channelId", "emailMessage"],
         },
       },
     },
