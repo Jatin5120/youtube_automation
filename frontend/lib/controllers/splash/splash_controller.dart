@@ -11,7 +11,7 @@ class SplashController extends GetxController {
 
   void _checkLoggedIn() {
     if (isLoggedIn) {
-      Get.offAllNamed(AppRoutes.dashboard);
+      Get.offAllNamed(AppRoutes.defaultRoute);
     } else {
       Get.offAllNamed(AppRoutes.auth);
     }

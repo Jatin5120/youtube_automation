@@ -37,43 +37,6 @@ class DashboardView extends StatelessWidget {
             return Center(
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: InputField(
-                          hint: controller.channelBy.inputHint,
-                          controller: controller.searchController,
-                          onFieldSubmitted: (_) => controller.getVideos(),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      SizedBox(
-                        width: 80,
-                        child: AppButton(
-                          onTap: controller.getVideos,
-                          label: 'Find',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  RadioGroup(
-                    onChanged: controller.onChannelByChanged,
-                    groupValue: controller.channelBy,
-                    child: Row(
-                      children: ChannelBy.values
-                          .map((e) => Flexible(
-                                child: RadioListTile(
-                                  value: e,
-                                  title: Text(
-                                    e.label,
-                                    style: context.textTheme.titleMedium?.withTitleColor,
-                                  ),
-                                ),
-                              ))
-                          .toList(),
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   Flexible(
                     child: SingleChildScrollView(

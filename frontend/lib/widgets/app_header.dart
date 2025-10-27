@@ -35,6 +35,8 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
             child: AppButton.small(
               onTap: buttons[i].onTap,
               label: buttons[i].label,
+              color: AppColors.cardDark,
+              foregroundColor: AppColors.primary,
             ),
           ),
         ],

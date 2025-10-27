@@ -31,7 +31,7 @@ class AuthController extends GetxController {
     );
 
     if (isLoggedIn) {
-      Get.offAllNamed(AppRoutes.dashboard);
+      Get.offAllNamed(AppRoutes.defaultRoute);
     }
   }
 }

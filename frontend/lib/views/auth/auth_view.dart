@@ -30,6 +30,11 @@ class AuthView extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      const SizedBox(
+                        height: 50,
+                        child: AppIcon(),
+                      ),
+                      const SizedBox(height: 24),
                       AppText(
                         'Welcome Back!',
                         style: context.textTheme.titleSmall?.withTitleColor.copyWith(
