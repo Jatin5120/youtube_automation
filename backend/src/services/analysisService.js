@@ -1,9 +1,6 @@
 const OpenAI = require("openai");
 const crypto = require("crypto");
-const {
-  getCombinedBatchPrompt,
-  getBatchEmailPrompt,
-} = require("../utils/prompts");
+const { getNameTitlePrompts, getEmailPrompts } = require("../utils/prompts");
 const { MemoryCache } = require("../utils/cache");
 const config = require("../config/analysis");
 const Logger = require("../utils/logger");
@@ -139,9 +136,7 @@ class AnalysisService {
   }
 
   async _getResponseFromOpenAI(channels) {
-    const prompt = getCombinedBatchPrompt(channels);
-
-    const result = await this._getAnalysisResponseFromOpenAI(prompt, channels);
+    const result = await this._getAnalysisResponseFromOpenAI(channels);
 
     result.results = await this._getEmailResponseFromOpenAI(
       result.results,
@@ -151,7 +146,9 @@ class AnalysisService {
     return result;
   }
 
-  async _getAnalysisResponseFromOpenAI(prompt, channels) {
+  async _getAnalysisResponseFromOpenAI(channels) {
+    const prompt = getNameTitlePrompts(channels);
+
     const controller = new AbortController();
     const timeoutId = setTimeout(
       () => controller.abort(),
@@ -237,7 +234,7 @@ class AnalysisService {
         };
       });
 
-      const prompt = getBatchEmailPrompt(emailInputs);
+      const prompt = getEmailPrompts(emailInputs);
 
       // Timeout control
       const controller = new AbortController();

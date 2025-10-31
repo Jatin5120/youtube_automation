@@ -3,12 +3,12 @@ module.exports = {
   // OpenAI Configuration
   OPENAI: {
     MODEL: "gpt-4.1-nano",
-    TEMPERATURE: 0.1,
+    TEMPERATURE: 0.2,
     TOP_P: 0.8,
     MAX_TOKENS: 800,
     TIMEOUT: 15000,
     EMAIL_TEMPERATURE: 0.7,
-    EMAIL_MAX_TOKENS: 90,
+    EMAIL_MAX_TOKENS: 150,
   },
 
   // Cache Configuration
