@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@toon-format/toon": "^0.7.3",
     "apify-client": "^2.19.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

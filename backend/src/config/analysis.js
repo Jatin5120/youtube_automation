@@ -5,10 +5,10 @@ module.exports = {
     MODEL: "gpt-4.1-nano",
     TEMPERATURE: 0.2,
     TOP_P: 0.8,
-    MAX_TOKENS: 800,
+    MAX_TOKENS: 1000,
     TIMEOUT: 15000,
     EMAIL_TEMPERATURE: 0.7,
-    EMAIL_MAX_TOKENS: 150,
+    EMAIL_MAX_TOKENS: 200,
   },
 
   // Cache Configuration
