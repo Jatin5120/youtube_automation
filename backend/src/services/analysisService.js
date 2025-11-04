@@ -377,6 +377,62 @@ class AnalysisService {
     });
   }
 
+  _generateFallbackResults(channels) {
+    // Generate fallback results when AI analysis fails
+    // Extract basic information from channels and provide safe defaults
+    const results = channels.map((channel) => {
+      // Extract analyzedTitle from videoTitle (first 3-8 words)
+      let analyzedTitle = "Business Content";
+      if (channel.videoTitle) {
+        const words = channel.videoTitle.trim().split(/\s+/);
+        const wordCount = Math.min(Math.max(words.length, 3), 8);
+        analyzedTitle = words.slice(0, wordCount).join(" ");
+      }
+
+      // Extract analyzedName from userName or channelName (first name)
+      let analyzedName = "User";
+      if (channel.userName) {
+        // Try to extract first name from username
+        const userNameParts = channel.userName
+          .replace(/[^a-zA-Z\s]/g, " ")
+          .trim()
+          .split(/\s+/);
+        if (userNameParts.length > 0) {
+          analyzedName = userNameParts[0];
+        } else {
+          analyzedName = channel.userName.substring(0, 10);
+        }
+      } else if (channel.channelName) {
+        const channelNameParts = channel.channelName
+          .replace(/[^a-zA-Z\s]/g, " ")
+          .trim()
+          .split(/\s+/);
+        if (channelNameParts.length > 0) {
+          analyzedName = channelNameParts[0];
+        }
+      }
+
+      // Ensure analyzedName is title case and within reasonable length
+      analyzedName =
+        analyzedName.charAt(0).toUpperCase() +
+        analyzedName.slice(1).toLowerCase();
+      if (analyzedName.length > 20) {
+        analyzedName = analyzedName.substring(0, 20);
+      }
+
+      return {
+        channelId: channel.channelId || "",
+        userName: channel.userName || "",
+        analyzedTitle: analyzedTitle || "Business Content",
+        analyzedName: analyzedName || "User",
+        email: "", // Empty in fallback scenario
+        emailMessage: "", // Empty in fallback scenario
+      };
+    });
+
+    return { results };
+  }
+
   _validateBatchResponse(result, channels) {
     if (!result.results || !Array.isArray(result.results)) {
       throw new AnalysisError("Invalid response structure");
