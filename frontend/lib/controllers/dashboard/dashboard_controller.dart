@@ -221,12 +221,8 @@ class DashboardController extends GetxController {
 
   void parseData() {
     parsedChannels = channels
-        .where((e) =>
-            e.subscriberCount > 100 &&
-            e.totalVideosLastMonth > 2 &&
-            e.totalVideosLastThreeMonths > 5 &&
-            AppConstants.targetCountries.contains(e.country))
         .toSet()
+        .where((e) => e.totalVideosLastMonth > 3 && e.totalVideosLastThreeMonths > 5 && AppConstants.targetCountries.contains(e.country))
         .toList();
 
     update([DashboardView.updateId]);
@@ -330,8 +326,8 @@ class DashboardController extends GetxController {
 
     // Show error message to user
     Get.snackbar(
-      'Analysis Error',
       'Failed to analyze videos. Please try again.',
+      'Analysis Error: $error',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.red,
       colorText: Colors.white,

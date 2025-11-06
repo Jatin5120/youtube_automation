@@ -29,6 +29,15 @@ class VideoService {
     throw new Error("Method not implemented - use getChannelsByIds instead");
   }
 
+  // Helper function to calculate upload frequency
+  static _calculateUploadFrequency(monthly, quarterly) {
+    if (monthly >= 20) return "daily";
+    if (monthly >= 8) return "weekly";
+    if (monthly >= 2) return "bi-weekly";
+    if (quarterly >= 3) return "monthly";
+    return "occasional";
+  }
+
   // Video data operations
   static async getVideosDataByChannel(channel, variant) {
     if (!channel) {
@@ -39,6 +48,8 @@ class VideoService {
     const subscriberCount = channel.statistics.subscriberCount;
     const totalVideos = channel.statistics.videoCount;
     const channelId = channel.contentDetails.relatedPlaylists.uploads;
+    const viewCount = channel.statistics.viewCount || 0;
+    const keywords = channel.brandingSettings?.channel?.keywords || "";
 
     const playlist = await this.getPlaylists(channelId, variant);
     const videosThisMonth = playlist.videosThisMonth;
@@ -49,6 +60,12 @@ class VideoService {
     );
     const uploadedLastThreeMonths = isUploadedThisMonth(
       Date.parse(videosLastThreeMonths[0].snippet.publishedAt)
+    );
+
+    // Calculate upload frequency
+    const uploadFrequency = this._calculateUploadFrequency(
+      uploadedThisMonth ? videosThisMonth.length : 0,
+      uploadedLastThreeMonths ? videosLastThreeMonths.length : 0
     );
 
     return {
@@ -68,6 +85,9 @@ class VideoService {
       lastUploadDate: videosThisMonth[0].snippet.publishedAt,
       language: playlist.language,
       uploadedThisMonth: uploadedThisMonth,
+      viewCount,
+      keywords,
+      uploadFrequency,
     };
   }
 

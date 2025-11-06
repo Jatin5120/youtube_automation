@@ -147,7 +147,7 @@ class AnalysisService {
   }
 
   async _getAnalysisResponseFromOpenAI(channels) {
-    const prompt = getNameTitlePrompts(channels);
+    const prompt = await getNameTitlePrompts(channels);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(
@@ -230,11 +230,17 @@ class AnalysisService {
           channelId: result.channelId,
           analyzedName: result.analyzedName,
           analyzedTitle: result.analyzedTitle,
-          videoDescription: channel?.videoDescription || "",
+          videoDescription:
+            channel?.latestVideoDescription || channel?.videoDescription || "",
+          channelDescription: channel?.channelDescription || "",
+          subscriberCount: channel?.subscriberCount || 0,
+          viewCount: channel?.viewCount || 0,
+          keywords: channel?.keywords || "",
+          uploadFrequency: channel?.uploadFrequency || "",
         };
       });
 
-      const prompt = getEmailPrompts(emailInputs);
+      const prompt = await getEmailPrompts(emailInputs);
 
       // Timeout control
       const controller = new AbortController();

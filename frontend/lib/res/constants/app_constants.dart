@@ -17,7 +17,7 @@ class AppConstants {
 
   static const String youtubeBase = 'https://www.youtube.com/';
 
-  static const List<String> targetCountries = ['US', "GB", "CA", "AU", "NZ", "IE", "DK"];
+  static const List<String> targetCountries = ['US', "GB", "CA", "AU", "NZ"];
 
   static const List<String> csvMimes = [
     'application/csv',

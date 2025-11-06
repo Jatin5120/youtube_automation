@@ -26,6 +26,8 @@ const CHANNEL_PARTS = [
   "contentDetails",
   "statistics",
   "localizations",
+  "topicDetails", // NEW: For channel topics/categories
+  "brandingSettings", // NEW: For channel keywords
 ];
 
 // Custom error classes

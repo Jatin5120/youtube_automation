@@ -15,6 +15,12 @@ const Logger = require("../utils/logger");
  * - Performance metrics
  */
 function apiLogger(req, res, next) {
+  // Skip logging for health check endpoints
+  const healthCheckPaths = ["/", "/health", "/wakeup"];
+  if (healthCheckPaths.includes(req.path)) {
+    return next();
+  }
+
   const startTime = Date.now();
   const requestId =
     req.requestId ||

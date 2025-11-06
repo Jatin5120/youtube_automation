@@ -170,7 +170,7 @@ class SSEClient {
               }
             } catch (e, st) {
               AppLog.error('SSE parse error: $e', st);
-              // onError?.call('Failed to parse response: ${e.toString()}');
+              onError?.call('Failed to parse response: ${e.toString()}');
               // completer.completeError(e);
             }
           },

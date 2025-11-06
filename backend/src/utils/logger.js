@@ -2,13 +2,8 @@
 const config = require("../config");
 
 class Logger {
-  static getTimestamp() {
-    return new Date().toISOString();
-  }
-
   static formatMessage(level, message, meta = {}) {
     const logEntry = {
-      timestamp: this.getTimestamp(),
       level: level.toUpperCase(),
       message,
       ...meta,
@@ -19,7 +14,7 @@ class Logger {
     }
 
     // Pretty print for development
-    return `[${logEntry.level}] ${logEntry.timestamp} - ${logEntry.message}${
+    return `[${logEntry.level}] - ${logEntry.message}${
       Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : ""
     }`;
   }
