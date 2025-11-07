@@ -6,6 +6,7 @@ const config = require("../config/analysis");
 const Logger = require("../utils/logger");
 const { AnalysisError } = require("../utils/errors");
 const EmailsService = require("./emailsService");
+const tokenCostManager = require("../utils/tokenCost");
 
 class AnalysisService {
   constructor() {
@@ -179,6 +180,15 @@ class AnalysisService {
 
     clearTimeout(timeoutId);
 
+    // Extract and record token usage for cost calculation
+    if (response.usage) {
+      tokenCostManager.recordUsage(
+        response.usage,
+        this.config.OPENAI.MODEL,
+        `Channel Analysis (${channels.length} channels)`
+      );
+    }
+
     if (!response.choices || response.choices.length === 0) {
       Logger.error("OpenAI response has no choices", { response });
       throw new AnalysisError("No response choices from AI", "NO_CHOICES");
@@ -271,6 +281,15 @@ class AnalysisService {
       );
 
       clearTimeout(timeoutId);
+
+      // Extract and record token usage for cost calculation
+      if (response.usage) {
+        tokenCostManager.recordUsage(
+          response.usage,
+          this.config.OPENAI.MODEL,
+          `Email Generation (${emailInputs.length} emails)`
+        );
+      }
 
       if (!response.choices || response.choices.length === 0) {
         Logger.error("OpenAI response has no choices", { response });
@@ -452,7 +471,7 @@ class AnalysisService {
     for (const item of result.results) {
       var missingFields = [];
       if (!item.channelId) missingFields.push("channelId");
-      if (!item.userName) missingFields.push("userName");
+      // if (!item.userName) missingFields.push("userName");
       if (!item.analyzedTitle) missingFields.push("analyzedTitle");
       if (!item.analyzedName) missingFields.push("analyzedName");
       if (missingFields.length > 0) {

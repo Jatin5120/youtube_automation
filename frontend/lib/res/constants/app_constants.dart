@@ -15,6 +15,9 @@ class AppConstants {
   static const double tabletBreakPoint = 1024;
   static const double mobileBreakPoint = 612;
 
+  static const int totalSearchs = 500;
+  static const int totalSearchRequests = totalSearchs ~/ 50;
+
   static const String youtubeBase = 'https://www.youtube.com/';
 
   static const List<String> targetCountries = ['US', "GB", "CA", "AU", "NZ"];

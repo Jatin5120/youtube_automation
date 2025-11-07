@@ -36,22 +36,30 @@ analyzedTitle - Intent: Create a natural, conversational phrase from the latest 
 - Validation: Verify it sounds natural in conversation ("your video on [analyzedTitle]")
 
 analyzedName - Intent: Extract the creator's personal name from available YouTube channel information (userName, channelName, videoDescription, channelDescription) for email greeting.
-- Priority 1: Search videoDescription and channelDescription for introduction patterns: "Hi, I'm [Name]", "My name is [Name]", "[Name] here", "This is [Name]"
-- Priority 2: Parse userName for clear personal name (e.g., "JohnDoePro" → "John", "SarahK" → "Sarah")
-- Priority 3: Parse channelName for personal name indicators (e.g., "John's Channel" → "John", "Sarah's Kitchen" → "Sarah")
-- Extract first name only (not full name or username)
-- Exclude brand suffixes: "Official", "TV", "Studio", "Media", "Channel", "Pro", "123", numbers
-- Classify as personal name vs brand name (if unclear, prefer personal name if it looks like a real name)
-- If no personal name found: use "Team {ChannelName}" format (remove brand suffixes first)
-- Must be 2-20 letters, Title Case, letters only (no numbers, special characters)
+
+Extraction Process (follow in order):
+1. Priority 1: Search videoDescription and channelDescription for introduction patterns: "Hi, I'm [Name]", "My name is [Name]", "[Name] here", "This is [Name]"
+2. Priority 2: Parse userName for clear personal name (e.g., "JohnDoePro" → "John", "SarahK" → "Sarah")
+3. Priority 3: Parse channelName for personal name indicators (e.g., "John's Channel" → "John", "Sarah's Kitchen" → "Sarah")
+4. Extract first name only (not full name or username)
+5. Exclude brand suffixes: "Official", "TV", "Studio", "Media", "Channel", "Pro", "123", numbers
+6. Classify as personal name vs brand name (if unclear, prefer personal name if it looks like a real name)
+
+CRITICAL FALLBACK (MANDATORY): If no personal name is found after all extraction attempts, you MUST use "Team {ChannelName}" format. Remove brand suffixes from channelName first, then format as "Team {CleanedChannelName}". This fallback ensures analyzedName is always a valid, appropriate greeting. Examples: "Team TechGuru", "Team Brand Studio", "Team Nova Channel".
+
+Requirements:
+- Must be 2-20 letters, Title Case, letters and spaces only (no numbers, special characters)
 - Validation: Verify it's appropriate for email greeting ("Hey [analyzedName],")
+- NEVER output empty string, null, or undefined - always use fallback if needed
 
 Examples:
 - Title: "How to Build a 10M SaaS Business in 2024" → analyzedTitle: "SaaS Growth" (conversational, natural)
 - Title: "Top 10 AI Tools You Need Now" → analyzedTitle: "AI Tools" (conversational, natural)
 - Username: "JohnDoePro" | Channel: "John Doe Pro" → analyzedName: "John" (personal name extracted)
 - Username: "TechGuru123" | Description: "Hi, I'm Maria" → analyzedName: "Maria" (from description)
-- Username: "BrandStudio" | Channel: "Brand Studio" | No description → analyzedName: "Team Brand Studio" (no personal name found)
+- Username: "BrandStudio" | Channel: "Brand Studio" | No description → analyzedName: "Team Brand Studio" (FALLBACK: no personal name found)
+- Username: "TechGuru123" | Channel: "Tech Guru Official" | No description → analyzedName: "Team Tech Guru" (FALLBACK: removed "Official" suffix)
+- Username: "NovaChannel" | Channel: "Nova Channel" | No description → analyzedName: "Team Nova Channel" (FALLBACK: no personal name found)
 
 Output: JSON matching schema with results array. Each result must have: channelId (match input), userName, analyzedTitle, analyzedName. All fields non-empty strings.`;
 
@@ -82,10 +90,12 @@ ${toonData}
 For each channel:
 1. analyzedTitle: Extract conversational phrase from videoTitle (${_wordRange} words, Title Case, English) - must be natural and usable in conversation (e.g., "saw your video on [analyzedTitle]")
 2. analyzedName: Extract creator's personal name from userName/channelName/videoDescription/channelDescription (2-20 letters, Title Case) - must be appropriate for email greeting (e.g., "Hey [analyzedName],")
+   - CRITICAL: If no personal name is found, you MUST use "Team {ChannelName}" format as fallback (remove brand suffixes first)
+   - NEVER output empty string - always use fallback if needed
 
 Validation before outputting:
 - analyzedTitle: Verify it sounds natural in conversation, is ${_wordRange} words, Title Case, letters and spaces only
-- analyzedName: Verify it's appropriate for email greeting, is 2-20 letters, Title Case, letters only (no numbers or special characters)
+- analyzedName: Verify it's appropriate for email greeting, is 2-20 letters, Title Case, letters and spaces only (no numbers or special characters). If no personal name found, verify fallback "Team {ChannelName}" is used.
 
 Output: JSON matching schema. Process all ${channels.length} channels in order.`,
   };
