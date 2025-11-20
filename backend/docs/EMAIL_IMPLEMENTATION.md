@@ -29,7 +29,7 @@ This implementation adds email fetching functionality using Apify's YouTube Emai
 ### Environment Variables
 
 ```bash
-APIFY_API_TOKEN=your_apify_api_token_here
+APIFY_API_KEY=your_apify_api_key_here
 APIFY_TIMEOUT=300000  # Optional: 5 minutes default
 APIFY_MAX_RETRIES=3   # Optional: 3 retries default
 ```

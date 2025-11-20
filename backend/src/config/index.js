@@ -16,7 +16,8 @@ const config = {
       production: process.env.YOUTUBE_API_KEY,
     },
     openai: process.env.OPENAI_API_KEY,
-    apify: process.env.APIFY_API_TOKEN,
+    apify: process.env.APIFY_API_KEY,
+    leadmagic: process.env.LEADMAGIC_API_KEY,
   },
 
   // Rate Limiting
@@ -46,6 +47,16 @@ const config = {
     actorId: "exporter24/youtube-email-bulk-scraper",
     timeout: parseInt(process.env.APIFY_TIMEOUT) || 300000, // 5 minutes
     maxRetries: parseInt(process.env.APIFY_MAX_RETRIES) || 3,
+  },
+
+  // LeadMagic Configuration
+  leadmagic: {
+    timeout: 10000,
+    maxRetries: 3,
+    retryDelay: 1000,
+    concurrency: 10,
+    acceptCatchAll: true,
+    failSafe: true,
   },
 
   // Logging Configuration

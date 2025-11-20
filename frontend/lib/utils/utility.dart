@@ -114,7 +114,7 @@ class Utility {
     await FileSaver.instance.saveFile(
       name: '${filename ?? "data"}-${DateTime.now()}',
       bytes: bytes,
-      ext: 'csv',
+      fileExtension: 'csv',
       mimeType: MimeType.csv,
     );
     Utility.closeLoader();

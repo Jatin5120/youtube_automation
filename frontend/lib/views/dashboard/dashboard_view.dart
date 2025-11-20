@@ -69,15 +69,15 @@ class DashboardView extends StatelessWidget {
       columns: [
         DaviColumn(
           name: 'Channel Name',
-          stringValue: (row) => row.channelName,
+          cellValue: (row) => row.data.channelName,
         ),
         DaviColumn(
           name: 'UserName',
-          stringValue: (row) => row.userName,
+          cellValue: (row) => row.data.userName,
         ),
         DaviColumn(
           name: 'Channel Link',
-          cellBuilder: (context, row) => TapHandler(
+          cellWidget: (row) => TapHandler(
             onTap: () => Utility.launchURL(row.data.channelLink),
             child: AppText(
               row.data.channelLink,
@@ -92,43 +92,43 @@ class DashboardView extends StatelessWidget {
         ),
         DaviColumn(
           name: 'Channel Description',
-          stringValue: (row) => row.channelDescription,
+          cellValue: (row) => row.data.channelDescription,
           grow: 2,
         ),
         DaviColumn(
           name: 'Subscriber Count',
-          intValue: (row) => row.subscriberCount,
+          cellValue: (row) => row.data.subscriberCount,
           cellAlignment: Alignment.centerRight,
         ),
         DaviColumn(
           name: 'Total Videos',
-          intValue: (row) => row.totalVideos,
+          cellValue: (row) => row.data.totalVideos,
           cellAlignment: Alignment.centerRight,
         ),
         DaviColumn(
           name: 'Total Videos Last Month',
-          intValue: (row) => row.totalVideosLastMonth,
+          cellValue: (row) => row.data.totalVideosLastMonth,
           cellAlignment: Alignment.centerRight,
         ),
         // DaviColumn(
         //   name: 'Total Videos Last 3 Months',
-        //   intValue: (row) => row.totalVideosLastThreeMonths,
+        //   cellValue: (row) => row.data.totalVideosLastThreeMonths,
         //   cellAlignment: Alignment.centerRight,
         // ),
         DaviColumn(
           name: 'Latest Video Title',
-          stringValue: (row) => row.latestVideoTitle,
+          cellValue: (row) => row.data.latestVideoTitle,
           grow: 2,
         ),
         DaviColumn(
           name: 'Last Upload Date',
-          stringValue: (row) => DateFormat('yyyy MMM dd, hh:mm:ss').format(
-            row.lastUploadDate ?? DateTime.now(),
+          cellValue: (row) => DateFormat('yyyy MMM dd, hh:mm:ss').format(
+            row.data.lastUploadDate ?? DateTime.now(),
           ),
         ),
         DaviColumn(
           name: 'Channel Country',
-          stringValue: (row) => row.country,
+          cellValue: (row) => row.data.country,
           cellAlignment: Alignment.center,
         ),
       ],

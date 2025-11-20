@@ -20,7 +20,7 @@ class EmailsService {
     if (!this._apifyClient) {
       if (!config.apiKeys.apify) {
         throw new ApifyError(
-          "Apify API token not configured. Please set APIFY_API_TOKEN environment variable."
+          "Apify API token not configured. Please set APIFY_API_KEY environment variable."
         );
       }
       this._apifyClient = new ApifyClient({

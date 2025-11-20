@@ -43,6 +43,16 @@ class ApifyError extends Error {
   }
 }
 
+class LeadMagicError extends Error {
+  constructor(message, originalError = null, statusCode = 500) {
+    super(message);
+    this.name = "LeadMagicError";
+    this.originalError = originalError;
+    this.statusCode = statusCode;
+    this.status = statusCode; // For compatibility with retry utility
+  }
+}
+
 // Error response formatter
 function formatErrorResponse(error, includeStack = false) {
   const response = {
@@ -69,5 +79,6 @@ module.exports = {
   CacheError,
   OpenAIError,
   ApifyError,
+  LeadMagicError,
   formatErrorResponse,
 };

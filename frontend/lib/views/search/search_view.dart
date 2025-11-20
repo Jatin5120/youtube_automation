@@ -118,11 +118,11 @@ class _ChannelTable extends StatelessWidget {
       columns: [
         DaviColumn(
           name: 'Channel Name',
-          stringValue: (row) => row.channelName,
+          cellValue: (row) => row.data.channelName,
         ),
         DaviColumn(
           name: 'Channel Link',
-          cellBuilder: (context, row) => TapHandler(
+          cellWidget: (row) => TapHandler(
             onTap: () => Utility.launchURL(row.data.channelLink),
             child: AppText(
               row.data.channelLink,
@@ -137,11 +137,11 @@ class _ChannelTable extends StatelessWidget {
         ),
         DaviColumn(
           name: 'Channel Id',
-          stringValue: (row) => row.channelId,
+          cellValue: (row) => row.data.channelId,
         ),
         DaviColumn(
           name: 'Channel Description',
-          stringValue: (row) => row.channelDescription,
+          cellValue: (row) => row.data.channelDescription,
           grow: 2,
         ),
       ],

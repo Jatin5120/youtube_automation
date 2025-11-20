@@ -6,6 +6,7 @@ const config = require("../config/analysis");
 const Logger = require("../utils/logger");
 const { AnalysisError } = require("../utils/errors");
 const EmailsService = require("./emailsService");
+const LeadMagicService = require("./leadMagicService");
 const tokenCostManager = require("../utils/tokenCost");
 
 class AnalysisService {
@@ -14,6 +15,7 @@ class AnalysisService {
       apiKey: process.env.OPENAI_API_KEY,
     });
     this.emailsService = new EmailsService();
+    this.leadMagicService = new LeadMagicService();
 
     // Initialize cache with configuration
     this.analysisCache = new MemoryCache(
@@ -134,6 +136,211 @@ class AnalysisService {
     // }
 
     return emailsArray.map((arr) => arr[0] || "");
+  }
+
+  /**
+   * Validate emails and filter channels - keep only channels with at least one valid email
+   * @param {Array} channelsWithEmails - Channels with rawEmails property
+   * @returns {Promise<{validChannels: Array, emailValidationMap: Object, originalIndices: Array}>}
+   */
+  async _validateAndFilterChannels(channelsWithEmails) {
+    try {
+      // Extract and flatten all emails
+      const emailList = [];
+      const emailToChannelMap = new Map(); // email -> [channelIndex, emailIndex]
+
+      channelsWithEmails.forEach((channel, channelIndex) => {
+        const rawEmails = channel.rawEmails || "";
+        if (!rawEmails || rawEmails.trim() === "") {
+          // Empty email - will be handled separately
+          return;
+        }
+
+        // Split comma-separated emails
+        const emails = rawEmails
+          .split(",")
+          .map((e) => e.trim())
+          .filter(Boolean);
+
+        emails.forEach((email, emailIndex) => {
+          emailList.push(email);
+          if (!emailToChannelMap.has(email)) {
+            emailToChannelMap.set(email, []);
+          }
+          emailToChannelMap.get(email).push({
+            channelIndex,
+            emailIndex,
+            channelId: channel.channelId,
+          });
+        });
+      });
+
+      // If no emails to validate, return all channels
+      if (emailList.length === 0) {
+        Logger.info("No emails to validate, proceeding with all channels");
+        return {
+          validChannels: channelsWithEmails,
+          emailValidationMap: {},
+          originalIndices: channelsWithEmails.map((_, i) => i),
+        };
+      }
+
+      // Validate emails in batches
+      const validationResults = await this.leadMagicService.validateEmails(
+        emailList
+      );
+
+      // Build validation map: email -> {valid, status}
+      const emailValidationMap = {};
+      validationResults.forEach((result) => {
+        emailValidationMap[result.email] = {
+          valid: result.valid,
+          status: result.status,
+        };
+      });
+
+      // Determine which channels have at least one valid email
+      const channelsWithValidEmail = new Set();
+      validationResults.forEach((result) => {
+        if (result.valid) {
+          const channelMappings = emailToChannelMap.get(result.email) || [];
+          channelMappings.forEach((mapping) => {
+            channelsWithValidEmail.add(mapping.channelIndex);
+          });
+        }
+      });
+
+      // Filter channels: keep if has valid email OR has no email (empty email channels pass through)
+      const validChannels = [];
+      const originalIndices = [];
+
+      channelsWithEmails.forEach((channel, index) => {
+        const rawEmails = channel.rawEmails || "";
+        const hasEmail = rawEmails && rawEmails.trim() !== "";
+
+        if (!hasEmail || channelsWithValidEmail.has(index)) {
+          validChannels.push(channel);
+          originalIndices.push(index);
+        }
+      });
+
+      Logger.info("Email validation complete", {
+        totalChannels: channelsWithEmails.length,
+        validChannels: validChannels.length,
+        filteredChannels: channelsWithEmails.length - validChannels.length,
+        emailsValidated: emailList.length,
+        validEmails: validationResults.filter((r) => r.valid).length,
+      });
+
+      return {
+        validChannels,
+        emailValidationMap,
+        originalIndices,
+      };
+    } catch (error) {
+      Logger.error("Email validation failed", {
+        error: error.message,
+        errorStack: error.stack,
+      });
+
+      // Fail-safe: if validation fails and failSafe is enabled, proceed with all channels
+      if (this.leadMagicService.failSafe) {
+        Logger.warn(
+          "Email validation failed, proceeding with all channels (fail-safe mode)"
+        );
+        return {
+          validChannels: channelsWithEmails,
+          emailValidationMap: {},
+          originalIndices: channelsWithEmails.map((_, i) => i),
+        };
+      }
+
+      // If fail-safe is disabled, throw error
+      throw new AnalysisError(
+        `Email validation failed: ${error.message}`,
+        "VALIDATION_ERROR"
+      );
+    }
+  }
+
+  /**
+   * Map AI results back to original channel structure
+   * @param {Array} originalChannels - Original channels array
+   * @param {Array} validChannels - Channels that passed validation
+   * @param {Object} aiResult - AI analysis results
+   * @param {Object} emailValidationMap - Map of email -> {valid, status}
+   * @param {Array} originalIndices - Indices mapping valid channels back to original
+   * @returns {Object} - Results matching original channels structure
+   */
+  _mapResultsToOriginalChannels(
+    originalChannels,
+    validChannels,
+    aiResult,
+    emailValidationMap,
+    originalIndices
+  ) {
+    // Create results array matching original channels length
+    const results = new Array(originalChannels.length);
+
+    // Process valid channels with AI results
+    validChannels.forEach((validChannel, validIndex) => {
+      const originalIndex = originalIndices[validIndex];
+      const aiResultItem = aiResult.results.find(
+        (r) => r.channelId === validChannel.channelId
+      );
+
+      if (aiResultItem) {
+        // Get validated emails for this channel
+        const rawEmails = validChannel.rawEmails || "";
+        let validatedEmails = "";
+
+        if (rawEmails && rawEmails.trim() !== "") {
+          // Split and filter to only valid emails
+          const emails = rawEmails
+            .split(",")
+            .map((e) => e.trim())
+            .filter(Boolean);
+
+          const validEmailList = emails.filter((email) => {
+            const validation = emailValidationMap[email];
+            return validation && validation.valid;
+          });
+
+          validatedEmails = validEmailList.join(",");
+        }
+
+        results[originalIndex] = {
+          ...aiResultItem,
+          email: validatedEmails,
+        };
+      } else {
+        // AI result not found (shouldn't happen, but handle gracefully)
+        results[originalIndex] = {
+          channelId: validChannel.channelId,
+          userName: validChannel.userName || "",
+          analyzedTitle: "",
+          analyzedName: "",
+          email: validChannel.rawEmails || "",
+          emailMessage: "",
+        };
+      }
+    });
+
+    // Fill in filtered channels with empty results
+    originalChannels.forEach((channel, index) => {
+      if (!results[index]) {
+        results[index] = {
+          channelId: channel.channelId,
+          userName: channel.userName || "",
+          analyzedTitle: "",
+          analyzedName: "",
+          email: "",
+          emailMessage: "",
+        };
+      }
+    });
+
+    return { results };
   }
 
   async _getResponseFromOpenAI(channels) {
@@ -373,17 +580,48 @@ class AnalysisService {
       }
 
       try {
-        const data = await Promise.all([
-          this._getEmailsFromChannels(channels),
-          this._getResponseFromOpenAI(channels),
-        ]);
-        const emails = data[0];
-        const result = data[1];
+        // 1. Fetch emails first
+        const emails = await this._getEmailsFromChannels(channels);
 
-        result.results = result.results.map((result, index) => ({
-          ...result,
-          email: index < emails.length ? emails[index] : "",
+        // 2. Attach emails to channel data
+        const channelsWithEmails = channels.map((ch, idx) => ({
+          ...ch,
+          rawEmails: emails[idx] || "",
         }));
+
+        // 3. Validate emails and filter channels
+        const { validChannels, emailValidationMap, originalIndices } =
+          await this._validateAndFilterChannels(channelsWithEmails);
+
+        // 4. Early return if no valid channels
+        if (validChannels.length === 0) {
+          Logger.info("All channels filtered out due to invalid emails");
+          // Return empty results matching original structure
+          const emptyResults = channels.map((channel) => ({
+            channelId: channel.channelId,
+            userName: channel.userName || "",
+            analyzedTitle: "",
+            analyzedName: "",
+            email: "",
+            emailMessage: "",
+          }));
+          const result = { results: emptyResults };
+          // Cache result
+          this.analysisCache.set(cacheKey, result);
+          return result;
+        }
+
+        // 5. Run AI analysis only on valid channels
+        const aiResult = await this._getResponseFromOpenAI(validChannels);
+
+        // 6. Map results back to original channel structure
+        const result = this._mapResultsToOriginalChannels(
+          channels,
+          validChannels,
+          aiResult,
+          emailValidationMap,
+          originalIndices
+        );
 
         // Cache result
         this.analysisCache.set(cacheKey, result);
