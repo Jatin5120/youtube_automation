@@ -16,8 +16,28 @@ const Logger = require("../utils/logger");
  */
 function apiLogger(req, res, next) {
   // Skip logging for health check endpoints
-  const healthCheckPaths = ["/", "/health", "/wakeup"];
-  if (healthCheckPaths.includes(req.path)) {
+  // Check both req.path (relative to mount) and req.url (full path)
+  const path = req.path || "";
+  const url = req.url || "";
+  const originalUrl = req.originalUrl || "";
+
+  const healthCheckPaths = [
+    "/",
+    "/health",
+    "/wakeup",
+    "/api/health",
+    "/api/",
+    "/api/wakeup",
+  ];
+  const isHealthCheck =
+    healthCheckPaths.includes(path) ||
+    healthCheckPaths.includes(url) ||
+    healthCheckPaths.includes(originalUrl) ||
+    path.endsWith("/health") ||
+    url.endsWith("/health") ||
+    originalUrl.endsWith("/health");
+
+  if (isHealthCheck) {
     return next();
   }
 

@@ -291,18 +291,18 @@ class DashboardController extends GetxController {
           }
         },
         onComplete: () {
-          for (var i = 0; i < parsedChannels.length; i++) {
-            final v = parsedChannels[i];
-            final result = channelsById[v.channelId];
-            if (result != null) {
-              parsedChannels[i] = v.copyWith(
-                analyzedTitle: result.analyzedTitle,
-                analyzedName: result.analyzedName,
-                email: result.email,
-                emailMessage: result.emailMessage,
-              );
-            }
-          }
+          // Filter and merge in one pass: only keep channels returned by backend
+          // (channels filtered by backend due to no valid emails are excluded)
+          parsedChannels = parsedChannels.where((channel) => channelsById.containsKey(channel.channelId)).map((channel) {
+            final result = channelsById[channel.channelId]!;
+            return channel.copyWith(
+              analyzedTitle: result.analyzedTitle,
+              analyzedName: result.analyzedName,
+              email: result.email,
+              emailMessage: result.emailMessage,
+            );
+          }).toList();
+
           analyzeProgress = 100;
           isAnalyzing = false;
           update([DashboardView.updateId]);

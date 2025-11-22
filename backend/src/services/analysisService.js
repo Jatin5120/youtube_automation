@@ -121,21 +121,173 @@ class AnalysisService {
     }
   }
 
+  /**
+   * Parse comma-separated email string into array of normalized emails
+   * @param {string} rawEmails - Comma-separated email string
+   * @returns {Array<string>} - Array of normalized email strings
+   */
+  _parseEmailString(rawEmails) {
+    if (!rawEmails || rawEmails.trim() === "") {
+      return [];
+    }
+    return rawEmails
+      .split(",")
+      .map((e) => this._normalizeEmailString(e))
+      .filter(Boolean);
+  }
+
+  /**
+   * Normalize email format (trim whitespace, lowercase)
+   * @param {string} email - Raw email string
+   * @returns {string} - Normalized email string
+   */
+  _normalizeEmailString(email) {
+    if (!email || typeof email !== "string") {
+      return "";
+    }
+    return email.trim().toLowerCase();
+  }
+
+  /**
+   * Extract only valid emails from raw email string based on validation map
+   * @param {string} rawEmails - Comma-separated email string
+   * @param {Object} emailValidationMap - Map of email -> {valid, status}
+   * @returns {string} - Comma-separated string of valid emails
+   */
+  _extractValidEmails(rawEmails, emailValidationMap) {
+    if (!rawEmails || rawEmails.trim() === "") {
+      return "";
+    }
+
+    const emails = this._parseEmailString(rawEmails);
+    const validEmailList = emails.filter((email) => {
+      const validation = emailValidationMap[email];
+      return validation && validation.valid;
+    });
+
+    return validEmailList.join(",");
+  }
+
+  /**
+   * Validate OpenAI API response structure
+   * @param {Object} response - OpenAI API response object
+   * @returns {Object} - Validated response with choices and content
+   * @throws {AnalysisError} - If response is invalid
+   */
+  _validateOpenAIResponse(response) {
+    if (!response.choices || response.choices.length === 0) {
+      Logger.error("OpenAI response has no choices", { response });
+      throw new AnalysisError("No response choices from AI", "NO_CHOICES");
+    }
+
+    if (!response.choices[0].message || !response.choices[0].message.content) {
+      Logger.error("OpenAI response has no message content", {
+        choice: response.choices[0],
+      });
+      throw new AnalysisError("No message content from AI", "NO_CONTENT");
+    }
+
+    return response;
+  }
+
+  /**
+   * Create AbortController with timeout
+   * @param {number} timeoutMs - Timeout in milliseconds
+   * @returns {Object} - Object with controller and timeoutId {controller, timeoutId}
+   */
+  _createTimeoutController(timeoutMs) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    return { controller, timeoutId };
+  }
+
+  /**
+   * Fetch emails for channels from email service
+   * @param {Array} channels - Array of channel objects with channelId
+   * @returns {Promise<Array<string>>} - Array of email strings (one per channel)
+   */
   async _getEmailsFromChannels(channels) {
     const emailPromises = channels.map((channel) =>
       this.emailsService.fromChannelIds([channel.channelId])
     );
     const emailsArray = await Promise.all(emailPromises);
 
-    // const emailsArray = [];
-    // for (const channel of channels) {
-    //   const emailArr = await this.emailsService.fromChannelIds([
-    //     channel.channelId,
-    //   ]);
-    //   emailsArray.push(emailArr);
-    // }
-
     return emailsArray.map((arr) => arr[0] || "");
+  }
+
+  /**
+   * Parse emails from channels and build mapping
+   * @param {Array} channelsWithEmails - Channels with rawEmails property
+   * @returns {Object} - Object with emailList and emailToChannelMap
+   */
+  _parseEmailsFromChannels(channelsWithEmails) {
+    const emailList = [];
+    const emailToChannelMap = new Map(); // email -> [{channelIndex, emailIndex, channelId}]
+
+    channelsWithEmails.forEach((channel, channelIndex) => {
+      const rawEmails = channel.rawEmails || "";
+      if (!rawEmails || rawEmails.trim() === "") {
+        return;
+      }
+
+      const emails = this._parseEmailString(rawEmails);
+
+      emails.forEach((email) => {
+        emailList.push(email);
+        if (!emailToChannelMap.has(email)) {
+          emailToChannelMap.set(email, []);
+        }
+        emailToChannelMap.get(email).push({
+          channelIndex,
+          channelId: channel.channelId,
+        });
+      });
+    });
+
+    return { emailList, emailToChannelMap };
+  }
+
+  /**
+   * Build email validation map from validation results
+   * Note: This method is kept for potential future use, but normalization
+   * is now handled inline in _validateAndFilterChannels for consistency
+   * @param {Array} validationResults - Results from email validation service
+   * @returns {Object} - Map of normalized email -> {valid, status}
+   */
+  _buildEmailValidationMap(validationResults) {
+    const emailValidationMap = {};
+    validationResults.forEach((result) => {
+      const normalizedEmail = this._normalizeEmailString(result.email);
+      emailValidationMap[normalizedEmail] = {
+        valid: result.valid,
+        status: result.status,
+      };
+    });
+    return emailValidationMap;
+  }
+
+  /**
+   * Filter channels to keep only those with valid emails
+   * @param {Array} channelsWithEmails - Channels with rawEmails property
+   * @param {Set} channelsWithValidEmail - Set of channel indices with valid emails
+   * @returns {Object} - Object with validChannels and originalIndices
+   */
+  _filterChannelsByEmailValidation(channelsWithEmails, channelsWithValidEmail) {
+    const validChannels = [];
+    const originalIndices = [];
+
+    channelsWithEmails.forEach((channel, index) => {
+      const rawEmails = channel.rawEmails || "";
+      const hasEmail = rawEmails && rawEmails.trim() !== "";
+
+      // Only keep channels with valid emails (channels without emails are filtered out)
+      if (hasEmail && channelsWithValidEmail.has(index)) {
+        validChannels.push(channel);
+        originalIndices.push(index);
+      }
+    });
+
+    return { validChannels, originalIndices };
   }
 
   /**
@@ -145,43 +297,17 @@ class AnalysisService {
    */
   async _validateAndFilterChannels(channelsWithEmails) {
     try {
-      // Extract and flatten all emails
-      const emailList = [];
-      const emailToChannelMap = new Map(); // email -> [channelIndex, emailIndex]
+      // Parse emails from channels
+      const { emailList, emailToChannelMap } =
+        this._parseEmailsFromChannels(channelsWithEmails);
 
-      channelsWithEmails.forEach((channel, channelIndex) => {
-        const rawEmails = channel.rawEmails || "";
-        if (!rawEmails || rawEmails.trim() === "") {
-          // Empty email - will be handled separately
-          return;
-        }
-
-        // Split comma-separated emails
-        const emails = rawEmails
-          .split(",")
-          .map((e) => e.trim())
-          .filter(Boolean);
-
-        emails.forEach((email, emailIndex) => {
-          emailList.push(email);
-          if (!emailToChannelMap.has(email)) {
-            emailToChannelMap.set(email, []);
-          }
-          emailToChannelMap.get(email).push({
-            channelIndex,
-            emailIndex,
-            channelId: channel.channelId,
-          });
-        });
-      });
-
-      // If no emails to validate, return all channels
+      // If no emails to validate, filter out all channels (no channels have emails)
       if (emailList.length === 0) {
-        Logger.info("No emails to validate, proceeding with all channels");
+        Logger.info("No emails to validate, filtering out all channels");
         return {
-          validChannels: channelsWithEmails,
+          validChannels: [],
           emailValidationMap: {},
-          originalIndices: channelsWithEmails.map((_, i) => i),
+          originalIndices: [],
         };
       }
 
@@ -190,10 +316,11 @@ class AnalysisService {
         emailList
       );
 
-      // Build validation map: email -> {valid, status}
+      // Build validation map (normalize email keys for consistency)
       const emailValidationMap = {};
       validationResults.forEach((result) => {
-        emailValidationMap[result.email] = {
+        const normalizedEmail = this._normalizeEmailString(result.email);
+        emailValidationMap[normalizedEmail] = {
           valid: result.valid,
           status: result.status,
         };
@@ -203,26 +330,21 @@ class AnalysisService {
       const channelsWithValidEmail = new Set();
       validationResults.forEach((result) => {
         if (result.valid) {
-          const channelMappings = emailToChannelMap.get(result.email) || [];
+          // Normalize email before lookup to ensure consistency
+          const normalizedEmail = this._normalizeEmailString(result.email);
+          const channelMappings = emailToChannelMap.get(normalizedEmail) || [];
           channelMappings.forEach((mapping) => {
             channelsWithValidEmail.add(mapping.channelIndex);
           });
         }
       });
 
-      // Filter channels: keep if has valid email OR has no email (empty email channels pass through)
-      const validChannels = [];
-      const originalIndices = [];
-
-      channelsWithEmails.forEach((channel, index) => {
-        const rawEmails = channel.rawEmails || "";
-        const hasEmail = rawEmails && rawEmails.trim() !== "";
-
-        if (!hasEmail || channelsWithValidEmail.has(index)) {
-          validChannels.push(channel);
-          originalIndices.push(index);
-        }
-      });
+      // Filter channels: only keep channels with valid emails
+      const { validChannels, originalIndices } =
+        this._filterChannelsByEmailValidation(
+          channelsWithEmails,
+          channelsWithValidEmail
+        );
 
       Logger.info("Email validation complete", {
         totalChannels: channelsWithEmails.length,
@@ -264,13 +386,13 @@ class AnalysisService {
   }
 
   /**
-   * Map AI results back to original channel structure
+   * Map AI results back to valid channels only (filtered channels are excluded)
    * @param {Array} originalChannels - Original channels array
    * @param {Array} validChannels - Channels that passed validation
    * @param {Object} aiResult - AI analysis results
    * @param {Object} emailValidationMap - Map of email -> {valid, status}
    * @param {Array} originalIndices - Indices mapping valid channels back to original
-   * @returns {Object} - Results matching original channels structure
+   * @returns {Object} - Results containing only valid channels (filtered channels excluded)
    */
   _mapResultsToOriginalChannels(
     originalChannels,
@@ -279,87 +401,85 @@ class AnalysisService {
     emailValidationMap,
     originalIndices
   ) {
-    // Create results array matching original channels length
-    const results = new Array(originalChannels.length);
+    // Create results array with only valid channels (filtered channels excluded)
+    const results = [];
 
-    // Process valid channels with AI results
+    // Create Map for O(1) lookup of AI results by channelId
+    const aiResultMap = new Map();
+    aiResult.results.forEach((result) => {
+      aiResultMap.set(result.channelId, result);
+    });
+
+    // Process valid channels with AI results (only include valid channels)
     validChannels.forEach((validChannel, validIndex) => {
-      const originalIndex = originalIndices[validIndex];
-      const aiResultItem = aiResult.results.find(
-        (r) => r.channelId === validChannel.channelId
-      );
+      const aiResultItem = aiResultMap.get(validChannel.channelId);
 
       if (aiResultItem) {
         // Get validated emails for this channel
         const rawEmails = validChannel.rawEmails || "";
-        let validatedEmails = "";
+        const validatedEmails = this._extractValidEmails(
+          rawEmails,
+          emailValidationMap
+        );
 
-        if (rawEmails && rawEmails.trim() !== "") {
-          // Split and filter to only valid emails
-          const emails = rawEmails
-            .split(",")
-            .map((e) => e.trim())
-            .filter(Boolean);
-
-          const validEmailList = emails.filter((email) => {
-            const validation = emailValidationMap[email];
-            return validation && validation.valid;
-          });
-
-          validatedEmails = validEmailList.join(",");
-        }
-
-        results[originalIndex] = {
+        results.push({
           ...aiResultItem,
           email: validatedEmails,
-        };
+        });
       } else {
         // AI result not found (shouldn't happen, but handle gracefully)
-        results[originalIndex] = {
+        results.push({
           channelId: validChannel.channelId,
           userName: validChannel.userName || "",
           analyzedTitle: "",
           analyzedName: "",
           email: validChannel.rawEmails || "",
           emailMessage: "",
-        };
-      }
-    });
-
-    // Fill in filtered channels with empty results
-    originalChannels.forEach((channel, index) => {
-      if (!results[index]) {
-        results[index] = {
-          channelId: channel.channelId,
-          userName: channel.userName || "",
-          analyzedTitle: "",
-          analyzedName: "",
-          email: "",
-          emailMessage: "",
-        };
+        });
       }
     });
 
     return { results };
   }
 
+  /**
+   * Get AI analysis response for channels (name/title analysis only)
+   * Email message generation is skipped - returns empty emailMessage for all results
+   * @param {Array} channels - Array of channel objects to analyze
+   * @returns {Promise<Object>} - Analysis results with empty emailMessage fields
+   */
   async _getResponseFromOpenAI(channels) {
     const result = await this._getAnalysisResponseFromOpenAI(channels);
 
-    result.results = await this._getEmailResponseFromOpenAI(
-      result.results,
-      channels
-    );
+    // Defensive check: ensure result.results exists and is an array
+    if (!result.results || !Array.isArray(result.results)) {
+      Logger.error("Invalid result structure after AI analysis", {
+        hasResults: !!result.results,
+        isArray: Array.isArray(result.results),
+        resultKeys: result ? Object.keys(result) : [],
+      });
+      throw new AnalysisError("Invalid result structure after AI analysis");
+    }
+
+    // Skip AI email message generation - return empty emailMessage for all results
+    // Keep _getEmailResponseFromOpenAI method intact for future use
+    result.results = result.results.map((r) => ({
+      ...r,
+      emailMessage: "",
+    }));
 
     return result;
   }
 
+  /**
+   * Get AI analysis response for channels (analyzedName and analyzedTitle)
+   * @param {Array} channels - Array of channel objects to analyze
+   * @returns {Promise<Object>} - Analysis results with analyzedName and analyzedTitle
+   */
   async _getAnalysisResponseFromOpenAI(channels) {
     const prompt = await getNameTitlePrompts(channels);
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(
-      () => controller.abort(),
+    const { controller, timeoutId } = this._createTimeoutController(
       this.config.OPENAI.TIMEOUT
     );
 
@@ -396,17 +516,7 @@ class AnalysisService {
       );
     }
 
-    if (!response.choices || response.choices.length === 0) {
-      Logger.error("OpenAI response has no choices", { response });
-      throw new AnalysisError("No response choices from AI", "NO_CHOICES");
-    }
-
-    if (!response.choices[0].message || !response.choices[0].message.content) {
-      Logger.error("OpenAI response has no message content", {
-        choice: response.choices[0],
-      });
-      throw new AnalysisError("No message content from AI", "NO_CONTENT");
-    }
+    this._validateOpenAIResponse(response);
 
     let result;
     try {
@@ -432,17 +542,28 @@ class AnalysisService {
     return result;
   }
 
+  /**
+   * Generate email messages using AI (currently not used in active flow)
+   * This method is kept intact for future use but is skipped in _getResponseFromOpenAI
+   * @param {Array} analysisResults - Analysis results with analyzedName and analyzedTitle
+   * @param {Array} channels - Original channel objects for context
+   * @returns {Promise<Array>} - Results with emailMessage fields populated
+   */
   async _getEmailResponseFromOpenAI(analysisResults, channels) {
     if (!analysisResults || analysisResults.length === 0) {
       return analysisResults.map((r) => ({ ...r, emailMessage: "" }));
     }
 
     try {
+      // Create Map for O(1) lookup of channels by channelId
+      const channelMap = new Map();
+      channels.forEach((channel) => {
+        channelMap.set(channel.channelId, channel);
+      });
+
       // Prepare email inputs
       const emailInputs = analysisResults.map((result) => {
-        const channel = channels.find(
-          (ch) => ch.channelId === result.channelId
-        );
+        const channel = channelMap.get(result.channelId);
         return {
           channelId: result.channelId,
           analyzedName: result.analyzedName,
@@ -459,10 +580,7 @@ class AnalysisService {
 
       const prompt = await getEmailPrompts(emailInputs);
 
-      // Timeout control
-      const controller = new AbortController();
-      const timeoutId = setTimeout(
-        () => controller.abort(),
+      const { controller, timeoutId } = this._createTimeoutController(
         this.config.OPENAI.TIMEOUT
       );
 
@@ -498,30 +616,21 @@ class AnalysisService {
         );
       }
 
-      if (!response.choices || response.choices.length === 0) {
-        Logger.error("OpenAI response has no choices", { response });
-        throw new AnalysisError("No response choices from AI", "NO_CHOICES");
-      }
-
-      if (
-        !response.choices[0].message ||
-        !response.choices[0].message.content
-      ) {
-        Logger.error("OpenAI response has no message content", {
-          choice: response.choices[0],
-        });
-        throw new AnalysisError("No message content from AI", "NO_CONTENT");
-      }
+      this._validateOpenAIResponse(response);
 
       const content = response.choices[0].message.content;
 
       const emailData = JSON.parse(content);
 
+      // Create Map for O(1) lookup of email results by channelId
+      const emailResultMap = new Map();
+      emailData.results?.forEach((emailResult) => {
+        emailResultMap.set(emailResult.channelId, emailResult);
+      });
+
       // Merge emails into results
       const messages = analysisResults.map((result) => {
-        const emailObj = emailData.results?.find(
-          (e) => e.channelId === result.channelId
-        );
+        const emailObj = emailResultMap.get(result.channelId);
         return {
           ...result,
           emailMessage: emailObj?.emailMessage || "",
@@ -596,25 +705,48 @@ class AnalysisService {
         // 4. Early return if no valid channels
         if (validChannels.length === 0) {
           Logger.info("All channels filtered out due to invalid emails");
-          // Return empty results matching original structure
-          const emptyResults = channels.map((channel) => ({
-            channelId: channel.channelId,
-            userName: channel.userName || "",
-            analyzedTitle: "",
-            analyzedName: "",
-            email: "",
-            emailMessage: "",
-          }));
-          const result = { results: emptyResults };
+          // Return empty results (no channels passed email validation)
+          const result = { results: [] };
           // Cache result
           this.analysisCache.set(cacheKey, result);
           return result;
         }
 
-        // 5. Run AI analysis only on valid channels
-        const aiResult = await this._getResponseFromOpenAI(validChannels);
+        // 5. Store validChannels for error handling
+        // (needed in case AI call fails and we need to generate fallback)
+        const validChannelsForErrorHandling = validChannels;
 
-        // 6. Map results back to original channel structure
+        // 6. Run AI analysis only on valid channels
+        let aiResult;
+        try {
+          aiResult = await this._getResponseFromOpenAI(validChannels);
+        } catch (aiError) {
+          // If AI analysis fails, generate fallback for valid channels only
+          Logger.error("AI analysis failed, generating fallback", {
+            error: aiError.message,
+            validChannelsCount: validChannelsForErrorHandling.length,
+          });
+
+          // Generate fallback results for valid channels only
+          const fallbackResult = this._generateFallbackResults(
+            validChannelsForErrorHandling
+          );
+
+          // Map fallback results to maintain consistency
+          const result = this._mapResultsToOriginalChannels(
+            channels,
+            validChannelsForErrorHandling,
+            fallbackResult,
+            emailValidationMap,
+            originalIndices
+          );
+
+          // Cache result
+          this.analysisCache.set(cacheKey, result);
+          return result;
+        }
+
+        // 7. Map results back to original channel structure
         const result = this._mapResultsToOriginalChannels(
           channels,
           validChannels,
@@ -633,9 +765,12 @@ class AnalysisService {
           throw new AnalysisError("Request timeout", "TIMEOUT");
         }
 
-        Logger.error("Batch analysis failed", error);
-        // Return fallback results
-        return this._generateFallbackResults(channels);
+        Logger.error("Batch analysis failed", {
+          error: error.message,
+          errorStack: error.stack,
+        });
+        // Re-throw to be handled by analyzeBatchWithSSE
+        throw error;
       }
     });
   }
@@ -698,11 +833,24 @@ class AnalysisService {
 
   _validateBatchResponse(result, channels) {
     if (!result.results || !Array.isArray(result.results)) {
+      Logger.error("Invalid response structure", {
+        hasResults: !!result.results,
+        isArray: Array.isArray(result.results),
+        resultKeys: result ? Object.keys(result) : [],
+      });
       throw new AnalysisError("Invalid response structure");
     }
 
     if (result.results.length !== channels.length) {
-      throw new AnalysisError("Result count mismatch");
+      Logger.error("Result count mismatch", {
+        resultCount: result.results.length,
+        channelCount: channels.length,
+        channelIds: channels.map((c) => c.channelId),
+        resultChannelIds: result.results.map((r) => r.channelId),
+      });
+      throw new AnalysisError(
+        `Result count mismatch: expected ${channels.length}, got ${result.results.length}`
+      );
     }
 
     // Validate each result has required fields
@@ -713,6 +861,10 @@ class AnalysisService {
       if (!item.analyzedTitle) missingFields.push("analyzedTitle");
       if (!item.analyzedName) missingFields.push("analyzedName");
       if (missingFields.length > 0) {
+        Logger.error("Missing required fields in result", {
+          item,
+          missingFields,
+        });
         throw new AnalysisError(
           `Missing required fields in result: ${missingFields.join(", ")}`
         );
@@ -777,27 +929,45 @@ class AnalysisService {
 
       // Process only non-cached batches
       for (const batch of batches) {
-        // Single AI call for batch
-        const batchResult = await this.analyzeChannelsBatch(batch, size);
+        try {
+          // Single AI call for batch
+          const batchResult = await this.analyzeChannelsBatch(batch, size);
 
-        processedCount += batchResult.results.length;
+          processedCount += batchResult.results.length;
 
-        onProgress(config.EVENTS.PROGRESS, {
-          current: processedCount,
-          total: totalChannels,
-          message: `Analyzed ${processedCount} of ${totalChannels} channels`,
-        });
+          onProgress(config.EVENTS.PROGRESS, {
+            current: processedCount,
+            total: totalChannels,
+            message: `Analyzed ${processedCount} of ${totalChannels} channels`,
+          });
 
-        onBatchResult(
-          batchResult.results.map((result) => ({
-            channelId: result.channelId,
-            userName: result.userName,
-            analyzedTitle: result.analyzedTitle,
-            analyzedName: result.analyzedName,
-            email: result.email,
-            emailMessage: result.emailMessage,
-          }))
-        );
+          // Send batch results (even if empty array)
+          onBatchResult(
+            batchResult.results.map((result) => ({
+              channelId: result.channelId,
+              userName: result.userName,
+              analyzedTitle: result.analyzedTitle,
+              analyzedName: result.analyzedName,
+              email: result.email,
+              emailMessage: result.emailMessage,
+            }))
+          );
+        } catch (batchError) {
+          // Log error but continue processing remaining batches
+          // Don't call onError here as it would end the SSE stream
+          // Only log and continue - fatal errors will be caught by outer try-catch
+          Logger.error(
+            "Error processing batch, continuing with remaining batches",
+            {
+              error: batchError.message,
+              batchSize: batch.length,
+              errorStack: batchError.stack,
+            }
+          );
+
+          // Continue processing remaining batches instead of stopping
+          continue;
+        }
 
         // Rate limiting between batches
         const batchIndex = batches.indexOf(batch);
