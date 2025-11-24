@@ -37,10 +37,6 @@ function apiLogger(req, res, next) {
     url.endsWith("/health") ||
     originalUrl.endsWith("/health");
 
-  if (isHealthCheck) {
-    return next();
-  }
-
   const startTime = Date.now();
   const requestId =
     req.requestId ||
@@ -60,12 +56,16 @@ function apiLogger(req, res, next) {
   };
 
   // Extract body information (be careful with sensitive data)
-  if (req.body && Object.keys(req.body).length > 0) {
-    requestInfo.body = sanitizeRequestBody(req.body);
-  }
+  // if (req.body && Object.keys(req.body).length > 0) {
+  //   requestInfo.body = sanitizeRequestBody(req.body);
+  // }
 
   // Log incoming request
-  Logger.info(`API Request: ${req.method} ${req.path}\n`, requestInfo);
+  Logger.info(`Request: ${req.method} ${req.path}`, requestInfo);
+
+  if (isHealthCheck) {
+    return next();
+  }
 
   // Override res.json to capture response data
   const originalJson = res.json;
@@ -148,8 +148,8 @@ function apiLogger(req, res, next) {
     // Log with appropriate level
     const logLevel = res.statusCode >= 400 ? "warn" : "info";
     const logMessage = isSSE
-      ? `API Response (SSE): ${req.method} ${req.path}`
-      : `API Response: ${req.method} ${req.path}`;
+      ? `Response (SSE): ${req.method} ${req.path}`
+      : `Response: ${req.method} ${req.path}`;
 
     Logger[logLevel](`${logMessage}\n`, responseInfo);
 
