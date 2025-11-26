@@ -74,17 +74,20 @@ class LeadMagicService {
 
           if (!response.ok) {
             const errorText = await response.text();
-            Logger.error("LeadMagic API error", {
-              status: response.status,
-              statusText: response.statusText,
-              error: errorText,
-              email,
-            });
-            throw new LeadMagicError(
+            const error = new LeadMagicError(
               `LeadMagic API error: ${response.status} ${response.statusText}`,
               null,
               response.status
             );
+            Logger.error(
+              `LeadMagic API error: ${response.status} ${response.statusText}`,
+              error,
+              {
+                email,
+                response,
+              }
+            );
+            throw error;
           }
 
           const data = await response.json();
@@ -152,9 +155,9 @@ class LeadMagicService {
             ...validation,
           };
         } catch (error) {
-          Logger.error("Error validating email", {
+          Logger.error("Error validating email", error, {
             email,
-            error: error.message,
+            error,
           });
 
           // In fail-safe mode, treat errors as invalid (not throw)
