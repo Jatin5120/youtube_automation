@@ -182,6 +182,7 @@ analyzedTitle Extraction:
 7. Ensure it works grammatically after preposition "on" (must be a topic/subject, not verb phrase)
 8. Must be ${_wordRange} words, Title Case, letters and spaces only
 9. If vague/spam/missing: use fallback "Collaboration Opportunity"
+10. From all the provided information, give videoTitle priority over other information.
 
 analyzedName Extraction (follow in priority order):
 1. Priority 1: Search videoDescription and channelDescription for introduction patterns: "Hi, I'm [Name]", "My name is [Name]", "[Name] here", "This is [Name]"

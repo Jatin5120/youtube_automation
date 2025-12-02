@@ -5,7 +5,7 @@ module.exports = {
     MODEL: "gpt-4.1-nano",
     TEMPERATURE: 0.2,
     TOP_P: 0.8,
-    MAX_TOKENS: 1000,
+    MAX_TOKENS: 1500,
     TIMEOUT: 15000,
     EMAIL_TEMPERATURE: 0.7,
     EMAIL_MAX_TOKENS: 200,
