@@ -9,7 +9,7 @@ class SearchViewModel {
 
   final SearchRepository _repository;
 
-  Future<(List<ChannelModel>, String)> searchChannels({
+  Future<ChannelSearchResult> searchChannels({
     required String query,
     required String pageToken,
     required Variant variant,
@@ -22,11 +22,15 @@ class SearchViewModel {
       );
       var data = jsonDecode(res.data) as Map<String, dynamic>;
       var token = data['nextPageToken'] as String? ?? '';
-      var channels = (data['data'] as List? ?? []).map((e) => ChannelModel.fromMap(e as Map<String, dynamic>)).toList();
-      return (channels, token);
+      var channels = (data['data'] as List? ?? [])
+          .map(
+            (e) => ChannelModel.fromMap(e as Map<String, dynamic>).copyWith(query: query),
+          )
+          .toList();
+      return (channels: channels, pageToken: token);
     } catch (e, st) {
       AppLog.error(e, st);
-      return (<ChannelModel>[], '');
+      return (channels: <ChannelModel>[], pageToken: '');
     }
   }
 }

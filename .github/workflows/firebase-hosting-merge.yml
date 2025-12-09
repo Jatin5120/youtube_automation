@@ -11,6 +11,9 @@ on:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      FIREBASE_SERVICE_ACCOUNT_AUTOMATION_F1555: ${{secrets.FIREBASE_SERVICE_ACCOUNT_AUTOMATION_F1555}}
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -31,7 +34,7 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           entrypoint: ./frontend
-          repoToken: "${{ secrets.GITHUB_TOKEN }}"
-          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUTOMATION_F1555 }}"
+          repoToken: "${{ env.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ env.FIREBASE_SERVICE_ACCOUNT_AUTOMATION_F1555 }}"
           channelId: live
           projectId: automation-f1555

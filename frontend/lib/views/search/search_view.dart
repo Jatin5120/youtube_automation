@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:davi/davi.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:frontend/controllers/controllers.dart';
@@ -38,7 +40,7 @@ class SearchView extends StatelessWidget {
                     children: [
                       Flexible(
                         child: InputField(
-                          hint: 'Enter your query to search channels',
+                          hint: 'Enter queries separated by comma (e.g., "tech, coding, programming")',
                           controller: controller.searchController,
                           onFieldSubmitted: (_) => controller.search(),
                         ),
@@ -80,7 +82,7 @@ class SearchView extends StatelessWidget {
                             ),
                           ] else ...[
                             Text(
-                              '10 sample results out of ${controller.channels.length} result(s)',
+                              '${min(10, controller.channels.length)} sample channels out of ${controller.channels.length} result(s)',
                               textAlign: TextAlign.center,
                               style: context.textTheme.bodyMedium?.withTitleColor,
                             ),
@@ -88,7 +90,7 @@ class SearchView extends StatelessWidget {
                             _ChannelTable(channels: controller.channels),
                             const SizedBox(height: 16),
                             AppButton.small(
-                              onTap: controller.triggerInLoop,
+                              onTap: controller.triggerSearch,
                               label: 'Fetch Details',
                             ),
                           ],
@@ -116,6 +118,10 @@ class _ChannelTable extends StatelessWidget {
       rows: channels.take(10).toList(),
       multiSortEnabled: true,
       columns: [
+        DaviColumn(
+          name: 'Search Query',
+          cellValue: (row) => row.data.query,
+        ),
         DaviColumn(
           name: 'Channel Name',
           cellValue: (row) => row.data.channelName,

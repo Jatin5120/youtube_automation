@@ -1,6 +1,4 @@
-import 'package:frontend/controllers/controllers.dart';
-import 'package:frontend/repositories/repositories.dart';
-import 'package:frontend/view_models/view_models.dart';
+import 'package:frontend/app.dart';
 import 'package:get/get.dart';
 
 class AuthBinding implements Bindings {
@@ -9,7 +7,9 @@ class AuthBinding implements Bindings {
     Get.lazyPut(
       () => AuthController(
         AuthViewModel(
-          AuthRepository(),
+          AuthRepository(
+            Get.find<DbClient>(),
+          ),
         ),
       ),
     );

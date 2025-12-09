@@ -37,9 +37,12 @@ Future<void> initialize() async {
   Get.put(ApiClient(client));
   Get.put(SSEClient(client));
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Future.wait([
+    Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ),
+    Get.put(DbClient()).init(),
+  ]);
 
   // Wake up the server to prevent Render.com from spinning it down
   try {

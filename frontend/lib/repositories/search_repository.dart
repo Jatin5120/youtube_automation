@@ -19,7 +19,7 @@ class SearchRepository {
     return _apiWrapper.makeRequest(
       '${Endpoints.search}?$params',
       type: RequestType.get,
-      showLoader: true,
+      showLoader: false,
     );
   }
 }

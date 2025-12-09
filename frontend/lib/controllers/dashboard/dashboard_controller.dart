@@ -2,14 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/app.dart';
 import 'package:frontend/controllers/controllers.dart' as controllers;
-import 'package:frontend/data/data.dart';
 import 'package:frontend/main.dart';
-import 'package:frontend/models/models.dart';
-import 'package:frontend/res/res.dart';
-import 'package:frontend/utils/utils.dart';
-import 'package:frontend/view_models/view_models.dart';
-import 'package:frontend/views/views.dart';
 import 'package:get/get.dart';
 
 class DashboardController extends GetxController {
@@ -17,6 +12,8 @@ class DashboardController extends GetxController {
   final DashboardViewModel _viewModel;
 
   controllers.AnalysisController get _analyticsController => Get.find<controllers.AnalysisController>();
+
+  DbClient get _dbClient => Get.find<DbClient>();
 
   var fetchedResult = false;
 
@@ -26,9 +23,11 @@ class DashboardController extends GetxController {
 
   var tableController = ScrollController();
 
-  var searchController = TextEditingController();
+  Map<String, List<String>>? queryMap;
 
-  int get searchCount => searchController.text.trim().split(',').length;
+  var query = '';
+
+  int get searchCount => query.trim().split(',').length;
 
   // Loading states
   final RxBool _isLoadingVideos = false.obs;
@@ -84,14 +83,13 @@ class DashboardController extends GetxController {
   }
 
   void fetchChannels() {
-    var parameters = Get.parameters;
-    if (parameters.isNotEmpty) {
+    queryMap = _dbClient.get(LocalKeys.queriesChannels) as Map<String, List<String>>?;
+    if (queryMap != null && queryMap!.isNotEmpty) {
       try {
-        var list = parameters['q']?.decrypt();
-        list = (list as List).cast<String>();
+        final list = queryMap!.entries.map((e) => e.value.join(', ')).toList();
         Utility.updateLater(() {
           onChannelByChanged(ChannelBy.channelId);
-          searchController.text = list.join(', ');
+          query = list.join(', ');
           getVideos();
         });
       } catch (e) {
@@ -106,7 +104,7 @@ class DashboardController extends GetxController {
   }
 
   void getVideos() async {
-    if (searchController.text.trim().isEmpty) {
+    if (query.trim().isEmpty) {
       return;
     }
 
@@ -121,7 +119,7 @@ class DashboardController extends GetxController {
 
   Future<void> _performSearch() async {
     try {
-      final channels = AppValidators.validateChannelList(searchController.text, channelBy == ChannelBy.channelId);
+      final channels = AppValidators.validateChannelList(query, channelBy == ChannelBy.channelId);
 
       if (channels == null) {
         _showError('Please enter valid channel names or IDs');
@@ -135,6 +133,7 @@ class DashboardController extends GetxController {
 
       _setLoadingState(false, 'Processing data...');
       parseData();
+      _dbClient.delete(LocalKeys.queriesChannels);
       _setLoadingState(false, '');
     } on ValidationException catch (e) {
       _setLoadingState(false, '');
@@ -291,11 +290,25 @@ class DashboardController extends GetxController {
           }
         },
         onComplete: () {
+          AppLog.info('Query map: ${queryMap?.entries.map((e) => '${e.key}: ${e.value.length}').join(' - ')}');
           // Filter and merge in one pass: only keep channels returned by backend
           // (channels filtered by backend due to no valid emails are excluded)
           parsedChannels = parsedChannels.where((channel) => channelsById.containsKey(channel.channelId)).map((channel) {
             final result = channelsById[channel.channelId]!;
+            var query = '';
+            if (queryMap != null && queryMap!.isNotEmpty) {
+              final queryPair = queryMap!.entries.firstWhere(
+                (e) => e.value.contains(channel.channelId),
+                orElse: () => MapEntry('', []),
+              );
+              AppLog.info('Query pair: ${queryPair.key}');
+              query = queryPair.key;
+            } else {
+              AppLog.error('Query map is empty for channel: ${channel.channelId}');
+              query = channel.query;
+            }
             return channel.copyWith(
+              query: query,
               analyzedTitle: result.analyzedTitle,
               analyzedName: result.analyzedName,
               email: result.email,
@@ -336,8 +349,7 @@ class DashboardController extends GetxController {
 
   // Download and save CSV to your Device
   void _downloadCSV() async {
-    final query = Get.isRegistered<controllers.SearchController>() ? Get.find<controllers.SearchController>().searchController.text.trim() : '';
-
+    final now = DateTime.now().toString();
     await Utility.downloadCSV(
       data: [
         [
@@ -347,30 +359,15 @@ class DashboardController extends GetxController {
           'Analyzed Name',
           'Analyzed Title',
           'Email Id',
-          'Instagram',
-          'LinkedIn',
-          'Twitter',
-          'Channel Country',
-          '',
-          '',
-          '',
           'Channel Name',
           'UserName',
-          'Subscriber Count',
-          'Total Videos',
-          'Total Videos Last Month',
-          // 'Total Videos Last 3 Months',
-          'Latest Video Title',
-          'Last Upload Date',
-          'Email Message',
+          'Timestamp',
         ],
-        ...parsedChannels.map((e) => [
-              query,
-              ...e.properties,
-            ]),
+        ...parsedChannels.map((e) => [...e.properties, now]),
       ],
       filename: 'lead-analysis',
     );
+
     Utility.showInfoDialog(
       ResponseModel.message('Your Lead and Analysis data is downloaded'),
       isSuccess: true,

@@ -2,10 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:frontend/data/data.dart';
-import 'package:frontend/models/models.dart';
-import 'package:frontend/res/res.dart';
-import 'package:frontend/utils/utils.dart';
+import 'package:frontend/app.dart';
 import 'package:http/http.dart' show Client, Response, MultipartRequest, MultipartFile;
 
 /// API WRAPPER to call all the IsmLiveApis and handle the status codes
@@ -27,6 +24,7 @@ class ApiClient {
     bool showDialog = true,
     bool shouldEncodePayload = true,
     String? message,
+    bool logPayload = true,
   }) async {
     assert(
       type != RequestType.upload || (type == RequestType.upload && payload is! Map<String, String> && field.isNotEmpty && filePath.isNotEmpty),
@@ -42,7 +40,9 @@ class ApiClient {
 
     final uri = Uri.parse(url);
 
-    AppLog.info('[Request] - ${type.name.toUpperCase()} - $uri\n$payload');
+    AppLog.info(
+      '[Request] - ${type.name.toUpperCase()} - $uri\n${logPayload ? '$payload' : ''}',
+    );
 
     if (showLoader) Utility.showLoader(message);
     try {
@@ -80,6 +80,8 @@ class ApiClient {
         showDialog: showDialog,
         showLoader: showLoader,
         shouldEncodePayload: shouldEncodePayload,
+        message: message,
+        logPayload: logPayload,
       );
     } on TimeoutException catch (e, st) {
       AppLog.error('TimeOutException - $e', st);
@@ -103,6 +105,8 @@ class ApiClient {
             showDialog: showDialog,
             showLoader: showLoader,
             shouldEncodePayload: shouldEncodePayload,
+            message: message,
+            logPayload: logPayload,
           ),
         );
       }

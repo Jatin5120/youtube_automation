@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:frontend/res/res.dart';
-import 'package:frontend/utils/utils.dart';
 
 class ChannelDetailsModel {
+  final String query;
   final String channelId;
   final String email;
   final int subscriberCount;
@@ -25,6 +25,7 @@ class ChannelDetailsModel {
   final String emailMessage;
 
   const ChannelDetailsModel({
+    required this.query,
     required this.channelId,
     required this.email,
     required this.subscriberCount,
@@ -47,30 +48,18 @@ class ChannelDetailsModel {
   });
 
   Iterable get properties => [
+        query,
         channelId,
         channelLink,
         analyzedName,
         analyzedTitle,
         email,
-        '',
-        '',
-        '',
-        country,
-        '',
-        '',
-        '',
         channelName,
         userName,
-        subscriberCount,
-        totalVideos,
-        totalVideosLastMonth,
-        // totalVideosLastThreeMonths,
-        latestVideoTitle,
-        lastUploadDate?.formatDate,
-        emailMessage,
       ];
 
   ChannelDetailsModel copyWith({
+    String? query,
     String? channelId,
     String? email,
     int? subscriberCount,
@@ -92,6 +81,7 @@ class ChannelDetailsModel {
     String? emailMessage,
   }) {
     return ChannelDetailsModel(
+      query: query ?? this.query,
       channelId: channelId ?? this.channelId,
       email: email ?? this.email,
       subscriberCount: subscriberCount ?? this.subscriberCount,
@@ -116,6 +106,7 @@ class ChannelDetailsModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'query': query,
       'channelId': channelId,
       'email': email,
       'subscriberCount': subscriberCount,
@@ -140,6 +131,7 @@ class ChannelDetailsModel {
 
   factory ChannelDetailsModel.fromMap(Map<String, dynamic> map) {
     var model = ChannelDetailsModel(
+      query: map['query'] as String? ?? '',
       channelId: map['channelId'] as String? ?? '',
       email: map['email'] as String? ?? '',
       subscriberCount: int.parse(map['subscriberCount'] as String? ?? '0'),
@@ -172,7 +164,7 @@ class ChannelDetailsModel {
 
   @override
   String toString() {
-    return 'ChannelDetailsModel(channelId: $channelId, email: $email, subscriberCount: $subscriberCount, totalVideos: $totalVideos, channelName: $channelName, userName: $userName, channelDescription: $channelDescription, channelLink: $channelLink, totalVideosLastMonth: $totalVideosLastMonth, totalVideosLastThreeMonths: $totalVideosLastThreeMonths, latestVideoTitle: $latestVideoTitle, latestVideoDescription: $latestVideoDescription, lastUploadDate: $lastUploadDate, uploadedThisMonth: $uploadedThisMonth, analyzedTitle: $analyzedTitle, analyzedName: $analyzedTitle, language: $language, country: $country, emailMessage: $emailMessage)';
+    return 'ChannelDetailsModel(query: $query, channelId: $channelId, email: $email, subscriberCount: $subscriberCount, totalVideos: $totalVideos, channelName: $channelName, userName: $userName, channelDescription: $channelDescription, channelLink: $channelLink, totalVideosLastMonth: $totalVideosLastMonth, totalVideosLastThreeMonths: $totalVideosLastThreeMonths, latestVideoTitle: $latestVideoTitle, latestVideoDescription: $latestVideoDescription, lastUploadDate: $lastUploadDate, uploadedThisMonth: $uploadedThisMonth, analyzedTitle: $analyzedTitle, analyzedName: $analyzedTitle, language: $language, country: $country, emailMessage: $emailMessage)';
   }
 
   @override

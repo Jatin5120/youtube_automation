@@ -16,10 +16,12 @@ dependencies:
   firebase_core: ^4.2.1
   flutter:
     sdk: flutter
+  flutter_secure_storage: ^9.2.4
   flutter_web_plugins:
     sdk: flutter
   get: ^4.6.6
   google_fonts: ^6.2.0
+  hive_flutter: ^1.1.0
   http: ^1.2.1
   intl: ^0.20.2
   url_launcher: ^6.3.0
@@ -47,3 +49,4 @@ flutter:
 
   assets:
     - assets/
+    - .env

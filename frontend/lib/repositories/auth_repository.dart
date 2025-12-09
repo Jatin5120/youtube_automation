@@ -1,17 +1,32 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:frontend/models/models.dart';
-import 'package:frontend/res/res.dart';
-import 'package:frontend/utils/utils.dart';
+import 'package:frontend/app.dart';
 
 class AuthRepository {
+  final DbClient _db;
+
+  AuthRepository(this._db);
+
   Future<ResponseModel> login(String email, String password) async {
     try {
       Utility.showLoader();
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
       Utility.closeLoader();
+
+      final user = credential.user;
+
+      if (user == null) {
+        Utility.closeLoader();
+        return ResponseModel.error('User not found');
+      }
+
+      await Future.wait([
+        _db.saveSecure(LocalKeys.uid, user.uid),
+        _db.save(LocalKeys.isLoggedIn, true),
+      ]);
+
       return ResponseModel.message(
         'Logged In Successfully',
         isSuccess: true,

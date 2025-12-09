@@ -8,6 +8,8 @@ class AppConstants {
 
   static const String name = 'YoutubeAutomation';
 
+  static const String boxName = 'youtube_automation';
+
   static const Duration timeOutDuration = Duration(seconds: 180);
 
   static const double desktopLargeBreakPoint = 1920;

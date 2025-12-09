@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/controllers/controllers.dart';
+import 'package:frontend/app.dart';
 import 'package:frontend/main.dart';
-import 'package:frontend/models/models.dart';
-import 'package:frontend/res/res.dart';
-import 'package:frontend/utils/utils.dart';
-import 'package:frontend/view_models/view_models.dart';
-import 'package:frontend/views/views.dart';
 import 'package:get/get.dart';
 
 class SearchController extends GetxController {
@@ -16,41 +11,93 @@ class SearchController extends GetxController {
 
   var channels = <ChannelModel>[];
 
-  var pageToken = '';
-
   var tableController = ScrollController();
 
   var searchController = TextEditingController();
 
-  void triggerInLoop() async {
-    for (var i = 0; i < AppConstants.totalSearchRequests; i++) {
-      var gotData = await search(true);
-      if (!gotData) {
-        break;
+  var queries = <String>[];
+
+  var queryMap = <String, List<String>>{};
+  var tokenMap = <String, String>{};
+
+  void triggerSearch() async {
+    Utility.showLoader();
+
+    for (var query in queries) {
+      final wasAlreadySearched = queries.indexOf(query) == 0 && channels.isNotEmpty;
+      final requestsToMake = wasAlreadySearched ? AppConstants.totalSearchRequests - 1 : AppConstants.totalSearchRequests;
+
+      for (var i = 0; i < requestsToMake; i++) {
+        var gotData = await _search(
+          query: query,
+        );
+        if (gotData.channels.isEmpty || gotData.pageToken.isEmpty) {
+          break;
+        }
       }
     }
+
+    Utility.closeLoader();
+
     fetchDetails();
   }
 
-  Future<bool> search([bool pagination = false]) async {
-    if (searchController.text.trim().isEmpty) {
-      return false;
+  Future<ChannelSearchResult> search() async {
+    queries = searchController.text
+        .trim()
+        .split(',')
+        .map((e) => e.trim())
+        .where(
+          (e) => e.isNotEmpty,
+        )
+        .toList();
+
+    if (queries.isEmpty) {
+      return (channels: <ChannelModel>[], pageToken: '');
     }
-    if (!pagination) {
-      channels.clear();
-      pageToken = '';
+
+    channels.clear();
+    queryMap.clear();
+    tokenMap.clear();
+
+    for (var query in queries) {
+      queryMap[query] = [];
+      tokenMap[query] = '';
+    }
+
+    Utility.showLoader();
+
+    final result = await _search(
+      query: queries.first,
+    );
+
+    Utility.closeLoader();
+
+    return result;
+  }
+
+  Future<ChannelSearchResult> _search({
+    required String query,
+  }) async {
+    if (query.trim().isEmpty) {
+      return (channels: <ChannelModel>[], pageToken: '');
     }
 
     var res = await _viewModel.searchChannels(
-      query: searchController.text.trim(),
-      pageToken: pageToken,
+      query: query.trim(),
+      pageToken: tokenMap[query] ?? '',
       variant: kVariant,
     );
-    channels.addAll(res.$1);
-    pageToken = res.$2;
+
+    channels.addAll(res.channels);
+
+    queryMap[query]?.addAll(res.channels.map((e) => e.channelId).toList());
+    tokenMap[query] = res.pageToken;
+
     fetchedResult = true;
+
     update([SearchView.updateId]);
-    return res.$1.isNotEmpty && res.$2.isNotEmpty;
+    return res;
   }
 
   // Download and save CSV to your Device
@@ -59,9 +106,10 @@ class SearchController extends GetxController {
     Utility.downloadCSV(
       data: [
         [
+          'Query',
+          'Channel Id',
           'Channel Name',
           'Channel Link',
-          'Channel Id',
           'Channel Description',
         ],
         ...channels.map((e) => e.properties.toList()),
@@ -71,9 +119,8 @@ class SearchController extends GetxController {
   }
 
   void fetchDetails() async {
-    var list = channels.map((e) => e.channelId).toList();
-    var parameters = {'q': list.encrypt()};
-    RouteManagement.goToDashboard(parameters);
+    Get.find<DbClient>().save(LocalKeys.queriesChannels, queryMap);
+    RouteManagement.goToDashboard();
     if (Get.isRegistered<DashboardController>()) {
       Get.find<DashboardController>().fetchChannels();
     }

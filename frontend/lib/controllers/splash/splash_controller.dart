@@ -1,8 +1,9 @@
-import 'package:frontend/res/res.dart';
+import 'package:frontend/app.dart';
+import 'package:frontend/main.dart';
 import 'package:get/get.dart';
 
 class SplashController extends GetxController {
-  var isLoggedIn = false;
+  var isLoggedIn = kVariant == Variant.development;
   @override
   void onReady() {
     super.onReady();
