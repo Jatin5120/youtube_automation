@@ -170,7 +170,7 @@ async _validateAndFilterChannels(channelsWithEmails) {
 async _getAnalysisResponseFromOpenAI(channels) {
   const prompt = await getNameTitlePrompts(channels);
   const response = await this.openai.chat.completions.create({
-    model: "gpt-4.1-nano",
+    model: "gpt-4.1-mini",
     messages: [
       { role: "system", content: prompt.systemPrompt },
       { role: "user", content: prompt.userPrompt }

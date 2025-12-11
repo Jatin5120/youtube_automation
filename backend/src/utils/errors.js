@@ -55,15 +55,41 @@ class LeadMagicError extends Error {
 
 // Error response formatter
 function formatErrorResponse(error, includeStack = false) {
+  // Handle error objects that already have user-friendly format (from _getUserFriendlyError)
+  if (error && typeof error === "object" && error.message && error.code) {
+    const response = {
+      success: false,
+      message: error.message,
+      code: error.code,
+      timestamp: new Date().toISOString(),
+    };
+
+    if (error.technicalDetails && process.env.NODE_ENV === "development") {
+      response.technicalDetails = error.technicalDetails;
+    }
+
+    if (error.field) {
+      response.field = error.field;
+    }
+
+    if (includeStack && process.env.NODE_ENV === "development" && error.stack) {
+      response.stack = error.stack;
+    }
+
+    return response;
+  }
+
+  // Handle standard Error objects
   const response = {
     success: false,
-    message: error.message,
+    message: error.message || "An unknown error occurred",
     code: error.code || "UNKNOWN_ERROR",
     timestamp: new Date().toISOString(),
   };
 
   if (includeStack && process.env.NODE_ENV === "development") {
     response.stack = error.stack;
+    response.technicalDetails = error.message;
   }
 
   if (error.field) {

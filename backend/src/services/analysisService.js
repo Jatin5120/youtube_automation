@@ -53,6 +53,109 @@ class AnalysisService {
     }
   }
 
+  /**
+   * Check if error is a quota/limit error that should stop processing
+   * @param {Error} error - Error object
+   * @returns {boolean} - True if error is a quota/limit error
+   */
+  _isQuotaLimitError(error) {
+    if (!error || !error.message) {
+      return false;
+    }
+
+    const quotaKeywords = [
+      "limit exceeded",
+      "quota exceeded",
+      "usage limit",
+      "hard limit",
+      "monthly usage",
+      "rate limit",
+    ];
+
+    const errorMessage = error.message.toLowerCase();
+    return quotaKeywords.some((keyword) => errorMessage.includes(keyword));
+  }
+
+  /**
+   * Convert technical error to user-friendly error message
+   * @param {Error} error - Error object (AnalysisError or generic Error)
+   * @returns {Object} - Object with user-friendly message, error code, and shouldStop flag
+   */
+  _getUserFriendlyError(error) {
+    // Check for quota/limit errors first (email service)
+    if (this._isQuotaLimitError(error)) {
+      return {
+        message:
+          "Email service quota limit has been reached. Please try again later or contact support.",
+        code: "QUOTA_EXCEEDED",
+        technicalDetails:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
+        shouldStop: true, // Flag to indicate processing should stop
+      };
+    }
+
+    // Check for OpenAI quota/rate limit errors that should stop processing
+    if (
+      error.code === "OPENAI_QUOTA_EXCEEDED" ||
+      error.code === "OPENAI_RATE_LIMIT"
+    ) {
+      return {
+        message:
+          error.code === "OPENAI_QUOTA_EXCEEDED"
+            ? "AI service quota has been exceeded. Please try again later or contact support."
+            : "AI service rate limit reached. Please wait a moment and try again.",
+        code: error.code,
+        technicalDetails:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
+        shouldStop: true, // Flag to indicate processing should stop
+      };
+    }
+
+    const errorMessages = {
+      NO_CHOICES:
+        "Analysis service is temporarily unavailable. Please try again in a moment.",
+      NO_CONTENT:
+        "Analysis service is temporarily unavailable. Please try again in a moment.",
+      EMPTY_CONTENT:
+        "Analysis service is temporarily unavailable. Please try again in a moment.",
+      PARSE_ERROR: "Failed to process analysis results. Please try again.",
+      INVALID_INPUT: "Please provide valid channel data.",
+      INVALID_CHANNEL:
+        "Some channels have invalid or missing data. Please check your input.",
+      TIMEOUT:
+        "Analysis request timed out. Please try again with fewer channels or check your connection.",
+      VALIDATION_ERROR: "Email validation failed. Please try again later.",
+      INVALID_STRUCTURE:
+        "Received invalid data from analysis service. Please try again.",
+      RESULT_MISMATCH: "Analysis results incomplete. Please try again.",
+      MISSING_FIELDS:
+        "Analysis results are missing required information. Please try again.",
+      EMPTY_ITEMS: "Please provide at least one channel to analyze.",
+      OPENAI_RATE_LIMIT:
+        "AI service rate limit reached. Please wait a moment and try again.",
+      OPENAI_QUOTA_EXCEEDED:
+        "AI service quota has been exceeded. Please try again later or contact support.",
+      OPENAI_AUTH_ERROR:
+        "AI service authentication error. Please contact support.",
+      OPENAI_SERVER_ERROR:
+        "AI service is temporarily unavailable. Please try again in a moment.",
+    };
+
+    // Get user-friendly message or use original message as fallback
+    const userMessage =
+      errorMessages[error.code] ||
+      error.message ||
+      "An unexpected error occurred. Please try again.";
+
+    return {
+      message: userMessage,
+      code: error.code || "UNKNOWN_ERROR",
+      technicalDetails:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+      shouldStop: false,
+    };
+  }
+
   // Generate cache key from input
   _getCacheKey(type, input) {
     const hash = crypto
@@ -458,7 +561,10 @@ class AnalysisService {
         isArray: Array.isArray(result.results),
         resultKeys: result ? Object.keys(result) : [],
       });
-      throw new AnalysisError("Invalid result structure after AI analysis");
+      throw new AnalysisError(
+        "Invalid result structure after AI analysis",
+        "INVALID_STRUCTURE"
+      );
     }
 
     // Skip AI email message generation - return empty emailMessage for all results
@@ -483,27 +589,63 @@ class AnalysisService {
       this.config.OPENAI.TIMEOUT
     );
 
-    const response = await this.openai.chat.completions.create(
-      {
-        model: this.config.OPENAI.MODEL,
-        messages: [
-          { role: "system", content: prompt.systemPrompt },
-          { role: "user", content: prompt.userPrompt },
-        ],
-        max_completion_tokens: this.config.OPENAI.MAX_TOKENS,
-        temperature: this.config.OPENAI.TEMPERATURE,
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "channel_analysis",
-            schema: this.config.RESPONSE_SCHEMA,
+    let response;
+    try {
+      response = await this.openai.chat.completions.create(
+        {
+          model: this.config.OPENAI.MODEL,
+          messages: [
+            { role: "system", content: prompt.systemPrompt },
+            { role: "user", content: prompt.userPrompt },
+          ],
+          max_completion_tokens: this.config.OPENAI.MAX_TOKENS,
+          temperature: this.config.OPENAI.TEMPERATURE,
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "channel_analysis",
+              schema: this.config.RESPONSE_SCHEMA,
+            },
           },
         },
-      },
-      {
-        signal: controller.signal,
+        {
+          signal: controller.signal,
+        }
+      );
+    } catch (openaiError) {
+      clearTimeout(timeoutId);
+
+      // Handle OpenAI-specific errors
+      if (openaiError.status === 429) {
+        throw new AnalysisError(
+          "OpenAI rate limit exceeded",
+          "OPENAI_RATE_LIMIT"
+        );
+      } else if (openaiError.status === 401) {
+        throw new AnalysisError(
+          "OpenAI authentication failed",
+          "OPENAI_AUTH_ERROR"
+        );
+      } else if (openaiError.status === 403) {
+        throw new AnalysisError(
+          "OpenAI quota exceeded",
+          "OPENAI_QUOTA_EXCEEDED"
+        );
+      } else if (openaiError.status >= 500) {
+        throw new AnalysisError(
+          "OpenAI service temporarily unavailable",
+          "OPENAI_SERVER_ERROR"
+        );
+      } else if (openaiError.code === "insufficient_quota") {
+        throw new AnalysisError(
+          "OpenAI quota exceeded",
+          "OPENAI_QUOTA_EXCEEDED"
+        );
       }
-    );
+
+      // Re-throw other errors
+      throw openaiError;
+    }
 
     clearTimeout(timeoutId);
 
@@ -522,7 +664,10 @@ class AnalysisService {
     try {
       const content = response.choices[0].message.content.trim();
       if (!content) {
-        throw new Error("Empty content received from AI");
+        throw new AnalysisError(
+          "Empty content received from AI",
+          "EMPTY_CONTENT"
+        );
       }
       result = JSON.parse(content);
     } catch (parseError) {
@@ -838,7 +983,10 @@ class AnalysisService {
         isArray: Array.isArray(result.results),
         resultKeys: result ? Object.keys(result) : [],
       });
-      throw new AnalysisError("Invalid response structure");
+      throw new AnalysisError(
+        "Invalid response structure",
+        "INVALID_STRUCTURE"
+      );
     }
 
     if (result.results.length !== channels.length) {
@@ -849,7 +997,8 @@ class AnalysisService {
         resultChannelIds: result.results.map((r) => r.channelId),
       });
       throw new AnalysisError(
-        `Result count mismatch: expected ${channels.length}, got ${result.results.length}`
+        `Result count mismatch: expected ${channels.length}, got ${result.results.length}`,
+        "RESULT_MISMATCH"
       );
     }
 
@@ -866,7 +1015,8 @@ class AnalysisService {
           missingFields,
         });
         throw new AnalysisError(
-          `Missing required fields in result: ${missingFields.join(", ")}`
+          `Missing required fields in result: ${missingFields.join(", ")}`,
+          "MISSING_FIELDS"
         );
       }
     }
@@ -953,9 +1103,23 @@ class AnalysisService {
             }))
           );
         } catch (batchError) {
-          // Log error but continue processing remaining batches
-          // Don't call onError here as it would end the SSE stream
-          // Only log and continue - fatal errors will be caught by outer try-catch
+          // Check if this is a quota/limit error that should stop processing
+          const friendlyError = this._getUserFriendlyError(batchError);
+
+          if (friendlyError.shouldStop || this._isQuotaLimitError(batchError)) {
+            // Quota/limit error - stop processing and send error to client
+            Logger.error("Quota limit reached, stopping batch processing", {
+              error: batchError.message,
+              batchSize: batch.length,
+              errorStack: batchError.stack,
+            });
+
+            // Send error to client and stop processing
+            onError(friendlyError);
+            return; // Exit the function, stopping all further processing
+          }
+
+          // For other errors, log but continue processing remaining batches
           Logger.error(
             "Error processing batch, continuing with remaining batches",
             {
@@ -984,7 +1148,8 @@ class AnalysisService {
       onComplete();
     } catch (error) {
       Logger.error("Fatal error in batch processing:", error);
-      onError(error);
+      const friendlyError = this._getUserFriendlyError(error);
+      onError(friendlyError);
     }
   }
 }

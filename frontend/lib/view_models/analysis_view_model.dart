@@ -28,7 +28,6 @@ class AnalysisViewModel {
       );
     } catch (e, st) {
       AppLog.error('Channel analysis error: $e', st);
-      onError?.call('Analysis failed: ${e.toString()}');
     }
   }
 }

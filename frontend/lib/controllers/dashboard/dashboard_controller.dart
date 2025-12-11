@@ -122,7 +122,7 @@ class DashboardController extends GetxController {
       final channels = AppValidators.validateChannelList(query, channelBy == ChannelBy.channelId);
 
       if (channels == null) {
-        _showError('Please enter valid channel names or IDs');
+        _showError('Validation Error', 'Please enter valid channel names or IDs');
         return;
       }
 
@@ -137,10 +137,10 @@ class DashboardController extends GetxController {
       _setLoadingState(false, '');
     } on ValidationException catch (e) {
       _setLoadingState(false, '');
-      _showError(e.message);
+      _showError('Validation Error', e.message);
     } catch (e) {
       _setLoadingState(false, '');
-      _showError('Failed to fetch data: ${e.toString()}');
+      _showError('Fetch Error', 'Failed to fetch data: ${e.toString()}');
     }
   }
 
@@ -151,7 +151,7 @@ class DashboardController extends GetxController {
     update([DashboardView.updateId]);
   }
 
-  void _showError(String message) {
+  void _showError(String title, String message) {
     Utility.showInfoDialog(
       ResponseModel.message(message),
       title: 'Error',
@@ -332,19 +332,11 @@ class DashboardController extends GetxController {
 
   // Fallback method for when backend analysis fails
   void _handleAnalysisError(String error) {
-    AppLog.error('Analysis failed: $error');
     isAnalyzing = false;
     analyzeProgress = 0.0;
     update([DashboardView.updateId]);
 
-    // Show error message to user
-    Get.snackbar(
-      'Failed to analyze videos. Please try again.',
-      'Analysis Error: $error',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-    );
+    _showError('Analysis Error', error);
   }
 
   // Download and save CSV to your Device
