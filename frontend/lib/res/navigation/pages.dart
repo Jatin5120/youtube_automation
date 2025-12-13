@@ -39,5 +39,11 @@ class AppPages {
       binding: SearchBinding(),
       transition: transition,
     ),
+    GetPage<UploadView>(
+      name: UploadView.route,
+      page: UploadView.new,
+      binding: UploadBinding(),
+      transition: transition,
+    ),
   ];
 }

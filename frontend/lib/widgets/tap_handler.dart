@@ -45,9 +45,10 @@ class TapHandler extends StatelessWidget {
             : showSplash
                 ? null
                 : WidgetStateProperty.all(Colors.transparent),
-        mouseCursor: mouseCursor ?? (showArrowCursor ? SystemMouseCursors.basic : null),
+        mouseCursor: mouseCursor ?? (showArrowCursor ? SystemMouseCursors.click : null),
+        canRequestFocus: true,
         onHover: onHover,
-        onTap: onHover == null ? onTap : onTap ?? () {},
+        onTap: onTap,
         child: child,
       );
 }

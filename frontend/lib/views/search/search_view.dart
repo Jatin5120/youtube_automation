@@ -23,6 +23,7 @@ class SearchView extends StatelessWidget {
         label: 'Search',
         buttons: [
           (label: 'Dashboard', onTap: RouteManagement.goToDashboard),
+          (label: 'Upload', onTap: RouteManagement.goToUpload),
         ],
       ),
       body: Padding(

@@ -13,4 +13,6 @@ class RouteManagement {
       );
 
   static void goToSearch() => Get.toNamed(AppRoutes.search);
+
+  static void goToUpload() => Get.toNamed(AppRoutes.upload);
 }

@@ -104,7 +104,9 @@ function apiLogger(req, res, next) {
   res.send = function (data) {
     responseData = data;
     responseSize =
-      typeof data === "string" ? data.length : JSON.stringify(data).length;
+      typeof data === "string"
+        ? data.length
+        : JSON.stringify(data ?? {}).length;
     return originalSend.call(this, data);
   };
 

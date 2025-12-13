@@ -188,10 +188,9 @@ class YouTubeService {
           uncachedIds.push(channelId);
         }
       } catch (cacheError) {
-        console.warn(
-          `Cache error for channel ${channelId}:`,
-          cacheError.message
-        );
+        Logger.error(`Cache error for channel ${channelId}`, {
+          error: cacheError,
+        });
         uncachedIds.push(channelId);
       }
     }
@@ -274,6 +273,7 @@ class YouTubeService {
 
         return channels;
       } catch (error) {
+        Logger.error(`Error fetching channels`, error);
         throw this._toYouTubeAPIError(error, YT_METHOD.CHANNELS_LIST);
       }
     });

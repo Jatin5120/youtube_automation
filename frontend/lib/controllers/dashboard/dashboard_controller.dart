@@ -290,9 +290,6 @@ class DashboardController extends GetxController {
           }
         },
         onComplete: () {
-          AppLog.info('Query map: ${queryMap?.entries.map((e) => '${e.key}: ${e.value.length}').join(' - ')}');
-          // Filter and merge in one pass: only keep channels returned by backend
-          // (channels filtered by backend due to no valid emails are excluded)
           parsedChannels = parsedChannels.where((channel) => channelsById.containsKey(channel.channelId)).map((channel) {
             final result = channelsById[channel.channelId]!;
             var query = '';
@@ -301,10 +298,8 @@ class DashboardController extends GetxController {
                 (e) => e.value.contains(channel.channelId),
                 orElse: () => MapEntry('', []),
               );
-              AppLog.info('Query pair: ${queryPair.key}');
               query = queryPair.key;
             } else {
-              AppLog.error('Query map is empty for channel: ${channel.channelId}');
               query = channel.query;
             }
             return channel.copyWith(

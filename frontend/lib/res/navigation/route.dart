@@ -5,6 +5,7 @@ class AppRoutes {
   static const String auth = '/auth';
   static const String dashboard = '/dashboard';
   static const String search = '/search';
+  static const String upload = '/upload';
 
   static const String defaultRoute = search;
 }

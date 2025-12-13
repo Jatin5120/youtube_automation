@@ -24,6 +24,7 @@ class DashboardView extends StatelessWidget {
         label: 'Dashboard',
         buttons: [
           (label: 'Search', onTap: RouteManagement.goToSearch),
+          (label: 'Upload', onTap: RouteManagement.goToUpload),
         ],
       ),
       body: Padding(

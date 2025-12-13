@@ -17,7 +17,7 @@ class SearchController extends GetxController {
 
   var queries = <String>[];
 
-  var queryMap = <String, List<String>>{};
+  var channelIdMap = <String, List<String>>{};
   var tokenMap = <String, String>{};
 
   void triggerSearch() async {
@@ -57,11 +57,11 @@ class SearchController extends GetxController {
     }
 
     channels.clear();
-    queryMap.clear();
+    channelIdMap.clear();
     tokenMap.clear();
 
     for (var query in queries) {
-      queryMap[query] = [];
+      channelIdMap[query] = [];
       tokenMap[query] = '';
     }
 
@@ -91,7 +91,7 @@ class SearchController extends GetxController {
 
     channels.addAll(res.channels);
 
-    queryMap[query]?.addAll(res.channels.map((e) => e.channelId).toList());
+    channelIdMap[query]?.addAll(res.channels.map((e) => e.channelId).toList());
     tokenMap[query] = res.pageToken;
 
     fetchedResult = true;
@@ -119,7 +119,7 @@ class SearchController extends GetxController {
   }
 
   void fetchDetails() async {
-    Get.find<DbClient>().save(LocalKeys.queriesChannels, queryMap);
+    Get.find<DbClient>().save(LocalKeys.queriesChannels, channelIdMap);
     RouteManagement.goToDashboard();
     if (Get.isRegistered<DashboardController>()) {
       Get.find<DashboardController>().fetchChannels();
